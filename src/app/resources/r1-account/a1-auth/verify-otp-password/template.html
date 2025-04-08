@@ -1,0 +1,118 @@
+<!-- otp form -->
+<ng-container *ngIf="isOtpForm[0]">
+    <div class="self-end relative flex flex-col gap-4  h-full mx-auto w-full max-w-80 md:w-80 sm:mx-0 sm:w-80">
+        <!-- form description -->
+        <div class="my-4 flex flex-col gap-2 items-center">
+            <div
+                class="p-3 bg-gray-100 w-fit h-fit rounded-full flex items-center justify-center scale-90 md:scale-100">
+                <mat-icon class="icon-size-10 text-black" svgIcon="mat_solid:password"></mat-icon>
+            </div>
+            <p class="text-xl md:text-2xl w-fit font-bold"> ផ្ទៀងផ្ទាត់គណនី </p>
+            <div class="text-center font-medium text-wrap text-sm sm:text-lg">
+                <p>សូមពិនិត្យមើលប្រអប់សាររបស់អ្នក</p>
+                <p>{{ phone }}</p>
+            </div>
+        </div>
+
+        <div class="flex flex-col grow relative w-full">
+            <div class="flex gap-1 scale-95 sm:scale-100 sm:gap-3 justify-center">
+                <input class="custom-input" #input1 [(ngModel)]="numStr1" (keydown)="keyDownHandler1($event)"
+                    [placeholder]="'*'" [maxlength]="1" />
+                <input class="custom-input" #input2 [(ngModel)]="numStr2" (keydown)="keyDownHandler2($event)"
+                    [placeholder]="'*'" [maxlength]="1" />
+                <input class="custom-input" #input3 [(ngModel)]="numStr3" (keydown)="keyDownHandler3($event)"
+                    [placeholder]="'*'" [maxlength]="1" />
+                <input class="custom-input" #input4 [(ngModel)]="numStr4" (keydown)="keyDownHandler4($event)"
+                    [placeholder]="'*'" [maxlength]="1" />
+                <input class="custom-input" #input5 [(ngModel)]="numStr5" (keydown)="keyDownHandler5($event)"
+                    [placeholder]="'*'" [maxlength]="1" />
+                <input class="custom-input" #input6 [(ngModel)]="numStr6" (keydown)="keyDownHandler6($event)"
+                    [placeholder]="'*'" [maxlength]="1" />
+            </div>
+        </div>
+
+        <div class="flex flex-col gap-2">
+            <div class="w-full flex justify-between">
+                <p class="text-[#09235f] font-bold text-sm sm:text-base"> ពេលវេលានៅសល់: {{ formatTime(remainingTime) }}
+                </p>
+                <p class="underline font-bold cursor-pointer text-sm sm:text-base" (click)="resendOtp()"> ផ្ញើ OTP
+                    ម្តងទៀត </p>
+            </div>
+
+            <button class="w-full mt-7 text-white bg-[#09235f]" [disabled]="!canSubmit || isLoading" mat-flat-button
+                (click)="verify() ">
+                <span *ngIf=" !isLoading ">ផ្ទៀងផ្ទាត់</span>
+                <mat-progress-spinner *ngIf=" isLoading " [diameter]="24"
+                    [mode]="'indeterminate'"></mat-progress-spinner>
+            </button>
+            <div class="flex items-center w-full -mt-5 -mb-5">
+                <hr class="flex-grow">
+                <span class="px-2 text-center">ឬ</span>
+                <hr class="flex-grow">
+            </div>
+            <button class="helper-mat-button-large w-full rounded-lg bg-white ring-1 ring-[#09235f] text-center"
+                mat-flat-button [color]="'primary'" (click)="changeToPassword()">
+                <span class="text-[#09235f] text-center"> ចូលប្រព័ន្ធតាមលេខសម្ងាត់ </span>
+            </button>
+        </div>
+    </div>
+</ng-container>
+
+<!-- ============= password form ========== -->
+<ng-container *ngIf="isOtpForm[1]">
+    <!-- im using form because there is styling for form already and if i use anything else it wont look good -->
+    <form class="self-end relative flex flex-col gap-4 h-full mx-auto max-w-80 w-80 sm:mx-0 sm:w-80"
+        [formGroup]="passwordForm">
+
+        <!-- form description -->
+        <div class="my-4 flex flex-col gap-2 items-center">
+            <div
+                class="p-3 bg-gray-100 w-fit h-fit rounded-full flex items-center justify-center scale-90 md:scale-100">
+                <mat-icon class="icon-size-10 text-black" svgIcon="mat_outline:lock"></mat-icon>
+            </div>
+            <p class="text-xl md:text-2xl w-fit font-bold"> ផ្ទៀងផ្ទាត់គណនី</p>
+            <div class="text-center font-medium text-wrap text-sm sm:text-lg">
+                <p>សូមបញ្ចូលពាក្យសម្ងាត់ដែលត្រូវវង្កើតជាមួយគណនី</p>
+                <p>{{ phone }}</p>
+            </div>
+        </div>
+
+        <!-- Alert Message -->
+        @if (showAlert) {
+        <helper-alert class="mt-8" [appearance]="'outline'" [showIcon]="false" [type]="alert.type"
+            [@shake]="alert.type === 'error'">
+            {{ alert.message }}
+        </helper-alert>
+        }
+
+        <div class="flex flex-col grow relative md-form-field-appearance-outline">
+            <mat-form-field class="w-full thick-border">
+                <mat-label>លេខសម្ងាត់</mat-label>
+                <input id="password" type="password" matInput formControlName="password" #passwordField />
+
+                <mat-error> សូមបញ្ចូលពាក្យសម្ងាត់ </mat-error>
+                <button mat-icon-button type="button" (click)="
+                    passwordField.type === 'password'
+                        ? (passwordField.type = 'text')
+                        : (passwordField.type = 'password')
+                    " matSuffix>
+                    <mat-icon *ngIf="passwordField.type === 'password'" class="icon-size-5"
+                        [svgIcon]="'heroicons_solid:eye'"></mat-icon>
+
+                    <mat-icon *ngIf="passwordField.type === 'text'" class="icon-size-5"
+                        [svgIcon]="'heroicons_solid:eye-slash'"></mat-icon>
+
+                </button>
+
+            </mat-form-field>
+        </div>
+
+        <div class="w-full">
+            <button class="helper-mat-button-large w-full bg-[#09235f] rounded-lg text-center" mat-flat-button
+                [color]="'primary'" [disabled]="passwordForm.invalid || isLoading" (click)="signIn()">
+                <span *ngIf="!isLoading" class="text-white text-center"> ចូលប្រព័ន្ធ </span>
+                <mat-progress-spinner *ngIf="isLoading" [diameter]="24" [mode]="'indeterminate'"></mat-progress-spinner>
+            </button>
+        </div>
+    </form>
+</ng-container>
