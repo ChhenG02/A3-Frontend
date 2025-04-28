@@ -13,7 +13,7 @@
                 <div class="flex justify-between -mt-8 ">
                     <button (click)="toPhone()" *ngIf="isChangeToVerifyOtp === true" mat-icon-button type="button"
                         class="md:bg-gray-50 mt-[0.5px] bg-transparent" matSuffix>
-                        <mat-icon mat-icon-button class="icon-size-6 text-slate-600 "
+                        <mat-icon mat-icon-button class="icon-size-6 text-slate-600"
                             svgIcon="feather:arrow-left"></mat-icon>
                     </button>
                     <div></div>
@@ -78,8 +78,8 @@
                                         }
 
                                     </mat-form-field>
-                                    <div class="flex justify-end items-center my-[10] mb-5">
-                                        <a (click)="verify-otp-password()" class="text-sm text-[#F15757]">Forgot password?</a>
+                                    <div class="flex justify-end items-center my-[10] mb-5 cursor-pointer">
+                                        <a (click)="goToOtpVerify()" class="text-sm text-[#F15757]">Forgot password?</a>
                                     </div>
 
                                 </form>

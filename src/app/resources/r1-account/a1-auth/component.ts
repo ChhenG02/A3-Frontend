@@ -102,8 +102,11 @@ export class AuthSignInComponent implements OnInit {
     // @ Public methods
     // -----------------------------------------------------------------------------------------------------
     toPhone() {
-        this.isChangeToVerifyOtp = false
+        this.isChangeToVerifyOtp = false;
     }
+    goToOtpVerify(): void {
+        this.isChangeToVerifyOtp = true;
+      }
     isChangeToVerifyOtp: boolean = false;
     checkExistUser() {
         // Return if the form is invalid
@@ -192,6 +195,14 @@ export class AuthSignInComponent implements OnInit {
             }
         });
     }
+
+    /**
+     * Sign up
+    */
+    signUp() {
+        this.changeToSignUp = true;
+    }
+    changeToSignUp: boolean = false;
 
     // image slider function
     startImageSlider() {
