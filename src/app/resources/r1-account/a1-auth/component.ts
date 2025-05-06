@@ -25,6 +25,7 @@ import { HelperAlertComponent, HelperAlertType } from 'helper/components/alert';
 import { SnackbarService }      from 'helper/services/snack-bar/snack-bar.service';
 import GlobalConstants          from 'helper/shared/constants';
 import { VerifyOTPAndPasswordComponent } from './verify-otp-password/component';
+import { AuthSignUpComponent }  from './sign-up/component';
 
 @Component({
     selector: 'auth-login',
@@ -46,7 +47,8 @@ import { VerifyOTPAndPasswordComponent } from './verify-otp-password/component';
         MatProgressSpinnerModule,
         LanguagesComponent,
         NgIf,
-        VerifyOTPAndPasswordComponent
+        VerifyOTPAndPasswordComponent,
+        AuthSignUpComponent,
     ],
 })
 export class AuthSignInComponent implements OnInit {
@@ -103,9 +105,11 @@ export class AuthSignInComponent implements OnInit {
     // -----------------------------------------------------------------------------------------------------
     toPhone() {
         this.isChangeToVerifyOtp = false;
+        this.changeToSignUp = false;
     }
     goToOtpVerify(): void {
         this.isChangeToVerifyOtp = true;
+        this.changeToSignUp = false;
       }
     isChangeToVerifyOtp: boolean = false;
     checkExistUser() {
@@ -201,6 +205,7 @@ export class AuthSignInComponent implements OnInit {
     */
     signUp() {
         this.changeToSignUp = true;
+        this.isChangeToVerifyOtp = false;
     }
     changeToSignUp: boolean = false;
 

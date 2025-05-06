@@ -1,17 +1,17 @@
 <div class="flex flex-col min-h-screen w-full items-start justify-between px-4 sm:px-6 lg:px-8 bg-[#FDF0EF]">
     <div>
-        <img class="md:h-20 w-auto pt-4 h-14 " src="images/logo/GameSTORE.png" />
+        <img class="md:h-20 w-auto pt-4 h-14" src="images/logo/GameSTORE.png" />
     </div>
     <div class="flex justify-center items-center w-full">
         <div class="flex h-[540px] overflow-hidden sm:bg-card sm:rounded-2xl sm:shadow md:w-[850px] md:max-w-6xl p-2 border-[#F1BDB9] border-4">
-            <div
-                class="relative hidden h-auto flex-auto items-center justify-center overflow-hidden bg-gray-800 dark:border-r md:flex ">
+            <div class="relative hidden h-auto flex-auto items-center justify-center overflow-hidden bg-gray-800 dark:border-r md:flex">
                 <img [src]="currentImage" alt="Image Slider" class="w-full h-full object-cover" />
             </div>
 
             <div class="w-full px-4 sm:w-auto sm:p-12 sm:mt-5 md:mt-0">
-                <div class="flex justify-between -mt-8 ">
-                    <button (click)="toPhone()" *ngIf="isChangeToVerifyOtp === true" mat-icon-button type="button"
+                <div class="flex justify-between -mt-8">
+                    <!-- Back button - shows for both verify-otp and sign-up screens -->
+                    <button (click)="toPhone()" *ngIf="isChangeToVerifyOtp || changeToSignUp" mat-icon-button type="button"
                         class="md:bg-gray-50 mt-[0.5px] bg-transparent" matSuffix>
                         <mat-icon mat-icon-button class="icon-size-6 text-slate-600"
                             svgIcon="feather:arrow-left"></mat-icon>
@@ -19,105 +19,106 @@
                     <div></div>
                     <languages login="true"></languages>
                 </div>
-                <ng-container>
-                    <div *ngIf="isChangeToVerifyOtp === false">
-                        <div class="mx-auto w-full max-w-80 md:w-80 sm:mx-0 sm:w-80">
-                            <div class="my-3 flex flex-col items-center">
-                                <div
-                                    class=" bg-gray-100 w-fit h-fit flex items-center justify-center rounded-full scale-90 md:scale-100">
-                                    <mat-icon class="icon-size-10 text-black"
-                                        [svgIcon]="'mat_outline:phone_android'"></mat-icon>
-                                </div>
-                                <p class="text-xl md:text-3xl w-fit font-bold">Login in to your account</p>
-                            </div>
 
-                            <div class="h-auto ">
-                                <form class="md-form-field-appearance-outline" [formGroup]="signInForm"
-                                    #signInNgForm="ngForm">
-                                    <!-- phone field -->
-                                    <mat-form-field class="w-full thick-border">
-                                        <mat-label>Phone or Email</mat-label>
-                                        <input id="username" matInput [formControlName]="'username'" />
-                                        @if (signInForm.get('username').hasError('required')) {
-                                        <mat-error> Please enter your phone or email </mat-error>
-                                        }
-                                        @if (signInForm.get('username').hasError('username')) {
-                                        <mat-error>
-                                            Please enter a valid username
-                                        </mat-error>
-                                        }
-                                        <button mat-icon-button type="button" matSuffix>
-                                            <mat-icon class="icon-size-5 "
-                                                [svgIcon]="'mat_outline:phone_android'"></mat-icon>
-                                        </button>
-
-                                    </mat-form-field>
-                                    <mat-form-field class="w-full thick-border">
-                                        <mat-label>Password</mat-label>
-                                        <input id="password" matInput type="password" [formControlName]="'password'"
-                                            #passwordField [type]="passwordField.type" />
-                                        <button mat-icon-button (click)="passwordField.type === 'password'
-                                            ? (passwordField.type = 'text')
-                                            : (passwordField.type = 'password')
-                                        " matSuffix>
-                                            <mat-icon class="icon-size-5" *ngIf="passwordField.type === 'password'"
-                                                [svgIcon]="'mat_outline:visibility'">
-                                            </mat-icon>
-                                            <mat-icon class="icon-size-5" *ngIf="passwordField.type === 'text'"
-                                                [svgIcon]="'mat_outline:visibility_off'">
-                                            </mat-icon>
-                                        </button>
-
-                                        @if (signInForm.get('password').hasError('required')) {
-                                        <mat-error> Please enter your password </mat-error>
-                                        }
-                                        @if (signInForm.get('password').hasError('password')) {
-                                        <mat-error>
-                                            Please enter a valid phone address
-                                        </mat-error>
-                                        }
-
-                                    </mat-form-field>
-                                    <div class="flex justify-end items-center my-[10] mb-5 cursor-pointer">
-                                        <a (click)="goToOtpVerify()" class="text-sm text-[#F15757]">Forgot password?</a>
-                                    </div>
-
-                                </form>
-
-                            </div>
-
-                            <div>
-                                <button class="helper-mat-button-large w-full bg-[#F15757] rounded-[10px] text-center"
-                                    mat-flat-button [color]="'primary'" [disabled]="signInForm.disabled"
-                                    (click)="signIn()">
-                                    <span *ngIf="!signInForm.disabled" class="text-white text-center">Sign In</span>
-                                    <mat-progress-spinner *ngIf="signInForm.disabled" [diameter]="24"
-                                        [mode]="'indeterminate'"></mat-progress-spinner>
-                                </button>
-                                <div class="flex items-center w-full">
-                                    <hr class="flex-grow">
-                                    <span class="px-2 text-center">or</span>
-                                    <hr class="flex-grow">
-                                </div>
-                                <button class="helper-mat-button-large w-full h-[36px] rounded-[10px] text-center border-1 border-[#E4B7B2]"
-                                    [disabled]="signInForm.disabled" (click)="signUp()">
-                                    <span *ngIf="!signInForm.disabled" class="text-[#F15757] text-center">Sign Up</span>
-                                    <mat-progress-spinner *ngIf="signInForm.disabled" [diameter]="24"
-                                        mode="indeterminate"></mat-progress-spinner>
-                                </button>
-                            </div>
+                <!-- Login Form -->
+                <div *ngIf="!isChangeToVerifyOtp && !changeToSignUp" class="mx-auto w-full max-w-80 md:w-80 sm:mx-0 sm:w-80">
+                    <div class="my-3 flex flex-col items-center">
+                        <div class="bg-gray-100 w-fit h-fit flex items-center justify-center rounded-full scale-90 md:scale-100">
+                            <mat-icon class="icon-size-10 text-black"
+                                [svgIcon]="'mat_outline:phone_android'"></mat-icon>
                         </div>
+                        <p class="text-xl md:text-3xl w-fit font-bold">Login to your account</p>
                     </div>
-                    <div *ngIf="isChangeToVerifyOtp === true">
-                        <verify-otp-password></verify-otp-password>
+
+                    <div class="h-auto">
+                        <form class="md-form-field-appearance-outline" [formGroup]="signInForm" #signInNgForm="ngForm">
+                            <!-- phone field -->
+                            <mat-form-field class="w-full thick-border">
+                                <mat-label>Phone or Email</mat-label>
+                                <input id="username" matInput [formControlName]="'username'" />
+                                @if (signInForm.get('username').hasError('required')) {
+                                <mat-error> Please enter your phone or email </mat-error>
+                                }
+                                @if (signInForm.get('username').hasError('username')) {
+                                <mat-error>
+                                    Please enter a valid username
+                                </mat-error>
+                                }
+                                <button mat-icon-button type="button" matSuffix>
+                                    <mat-icon class="icon-size-5"
+                                        [svgIcon]="'mat_outline:phone_android'"></mat-icon>
+                                </button>
+                            </mat-form-field>
+
+                            <mat-form-field class="w-full thick-border">
+                                <mat-label>Password</mat-label>
+                                <input id="password" matInput type="password" [formControlName]="'password'"
+                                    #passwordField [type]="passwordField.type" />
+                                <button mat-icon-button (click)="passwordField.type === 'password'
+                                    ? (passwordField.type = 'text')
+                                    : (passwordField.type = 'password')
+                                    " matSuffix>
+                                    <mat-icon class="icon-size-5" *ngIf="passwordField.type === 'password'"
+                                        [svgIcon]="'mat_outline:visibility'">
+                                    </mat-icon>
+                                    <mat-icon class="icon-size-5" *ngIf="passwordField.type === 'text'"
+                                        [svgIcon]="'mat_outline:visibility_off'">
+                                    </mat-icon>
+                                </button>
+
+                                @if (signInForm.get('password').hasError('required')) {
+                                <mat-error> Please enter your password </mat-error>
+                                }
+                                @if (signInForm.get('password').hasError('password')) {
+                                <mat-error>
+                                    Please enter a valid phone address
+                                </mat-error>
+                                }
+                            </mat-form-field>
+
+                            <div class="flex justify-end items-center my-[10] mb-5 cursor-pointer">
+                                <a (click)="goToOtpVerify()" class="text-sm text-[#F15757]">Forgot password?</a>
+                            </div>
+                        </form>
                     </div>
-                </ng-container>
+
+                    <div>
+                        <button class="helper-mat-button-large w-full bg-[#F15757] rounded-[10px] text-center"
+                            mat-flat-button [color]="'primary'" [disabled]="signInForm.disabled"
+                            (click)="signIn()">
+                            <span *ngIf="!signInForm.disabled" class="text-white text-center">Sign In</span>
+                            <mat-progress-spinner *ngIf="signInForm.disabled" [diameter]="24"
+                                [mode]="'indeterminate'"></mat-progress-spinner>
+                        </button>
+                        <div class="flex items-center w-full">
+                            <hr class="flex-grow">
+                            <span class="px-2 text-center">or</span>
+                            <hr class="flex-grow">
+                        </div>
+                        <button class="helper-mat-button-large w-full h-[36px] rounded-[10px] text-center border-1 border-[#E4B7B2]"
+                            [disabled]="signInForm.disabled" (click)="signUp()">
+                            <span *ngIf="!signInForm.disabled" class="text-[#F15757] text-center">Sign Up</span>
+                            <mat-progress-spinner *ngIf="signInForm.disabled" [diameter]="24"
+                                mode="indeterminate"></mat-progress-spinner>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Verify OTP Form -->
+                <div *ngIf="isChangeToVerifyOtp && !changeToSignUp">
+                    <verify-otp-password></verify-otp-password>
+                </div>
+
+                <!-- Sign-up Form -->
+                <div *ngIf="changeToSignUp">
+                    <sign-up></sign-up>
+                </div>
             </div>
         </div>
     </div>
     <div>
-        <div class=" flex justify-center items-center pb-4 gap-2">
-            
+        <div class="flex justify-center items-center pb-4 gap-2">
+            <!-- Footer content if needed -->
         </div>
     </div>
 </div>
