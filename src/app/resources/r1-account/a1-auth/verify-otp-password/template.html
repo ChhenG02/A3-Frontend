@@ -7,9 +7,9 @@
                 class="p-3 bg-gray-100 w-fit h-fit rounded-full flex items-center justify-center scale-90 md:scale-100">
                 <mat-icon class="icon-size-10 text-black" svgIcon="mat_solid:password"></mat-icon>
             </div>
-            <p class="text-xl md:text-2xl w-fit font-bold"> ផ្ទៀងផ្ទាត់គណនី </p>
+            <p class="text-xl md:text-2xl w-fit font-bold"> Verify Account </p>
             <div class="text-center font-medium text-wrap text-sm sm:text-lg">
-                <p>សូមពិនិត្យមើលប្រអប់សាររបស់អ្នក</p>
+                <p>Please check your inbox.</p>
                 <p>{{ phone }}</p>
             </div>
         </div>
@@ -33,26 +33,26 @@
 
         <div class="flex flex-col gap-2">
             <div class="w-full flex justify-between">
-                <p class="text-[#09235f] font-bold text-sm sm:text-base"> ពេលវេលានៅសល់: {{ formatTime(remainingTime) }}
+                <p class="text-[#09235f] font-bold text-sm sm:text-base"> Time remaining: {{ formatTime(remainingTime) }}
                 </p>
-                <p class="underline font-bold cursor-pointer text-sm sm:text-base" (click)="resendOtp()"> ផ្ញើ OTP
-                    ម្តងទៀត </p>
+                <p class="underline font-bold cursor-pointer text-sm sm:text-base" (click)="resendOtp()"> Resend OTP
+                </p>
             </div>
 
             <button class="w-full mt-7 text-white bg-[#09235f]" [disabled]="!canSubmit || isLoading" mat-flat-button
                 (click)="verify() ">
-                <span *ngIf=" !isLoading ">ផ្ទៀងផ្ទាត់</span>
+                <span *ngIf=" !isLoading ">Verify</span>
                 <mat-progress-spinner *ngIf=" isLoading " [diameter]="24"
                     [mode]="'indeterminate'"></mat-progress-spinner>
             </button>
             <div class="flex items-center w-full -mt-5 -mb-5">
                 <hr class="flex-grow">
-                <span class="px-2 text-center">ឬ</span>
+                <span class="px-2 text-center">or</span>
                 <hr class="flex-grow">
             </div>
             <button class="helper-mat-button-large w-full rounded-lg bg-white ring-1 ring-[#09235f] text-center"
                 mat-flat-button [color]="'primary'" (click)="changeToPassword()">
-                <span class="text-[#09235f] text-center"> ចូលប្រព័ន្ធតាមលេខសម្ងាត់ </span>
+                <span class="text-[#09235f] text-center"> Login with password </span>
             </button>
         </div>
     </div>
@@ -70,9 +70,9 @@
                 class="p-3 bg-gray-100 w-fit h-fit rounded-full flex items-center justify-center scale-90 md:scale-100">
                 <mat-icon class="icon-size-10 text-black" svgIcon="mat_outline:lock"></mat-icon>
             </div>
-            <p class="text-xl md:text-2xl w-fit font-bold"> ផ្ទៀងផ្ទាត់គណនី</p>
+            <p class="text-xl md:text-2xl w-fit font-bold"> Verify account</p>
             <div class="text-center font-medium text-wrap text-sm sm:text-lg">
-                <p>សូមបញ្ចូលពាក្យសម្ងាត់ដែលត្រូវវង្កើតជាមួយគណនី</p>
+                <p>Please enter the password that was created with the account.</p>
                 <p>{{ phone }}</p>
             </div>
         </div>
@@ -87,10 +87,10 @@
 
         <div class="flex flex-col grow relative md-form-field-appearance-outline">
             <mat-form-field class="w-full thick-border">
-                <mat-label>លេខសម្ងាត់</mat-label>
+                <mat-label>Password</mat-label>
                 <input id="password" type="password" matInput formControlName="password" #passwordField />
 
-                <mat-error> សូមបញ្ចូលពាក្យសម្ងាត់ </mat-error>
+                <mat-error> Please enter a password </mat-error>
                 <button mat-icon-button type="button" (click)="
                     passwordField.type === 'password'
                         ? (passwordField.type = 'text')
@@ -110,7 +110,7 @@
         <div class="w-full">
             <button class="helper-mat-button-large w-full bg-[#09235f] rounded-lg text-center" mat-flat-button
                 [color]="'primary'" [disabled]="passwordForm.invalid || isLoading" (click)="signIn()">
-                <span *ngIf="!isLoading" class="text-white text-center"> ចូលប្រព័ន្ធ </span>
+                <span *ngIf="!isLoading" class="text-white text-center"> Login </span>
                 <mat-progress-spinner *ngIf="isLoading" [diameter]="24" [mode]="'indeterminate'"></mat-progress-spinner>
             </button>
         </div>
