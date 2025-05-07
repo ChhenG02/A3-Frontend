@@ -46,6 +46,7 @@ export class AuthService {
         return this._httpClient.post<ResponseLogin>(`${env.API_BASE_URL}/account/auth/login`, requestBody).pipe(
             switchMap((response: ResponseLogin) => {
                 this.accessToken = response.token; // Store the access token
+                console.log('Access Token:', this.accessToken); // Log the access token
                 return of(response); // Return the response as a new observable
             }),
         );

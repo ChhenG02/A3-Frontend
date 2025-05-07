@@ -77,6 +77,8 @@ export class AuthSignUpComponent implements OnInit {
     public countdownInterval: any;
     public phone: string = '';
     public canSubmit: boolean = false;
+    public showPassword: boolean = false;
+    public showConfirm: boolean = false; // Confirm password visibility toggle
 
     otp_id: string = '';
     temp2fa: string = '';
@@ -101,7 +103,8 @@ export class AuthSignUpComponent implements OnInit {
         this.passwordForm = this._formBuilder.group({
             username: this.phone,
             password: [null, Validators.required],
-        });
+            confirmPassword: [null, Validators.required],
+        },{ validators: this.passwordMatchValidator });
     }
 
 
@@ -172,7 +175,21 @@ export class AuthSignUpComponent implements OnInit {
         this.isOtpForm = [false, false, true];
     }
 
+    
+    // Toggle Password
+    togglePasswordVisibility(): void {
+        this.showPassword = !this.showPassword;
+    }
 
+    // Custom validator to check password match
+    passwordMatchValidator(group: FormGroup) {
+    const password = group.get('password')?.value;
+    const confirmPassword = group.get('confirmPassword')?.value;
+
+    return password === confirmPassword ? null : { mismatch: true };
+    }
+    
+    
     // Verify OTP code
     verify(): void {
         this.isLoading = true;
