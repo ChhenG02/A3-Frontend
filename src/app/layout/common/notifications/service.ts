@@ -4,12 +4,14 @@ import { UserService } from 'app/core/user/service';
 import { User } from 'app/core/user/interface';
 import { Notification } from 'app/layout/common/notifications/interface';
 import { env } from 'envs/env';
-import { map, Observable, ReplaySubject, switchMap, take } from 'rxjs';
+import { map, Observable, of, ReplaySubject, switchMap, take } from 'rxjs';
 import { io, Socket } from 'socket.io-client';
 
 @Injectable({ providedIn: 'root' })
 export class NotificationsService implements OnDestroy {
-    private _notifications: ReplaySubject<Notification[]> = new ReplaySubject<Notification[]>(1);
+    private _notifications: ReplaySubject<Notification[]> = new ReplaySubject<
+        Notification[]
+    >(1);
     private _socket: Socket | undefined;
     private _user: User | undefined;
     private _notificationsCache: Notification[] = [];
@@ -42,28 +44,23 @@ export class NotificationsService implements OnDestroy {
         //     // this._socket = io(env.SOCKET_URL + '/notifications-getway', {
         //     //     transports: ['websocket'],
         //     // });
-
         //     this._socket.on('connect', () => {
         //         console.log('WebSocket connected');
         //         this.register();
         //     });
-
         //     this._socket.on('new-order-notification', (data: { data: Notification[] }) => {
         //         const newNotifications = data.data;
         //         this._notificationsCache = [...newNotifications];
         //         this._notifications.next(this._notificationsCache);
         //     });
-
         //     this._socket.on('notification-update', (data: { data: Notification[] }) => {
         //         const updatedNotifications = data.data;
         //         this._notificationsCache = [...updatedNotifications];
         //         this._notifications.next(this._notificationsCache);
         //     });
-
         //     this._socket.on('disconnect', () => {
         //         console.log('WebSocket disconnected');
         //     });
-
         //     this._socket.on('connect_error', (error: any) => {
         //         console.error(`WebSocket connection error: ${error.message}`, error);
         //     });
@@ -86,34 +83,70 @@ export class NotificationsService implements OnDestroy {
     }
 
     getAll(): Observable<Notification[]> {
-        const apiUrl = `${env.API_BASE_URL}/share/notifications`;
+        const staticNotifications: Notification[] = [
+            {
+                id: 1,
+                receipt_number: 10001,
+                total_price: 49.99,
+                ordered_at: new Date('2025-05-06T10:00:00Z'),
+                cashier: {
+                    id: 1,
+                    name: 'Sok Dara',
+                    avatar: 'static/avatars/dara.png',
+                },
+                read: false,
+            },
+            {
+                id: 2,
+                receipt_number: 10002,
+                total_price: 75.5,
+                ordered_at: new Date('2025-05-07T09:30:00Z'),
+                cashier: {
+                    id: 2,
+                    name: 'Chan Nita',
+                    avatar: 'static/avatars/nita.png',
+                },
+                read: true,
+            },
+            {
+                id: 3,
+                receipt_number: 10003,
+                total_price: 120.0,
+                ordered_at: new Date('2025-05-07T11:15:00Z'),
+                cashier: {
+                    id: 3,
+                    name: 'Rithy',
+                    avatar: 'static/avatars/rithy.png',
+                },
+                read: false,
+            },
+        ];
 
-        return this._httpClient.get<{ data: Notification[] }>(apiUrl).pipe(
-            map(response => {
-                const notifications = response.data;
-                this.notifications = notifications;
-                return notifications;
-            })
-        );
+        this.notifications = staticNotifications;
+        return of(staticNotifications);
     }
 
     markAllAsRead(): Observable<boolean> {
         return this.notifications$.pipe(
             take(1),
-            switchMap(notifications =>
-                this._httpClient.get<boolean>('api/common/notifications/mark-all-as-read').pipe(
-                    map((isUpdated: boolean) => {
-                        if (isUpdated) {
-                            const updatedNotifications = notifications.map(notification => ({
-                                ...notification,
-                                read: true,
-                            }));
-                            this._notificationsCache = updatedNotifications;
-                            this._notifications.next(updatedNotifications);
-                        }
-                        return isUpdated;
-                    })
-                )
+            switchMap((notifications) =>
+                this._httpClient
+                    .get<boolean>('api/common/notifications/mark-all-as-read')
+                    .pipe(
+                        map((isUpdated: boolean) => {
+                            if (isUpdated) {
+                                const updatedNotifications = notifications.map(
+                                    (notification) => ({
+                                        ...notification,
+                                        read: true,
+                                    })
+                                );
+                                this._notificationsCache = updatedNotifications;
+                                this._notifications.next(updatedNotifications);
+                            }
+                            return isUpdated;
+                        })
+                    )
             )
         );
     }
@@ -128,19 +161,24 @@ export class NotificationsService implements OnDestroy {
     delete(id: number): Observable<boolean> {
         return this.notifications$.pipe(
             take(1),
-            switchMap(notifications =>
-                this._httpClient.delete<boolean>(
-                    `${env.API_BASE_URL}/share/notifications/${id}`,
-                    { params: { id: id.toString() } }
-                ).pipe(
-                    map((isDeleted: boolean) => {
-                        if (isDeleted) {
-                            const updatedNotifications = notifications.filter(item => item.id !== id);
-                            this._notifications.next(updatedNotifications);
-                        }
-                        return isDeleted;
-                    })
-                )
+            switchMap((notifications) =>
+                this._httpClient
+                    .delete<boolean>(
+                        `${env.API_BASE_URL}/share/notifications/${id}`,
+                        { params: { id: id.toString() } }
+                    )
+                    .pipe(
+                        map((isDeleted: boolean) => {
+                            if (isDeleted) {
+                                const updatedNotifications =
+                                    notifications.filter(
+                                        (item) => item.id !== id
+                                    );
+                                this._notifications.next(updatedNotifications);
+                            }
+                            return isDeleted;
+                        })
+                    )
             )
         );
     }
