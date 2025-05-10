@@ -94,7 +94,8 @@ export class AuthSignInComponent implements OnInit {
     ngOnInit(): void {
         // Create the form
         this.signInForm = this._formBuilder.group({
-            username: ['099785698', [Validators.required, Validators.pattern('^0[0-9]{8,9}$')]],
+            username: ['099785698', [Validators.required,
+             Validators.pattern('^(0[0-9]{8,9}|[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,})$')]],
             password: ['123456', Validators.required]
         });
         this.startImageSlider();
