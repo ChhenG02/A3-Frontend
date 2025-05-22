@@ -133,7 +133,7 @@ helper-navigation {
         height: 100%;
         overflow: hidden;
         z-index: 10;
-        background: #0f172a;
+        background: #FFFFFF;
         box-shadow: inset -1px 0 0 var(--helper-border);
 
 
@@ -419,12 +419,12 @@ helper-navigation-group-item {
             color: currentColor;
 
             .helper-navigation-item-icon {
-                @apply text-current opacity-60;
+                @apply text-[#64748B];
             }
 
             .helper-navigation-item-title-wrapper {
                 .helper-navigation-item-title {
-                    @apply text-current opacity-80;
+                    @apply text-[#64748B];
                 }
             }
         }
@@ -442,33 +442,20 @@ helper-navigation-collapsable-item {
 
                 &.helper-navigation-item-active,
                 &.helper-navigation-item-active-forced {
-                    @apply bg-gray-800 bg-opacity-5 dark:bg-white dark:bg-opacity-12;
+                    @apply bg-gray-800 bg-opacity-5 dark:bg-[#ED5950] dark:bg-opacity-12;
 
                     .helper-navigation-item-icon {
-                        @apply opacity-100 text-[#ffff]/85;
+                        @apply opacity-100 text-[#ED5950]/85;
                     }
 
                     .helper-navigation-item-title {
-                        @apply opacity-100 text-[#ffff]/85;
+                        @apply opacity-100 text-[#ED5950]/85;
                     }
                 }
             }
 
             /* Hover state */
-            &:not(.helper-navigation-item-active-forced):not(.helper-navigation-item-active):not(.helper-navigation-item-disabled) {
-                &:hover {
-                    @apply bg-gray-800 bg-opacity-5 dark:bg-white dark:bg-opacity-12;
-
-                    .helper-navigation-item-icon {
-                        @apply opacity-100 text-[#ffff]/85;
-                    }
-
-                    .helper-navigation-item-title,
-                    .helper-navigation-item-arrow {
-                        @apply opacity-100 text-[#ffff]/85;
-                    }
-                }
-            }
+            
         }
     }
 }
