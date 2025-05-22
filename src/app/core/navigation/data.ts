@@ -36,6 +36,13 @@ const adminNavigation: HelperNavigationItem[] = [
         ],
     },
     {
+        id: 'stock',
+        title: 'ឃ្លាំង',
+        type: 'basic',
+        icon: 'mdi:file-check-outline',
+        link: '/admin/stock',
+    },
+    {
         id: 'users',
         title: 'អ្នកប្រើប្រាស់',
         type: 'basic',
@@ -48,6 +55,13 @@ const adminNavigation: HelperNavigationItem[] = [
         type: 'basic',
         icon: 'mdi:account-circle-outline',
         link: '/profile',
+    },
+    {
+        id: 'setting',
+        title: 'ការកំណត់',
+        type: 'basic',
+        icon: 'mdi:cog',
+        link: '/setting',
     },
 ];
 
