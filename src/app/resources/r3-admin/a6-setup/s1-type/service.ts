@@ -21,7 +21,7 @@ export class ProductTypeService {
     // Method to retrieve a list of product types from the backend
     getData(){
 
-        return this.httpClient.get(`${env.API_BASE_URL}/admin/products/types/data`, {
+        return this.httpClient.get(`${env.API_BASE_URL}/admin/settings/products/types/data`, {
             headers: new HttpHeaders().set('Content-Type', 'application/json')
         }).pipe(
             switchMap((response) => {
@@ -42,21 +42,21 @@ export class ProductTypeService {
 
     // Method to create a new product type
     create(body: { name: string, image: string }): Observable<{ data: Data, message: string }> {
-        return this.httpClient.post<{ data: Data, message: string }>(`${env.API_BASE_URL}/admin/products/types`, body, {
+        return this.httpClient.post<{ data: Data, message: string }>(`${env.API_BASE_URL}/admin/settings/products/types`, body, {
             headers: new HttpHeaders().set('Content-Type', 'application/json')
         });
     }
 
     // Method to update an existing product type
     update(id: number, body: { name: string, image: string }): Observable<{ data: Data, message: string }> {
-        return this.httpClient.put<{ data: Data, message: string }>(`${env.API_BASE_URL}/admin/products/types/${id}`, body, {
+        return this.httpClient.put<{ data: Data, message: string }>(`${env.API_BASE_URL}/admin/settings/products/types/${id}`, body, {
             headers: new HttpHeaders().set('Content-Type', 'application/json')
         });
     }
 
     // Method to delete an existing product type
     delete(id: number = 0): Observable<{ status_code: number, message: string }> {
-        return this.httpClient.delete<{ status_code: number, message: string }>(`${env.API_BASE_URL}/admin/products/types/${id}`, {
+        return this.httpClient.delete<{ status_code: number, message: string }>(`${env.API_BASE_URL}/admin/settings/products/types/${id}`, {
             headers: new HttpHeaders().set('Content-Type', 'application/json')
         });
     }

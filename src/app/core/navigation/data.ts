@@ -22,6 +22,27 @@ const adminNavigation: HelperNavigationItem[] = [
         icon: 'mdi:package-variant-closed',
         link: '/admin/product/all',
     },
+
+    // {
+    //     id: 'product',
+    //     title: 'ផលិតផល',
+    //     type: 'collapsable',
+    //     icon: 'mdi:package-variant-closed',
+    //     children: [
+    //         {
+    //             id: 'product.all',
+    //             title: 'ទាំងអស់',
+    //             type: 'basic',
+    //             link: '/admin/product/all',
+    //         },
+    //         {
+    //             id: 'product.type',
+    //             title: 'ប្រភេទ',
+    //             type: 'basic',
+    //             link: '/admin/product/type',
+    //         },
+    //     ],
+    // },
     {
         id: 'stock',
         title: 'ឃ្លាំង',
@@ -44,11 +65,11 @@ const adminNavigation: HelperNavigationItem[] = [
         link: '/profile',
     },
     {
-        id: 'setting',
+        id: 'settings',
         title: 'ការកំណត់',
         type: 'basic',
         icon: 'mdi:cog',
-        link: '/setting',
+        link: '/admin/settings',
     },
 ];
 

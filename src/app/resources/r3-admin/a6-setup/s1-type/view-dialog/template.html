@@ -27,17 +27,17 @@
             </div>
 
             <mat-form-field appearance="outline" class="w-full">
-                <mat-label>ឈ្មោះប្រភេទ</mat-label>
-                <input matInput formControlName="name" placeholder="បញ្ចូលឈ្មោះប្រភេទ">
-                <mat-error>សូមបញ្ចូលឈ្មោះប្រភេទ</mat-error>
+                <mat-label>Create Category</mat-label>
+                <input matInput formControlName="name" placeholder="name">
+                <mat-error>please input category</mat-error>
             </mat-form-field>
         </form>
     </div>
     <mat-dialog-actions>
         <div class="w-full flex justify-end px-1">
-            <button class="helpers-mat-button-md​ text-white bg-[#102d71]" mat-flat-button (click)="submit()"
+            <button class="helpers-mat-button-md​ text-white bg-[#F15757]" mat-flat-button (click)="submit()"
                 [disabled]="typeForm.invalid || saving">
-                <span *ngIf="!typeForm.disabled">រួចរាល់</span>
+                <span *ngIf="!typeForm.disabled">Save</span>
                 <mat-progress-spinner *ngIf="typeForm.disabled" [diameter]="24"
                     [mode]="'indeterminate'"></mat-progress-spinner>
             </button>

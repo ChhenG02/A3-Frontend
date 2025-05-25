@@ -1,5 +1,13 @@
-import { Routes } from "@angular/router";
-import { DashboardComponent } from "./a1-dashboard/component";
+import { Routes } from '@angular/router';
+import { DashboardComponent } from './a1-dashboard/component';
+
+
+import { SaleComponent } from './a2-sale/component';
+
+import { UserComponent } from './a5-user/u1-listing/component';
+import { ProductComponent } from './a3-product/component';
+import { SetupLayoutComponent } from './a6-setup/component';
+import { ProductTypeComponent } from './a6-setup/s1-type/component';
 
 import { ProductTypeComponent } from "./a3-product/p2-type/component";
 import { SaleComponent } from "./a2-sale/component";
@@ -11,14 +19,17 @@ import { ViewUserComponent } from "./a6-setting/u2-view/component";
 export default [
     {
         path: 'dashboard',
-        component: DashboardComponent
+        component: DashboardComponent,
     },
     {
         path: 'pos',
-        component: SaleComponent
+        component: SaleComponent,
     },
     {
         path: 'product',
+
+        component: ProductComponent,
+
         children: [
             {
                 path: 'all',
@@ -34,11 +45,30 @@ export default [
                 component: ProductComponent
             },
         ]
+
     },
+
+    //  {
+    //     path: 'stock',
+    //     component: StockComponent,
+    // },
+
     {
         path: 'users',
-        component: UserComponent
+        component: UserComponent,
     },
+    {
+        path: 'settings',
+        component: SetupLayoutComponent,
+        children: [
+            { path: '', pathMatch: 'full', redirectTo: 'products/types' },
+            {
+                path: 'products/types',
+                component: ProductTypeComponent,
+            },
+        ],
+    },
+
     {
         path: 'setting',
         component: ViewUserComponent

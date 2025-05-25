@@ -1,0 +1,144 @@
+.list-sale-section {
+    @apply bg-white dark:bg-gray-800 shadow-sm rounded-xl w-full overflow-hidden z-10;
+    height: calc(100dvh - 4.25rem) !important;
+
+    .list-sale-body,
+    .no-data {
+        height: calc(100dvh - 7.75rem);
+        overflow: hidden;
+
+        .list-sale-content {
+            height: calc(100dvh - 11rem);
+            margin-bottom: 0.25rem;
+            padding: 0.5rem;
+            @apply sm:p-4;
+            background-color: theme('colors.white');
+            @apply dark:bg-gray-800 rounded-b-xl shadow;
+
+            .list-sale-data {
+                max-height: calc(100dvh - 12rem);
+                overflow-y: auto;
+                border-top: 1px solid theme('colors.gray.200');
+                @apply dark:border-gray-700;
+            }
+        }
+
+        .no-data {
+            @apply flex flex-col justify-center items-center text-gray-500 py-4 sm:py-8;
+        }
+    }
+}
+
+table {
+    @apply w-full text-sm text-left;
+    padding: 0.5rem !important;
+    @apply sm:p-4;
+    border-collapse: separate;
+    border-spacing: 0 0.25rem;
+    @apply sm:border-spacing-y-2;
+}
+
+.list-sale-data .mat-cell {
+    @apply px-2 py-2 sm:px-2 sm:py-3 text-gray-600 dark:text-gray-300 text-sm sm:text-base;
+}
+
+.list-sale-data .mat-column-action {
+    flex: none;
+    width: 2rem;
+    margin-right: -2px !important;
+}
+
+// Mobile-specific styles
+@media (max-width: 640px) {
+    .mat-mdc-table {
+        font-size: 0.875rem;
+    }
+    
+    .mat-mdc-header-cell,
+    .mat-mdc-cell {
+        padding: 0.5rem 0.75rem;
+    }
+    
+    .mat-mdc-row {
+        min-height: 3rem;
+    }
+}
+
+// Touch-friendly button sizing
+@media (max-width: 768px) {
+    .mat-mdc-icon-button {
+        min-width: 2.5rem;
+        min-height: 2.5rem;
+    }
+    
+    .mat-mdc-menu-item {
+        min-height: 3rem;
+    }
+}
+
+::placeholder,
+::-ms-input-placeholder {
+    color: #94a3b8 !important;
+}
+
+:host ::ng-deep .custom-dialog-container .mdc-dialog__surface {
+    border-radius: 1rem !important;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1) !important;
+}
+
+.flex-custom {
+    @apply flex items-center justify-between;
+}
+
+:host ::ng-deep .mat-mdc-paginator-container .mdc-icon-button {
+    @apply dark:bg-gray-700;
+}
+
+:host ::ng-deep .customswitch .switch {
+    @apply h-6;
+    background-color: #e5e7eb;
+    border-radius: 9999px;
+
+    &.checked {
+        background-color: #3b82f6 !important;
+        border-color: #3b82f6 !important;
+
+        small {
+            margin: 3px !important;
+        }
+    }
+
+    small {
+        @apply ml-1 mt-0.5;
+    }
+}
+
+// Card view styles for mobile
+.mobile-card {
+    transition: all 0.2s ease-in-out;
+    
+    &:active {
+        transform: scale(0.98);
+        @apply bg-gray-50 dark:bg-gray-600;
+    }
+}
+
+// Improved scrollbar for mobile
+.overflow-auto {
+    scrollbar-width: thin;
+    scrollbar-color: theme('colors.gray.400') transparent;
+    
+    &::-webkit-scrollbar {
+        height: 6px;
+        width: 6px;
+    }
+    
+    &::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    
+    &::-webkit-scrollbar-thumb {
+        background-color: theme('colors.gray.400');
+        border-radius: 3px;
+    }
+}
