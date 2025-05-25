@@ -12,7 +12,10 @@ import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 
 // ================================================================>> Custom Library (Application-specific)
 import { env } from 'envs/env';
-import { HelperConfirmationConfig, HelperConfirmationService } from 'helper/services/confirmation';
+import {
+    HelperConfirmationConfig,
+    HelperConfirmationService,
+} from 'helper/services/confirmation';
 import { SnackbarService } from 'helper/services/snack-bar/snack-bar.service';
 import GlobalConstants from 'helper/shared/constants';
 import { ProductTypeDialogComponent } from './view-dialog/component';
@@ -20,7 +23,7 @@ import { ProductTypeService } from './service';
 import { Data, List } from './interface';
 
 @Component({
-    selector: 'products-type',
+    selector: 'types',
     standalone: true,
     templateUrl: './template.html',
     styleUrl: './style.scss',
@@ -33,42 +36,43 @@ import { Data, List } from './interface';
         MatButtonModule,
         MatMenuModule,
         DatePipe,
-    ]
+    ],
 })
-
 export class ProductTypeComponent implements OnInit {
+    private _service = inject(ProductTypeService);
+    private _snackBarService = inject(SnackbarService);
+    private _helpersConfirmationService = inject(HelperConfirmationService);
+    private _matDialog = inject(MatDialog);
 
-    private _service                    = inject(ProductTypeService);
-    private _snackBarService             = inject(SnackbarService);
-    private _helpersConfirmationService  = inject(HelperConfirmationService);
-    private _matDialog                   = inject(MatDialog);
+    public displayedColumns: string[] = [
+        'no',
+        'name',
+        'n_of_products',
+        'created_at',
+        'action',
+    ];
+    public dataSource: MatTableDataSource<Data> = new MatTableDataSource<Data>(
+        []
+    );
 
-    public displayedColumns : string[] = ['no', 'name', 'n_of_products', 'created_at', 'action'];
-    public dataSource       : MatTableDataSource<Data> = new MatTableDataSource<Data>([]);
+    public fileUrl: string = env.FILE_BASE_URL; // Assuming this is the base URL for file-related operations
+    public total: number = 10;
+    public limit: number = 10;
+    public page: number = 1;
+    public from: Date;
+    public to: Date;
+    public receipt_number: string = '';
 
-    public fileUrl          : string = env.FILE_BASE_URL; // Assuming this is the base URL for file-related operations
-    public total            : number = 10;
-    public limit            : number = 10;
-    public page             : number = 1;
-    public from             : Date;
-    public to               : Date;
-    public receipt_number   : string = '';
-
-    public isLoading: boolean  = true;
-
+    public isLoading: boolean = true;
 
     ngOnInit(): void {
-
         this.getData();
     }
 
-    getData(){
-
+    getData() {
         this.isLoading = true;
         this._service.getData().subscribe({
-
             next: (response: List) => {
-
                 // Update the data source with the received data
                 this.dataSource.data = response.data;
 
@@ -77,26 +81,24 @@ export class ProductTypeComponent implements OnInit {
             },
 
             error: (err: HttpErrorResponse) => {
-
                 // Display a snackbar notification with an error message, falling back to a generic error message if not available
-                this._snackBarService.openSnackBar(err?.error?.message ?? GlobalConstants.genericError, GlobalConstants.error);
+                this._snackBarService.openSnackBar(
+                    err?.error?.message ?? GlobalConstants.genericError,
+                    GlobalConstants.error
+                );
                 this.isLoading = false;
-            }
+            },
         });
     }
 
-
-
     create(): void {
-
         // Create a new MatDialogConfig to configure the appearance and behavior of the dialog
         const dialogConfig = new MatDialogConfig();
 
         // Set the initial data to be passed to the ProductTypeDialogComponent
         dialogConfig.data = {
-
-            title: 'បង្កើតប្រភេទ',
-            type: null
+            title: 'Create Cateogory',
+            type: null,
         };
 
         // Configure the width, minimum height, and autofocus settings for the dialog
@@ -109,11 +111,13 @@ export class ProductTypeComponent implements OnInit {
         dialogConfig.enterAnimationDuration = '0s';
 
         // Open the dialog with ProductTypeDialogComponent as the content component and apply the configuration
-        const dialogRef = this._matDialog.open(ProductTypeDialogComponent, dialogConfig);
+        const dialogRef = this._matDialog.open(
+            ProductTypeDialogComponent,
+            dialogConfig
+        );
 
         // Subscribe to the ResponseData observable in the ProductTypeDialogComponent
         dialogRef.componentInstance.ResponseData.subscribe((type: Data) => {
-
             // Get the current data from the data source
             const data = this.dataSource.data;
 
@@ -123,11 +127,13 @@ export class ProductTypeComponent implements OnInit {
                 name: type.name,
                 image: type.image,
                 n_of_products: type.n_of_products,
-                created_at: type.created_at
+                created_at: type.created_at,
             });
 
             // Sort the data array alphabetically based on the 'name' property
-            data.sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
+            data.sort((a, b) =>
+                a.name.toLowerCase().localeCompare(b.name.toLowerCase())
+            );
 
             // Update the data source with the modified data
             this.dataSource.data = data;
@@ -135,15 +141,13 @@ export class ProductTypeComponent implements OnInit {
     }
 
     update(row: Data): void {
-
         // Create a new MatDialogConfig to configure the appearance and behavior of the dialog
         const dialogConfig = new MatDialogConfig();
 
         // Set the initial data to be passed to the ProductTypeDialogComponent
         dialogConfig.data = {
-
-            title: 'កែប្រែប្រភេទ',
-            type: row
+            title: 'Edit Category',
+            type: row,
         };
 
         // Configure the width, minimum height, and autofocus settings for the dialog
@@ -156,11 +160,13 @@ export class ProductTypeComponent implements OnInit {
         dialogConfig.enterAnimationDuration = '0s';
 
         // Open the dialog with ProductTypeDialogComponent as the content component and apply the configuration
-        const dialogRef = this._matDialog.open(ProductTypeDialogComponent, dialogConfig);
+        const dialogRef = this._matDialog.open(
+            ProductTypeDialogComponent,
+            dialogConfig
+        );
 
         // Subscribe to the ResponseData observable in the ProductTypeDialogComponent
         dialogRef.componentInstance.ResponseData.subscribe((type: Data) => {
-
             // Find the index of the updated row in the data source
             const index = this.dataSource.data.indexOf(row);
 
@@ -171,31 +177,26 @@ export class ProductTypeComponent implements OnInit {
     }
 
     onDelete(type: Data): void {
-
         // Build the configuration for the confirmation dialog
         const configAction: HelperConfirmationConfig = {
-
             title: `Remove <strong> ${type.name} </strong>`,
-            message: 'Are you sure you want to remove this receipt number permanently? <span class="font-medium">This action cannot be undone!</span>', // Confirmation message
+            message:
+                'Are you sure you want to remove this receipt number permanently? <span class="font-medium">This action cannot be undone!</span>', // Confirmation message
 
             icon: {
-
                 show: true,
                 name: 'heroicons_outline:exclamation-triangle',
                 color: 'warn',
             },
 
             actions: {
-
                 confirm: {
-
                     show: true,
                     label: 'Remove',
                     color: 'warn',
                 },
 
                 cancel: {
-
                     show: true,
                     label: 'Cancel',
                 },
@@ -208,25 +209,35 @@ export class ProductTypeComponent implements OnInit {
 
         // Subscribe to the afterClosed event of the dialog reference
         dialogRef.afterClosed().subscribe((result: string) => {
-
             // Check if the user confirmed the action
-            if (result && typeof result === 'string' && result === 'confirmed') {
-
+            if (
+                result &&
+                typeof result === 'string' &&
+                result === 'confirmed'
+            ) {
                 // Call the delete method from the service to remove the type
                 this._service.delete(type.id).subscribe({
-
-                    next: (response: { status_code: number, message: string }) => {
-
+                    next: (response: {
+                        status_code: number;
+                        message: string;
+                    }) => {
                         // If successful, filter the deleted type from the data source
-                        this.dataSource.data = this.dataSource.data.filter((v: Data) => v.id != type.id);
+                        this.dataSource.data = this.dataSource.data.filter(
+                            (v: Data) => v.id != type.id
+                        );
                         // Display a success message using the snackbar service
-                        this._snackBarService.openSnackBar(response.message, GlobalConstants.success);
+                        this._snackBarService.openSnackBar(
+                            response.message,
+                            GlobalConstants.success
+                        );
                     },
                     error: (err: HttpErrorResponse) => {
-
                         // Handle errors by displaying an error message using the snackbar service
-                        this._snackBarService.openSnackBar(err?.error?.message || GlobalConstants.genericError, GlobalConstants.error);
-                    }
+                        this._snackBarService.openSnackBar(
+                            err?.error?.message || GlobalConstants.genericError,
+                            GlobalConstants.error
+                        );
+                    },
                 });
             }
         });
@@ -234,8 +245,11 @@ export class ProductTypeComponent implements OnInit {
 
     getTotal(): number {
         // Use map to extract the 'n_of_products' property from each item in the dataSource
-        return this.dataSource.data.map(t => t.n_of_products)
-            // Use reduce to sum up all the extracted values
-            .reduce((acc, value) => Number(acc) + Number(value), 0);
+        return (
+            this.dataSource.data
+                .map((t) => t.n_of_products)
+                // Use reduce to sum up all the extracted values
+                .reduce((acc, value) => Number(acc) + Number(value), 0)
+        );
     }
 }
