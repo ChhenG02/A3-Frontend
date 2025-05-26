@@ -73,9 +73,9 @@ export class ProfileComponent implements OnInit {
 
             // Check if the avatar is a valid image
             const validImgExtensions = /\.(jpg|jpeg|png|gif|bmp|webp)$/i;
-            this.src = this.user.avatar && validImgExtensions.test(this.user.avatar)
+           this.src = this.user.avatar && validImgExtensions.test(this.user.avatar)
                 ? this.staticImg
-                : `${this.fileUrl}/${this.user.avatar}`;
+                : this.fileUrl.replace(/\/+$/, '') + '/' + this.user.avatar.replace(/^\/+/, '');
 
             // Mark for check
             this._changeDetectorRef.markForCheck();
