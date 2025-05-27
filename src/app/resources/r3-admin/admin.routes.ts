@@ -18,7 +18,7 @@ export default [
         component: SaleComponent,
     },
     {
-        path: 'product',
+        path: 'products',
         component: ProductComponent,
     },
 
