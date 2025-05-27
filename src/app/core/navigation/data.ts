@@ -20,7 +20,7 @@ const adminNavigation: HelperNavigationItem[] = [
         title: 'ផលិតផល',
         type: 'basic',
         icon: 'mdi:package-variant-closed',
-        link: '/admin/product/all',
+        link: '/admin/products',
     },
 
     // {
