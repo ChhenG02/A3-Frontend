@@ -1,52 +1,43 @@
-import { BooleanInput } from '@angular/cdk/coercion';
-import { NgClass } from '@angular/common';
-import {
-    ChangeDetectionStrategy,
-    ChangeDetectorRef,
-    Component,
-    Input,
-    OnDestroy,
-    OnInit,
-    forwardRef,
-    inject,
-} from '@angular/core';
+import { NgClass, NgTemplateOutlet } from '@angular/common';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy, OnInit, inject } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { IsActiveMatchOptions, RouterLink, RouterLinkActive } from '@angular/router';
 import { HelperNavigationService } from 'helper/components/navigation/service';
 import { HelperNavigationItem } from 'helper/components/navigation/interface';
-
-import { HelperNavigationCollapsableItemComponent } from 'helper/components/navigation/collapsable/component';
-import { HelperNavigationDividerItemComponent } from 'helper/components/navigation/divider/component';
 import { HelperNavigationComponent } from 'helper/components/navigation/component';
+import { HelperUtilsService } from 'helper/services/utils/utils.service';
 import { Subject, takeUntil } from 'rxjs';
-import { HelperNavigationBasicParentItemComponent } from '../basic-parent/component';
-import { HelperNavigationBasicSubItemComponent } from '../basic-sub/component';
 
 @Component({
-    selector: 'helper-navigation-group-item',
+    selector: 'helper-navigation-basic-parent-item',
     templateUrl: './template.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
     imports: [
         NgClass,
+        RouterLink,
+        RouterLinkActive,
+        MatTooltipModule,
+        NgTemplateOutlet,
         MatIconModule,
-        HelperNavigationBasicParentItemComponent,
-        HelperNavigationBasicSubItemComponent,
-        HelperNavigationCollapsableItemComponent,
-        HelperNavigationDividerItemComponent,
-        forwardRef(() => HelperNavigationGroupItemComponent),
     ],
 })
-export class HelperNavigationGroupItemComponent implements OnInit, OnDestroy {
-    /* eslint-disable @typescript-eslint/naming-convention */
-    static ngAcceptInputType_autoCollapse: BooleanInput;
-    /* eslint-enable @typescript-eslint/naming-convention */
-
+export class HelperNavigationBasicParentItemComponent
+    implements OnInit, OnDestroy {
     private _changeDetectorRef = inject(ChangeDetectorRef);
     private _helperNavigationService = inject(HelperNavigationService);
+    private _helperUtilsService = inject(HelperUtilsService);
 
-    @Input() autoCollapse: boolean;
     @Input() item: HelperNavigationItem;
     @Input() name: string;
+
+    // Set the equivalent of {exact: false} as default for active match options.
+    // We are not assigning the item.isActiveMatchOptions directly to the
+    // [routerLinkActiveOptions] because if it's "undefined" initially, the router
+    // will throw an error and stop working.
+    isActiveMatchOptions: IsActiveMatchOptions =
+        this._helperUtilsService.subsetMatchOptions;
 
     private __helperNavigationComponent: HelperNavigationComponent;
     private _unsubscribeAll: Subject<any> = new Subject<any>();
@@ -59,9 +50,20 @@ export class HelperNavigationGroupItemComponent implements OnInit, OnDestroy {
      * On init
      */
     ngOnInit(): void {
+        // Set the "isActiveMatchOptions" either from item's
+        // "isActiveMatchOptions" or the equivalent form of
+        // item's "exactMatch" option
+        this.isActiveMatchOptions =
+            this.item.isActiveMatchOptions ?? this.item.exactMatch
+                ? this._helperUtilsService.exactMatchOptions
+                : this._helperUtilsService.subsetMatchOptions;
+
         // Get the parent navigation component
         this.__helperNavigationComponent =
             this._helperNavigationService.getComponent(this.name);
+
+        // Mark for check
+        this._changeDetectorRef.markForCheck();
 
         // Subscribe to onRefreshed on the navigation component
         this.__helperNavigationComponent.onRefreshed
@@ -79,19 +81,5 @@ export class HelperNavigationGroupItemComponent implements OnInit, OnDestroy {
         // Unsubscribe from all subscriptions
         this._unsubscribeAll.next(null);
         this._unsubscribeAll.complete();
-    }
-
-    // -----------------------------------------------------------------------------------------------------
-    // @ Public methods
-    // -----------------------------------------------------------------------------------------------------
-
-    /**
-     * Track by function for ngFor loops
-     *
-     * @param index
-     * @param item
-     */
-    trackByFn(index: number, item: any): any {
-        return item.id || index;
     }
 }

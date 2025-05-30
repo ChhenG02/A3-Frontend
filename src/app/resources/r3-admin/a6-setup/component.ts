@@ -54,9 +54,25 @@ export class SetupLayoutComponent implements OnInit {
         {
             id: 'types',
             title:'Category',
-            type: 'basic',
+            type: 'basic-sub',
             icon: 'mdi:shape-outline',
             link: 'products/types',
+        },
+
+          {
+            id: 'promotions',
+            title:'Promotions',
+            type: 'basic-sub',
+            icon: 'mdi:brightness-percent',
+            link: 'promotion',
+        },
+
+          {
+            id: 'stock-status',
+            title:'Stock Status',
+            type: 'basic-sub',
+            icon: 'mdi:list-status',
+            link: 'stock-status',
         },
         
     ];

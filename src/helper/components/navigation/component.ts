@@ -38,7 +38,7 @@ import {
     HelperNavigationMode,
     HelperNavigationPosition,
 } from 'helper/components/navigation/interface';
-import { HelperNavigationBasicItemComponent } from 'helper/components/navigation/basic/component';
+
 import { HelperNavigationCollapsableItemComponent } from 'helper/components/navigation/collapsable/component';
 import { HelperNavigationDividerItemComponent } from 'helper/components/navigation/divider/component';
 import { HelperNavigationGroupItemComponent } from 'helper/components/navigation/group/component';
@@ -53,6 +53,8 @@ import {
     Subscription,
     takeUntil,
 } from 'rxjs';
+import { HelperNavigationBasicParentItemComponent } from './basic-parent/component';
+import { HelperNavigationBasicSubItemComponent } from './basic-sub/component';
 
 @Component({
     selector: 'helper-navigation',
@@ -65,7 +67,8 @@ import {
     standalone: true,
     imports: [
         HelperScrollbarDirective,
-        HelperNavigationBasicItemComponent,
+        HelperNavigationBasicParentItemComponent,
+        HelperNavigationBasicSubItemComponent,
         HelperNavigationCollapsableItemComponent,
         HelperNavigationDividerItemComponent,
         HelperNavigationGroupItemComponent,
@@ -153,8 +156,7 @@ export class HelperNavigationComponent
     @HostBinding('class') get classList(): any {
         /* eslint-disable @typescript-eslint/naming-convention */
         return {
-            'helper-navigation-animations-enabled':
-                this._animationsEnabled,
+            'helper-navigation-animations-enabled': this._animationsEnabled,
             [`helper-navigation-appearance-${this.appearance}`]: true,
             'helper-navigation-hover': this._hovered,
             'helper-navigation-inner': this.inner,
@@ -162,8 +164,7 @@ export class HelperNavigationComponent
             'helper-navigation-mode-side': this.mode === 'side',
             'helper-navigation-opened': this.opened,
             'helper-navigation-position-left': this.position === 'left',
-            'helper-navigation-position-right':
-                this.position === 'right',
+            'helper-navigation-position-right': this.position === 'right',
         };
         /* eslint-enable @typescript-eslint/naming-convention */
     }
@@ -205,9 +206,11 @@ export class HelperNavigationComponent
             .pipe(takeUntil(this._unsubscribeAll), delay(250))
             .subscribe(() => {
                 // Loop through the scrollbars and update them
-                helperScrollbarDirectives.forEach((helperScrollbarDirective) => {
-                    helperScrollbarDirective.update();
-                });
+                helperScrollbarDirectives.forEach(
+                    (helperScrollbarDirective) => {
+                        helperScrollbarDirective.update();
+                    }
+                );
             });
     }
 
@@ -728,9 +731,7 @@ export class HelperNavigationComponent
         this._asideOverlay = this._renderer2.createElement('div');
 
         // Add a class to the aside overlay element
-        this._asideOverlay.classList.add(
-            'helper-navigation-aside-overlay'
-        );
+        this._asideOverlay.classList.add('helper-navigation-aside-overlay');
 
         // Append the aside overlay to the parent of the navigation
         this._renderer2.appendChild(

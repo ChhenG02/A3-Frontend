@@ -15,10 +15,16 @@
         <!-- Skip the hidden items -->
         @if ((item.hidden && !item.hidden(item)) || !item.hidden) {
 
-        <!-- Basic -->
-        @if (item.type === 'basic') {
-        <helper-navigation-basic-item [item]="item" [name]="name"></helper-navigation-basic-item>
+        <!-- Basic-parent -->
+        @if (item.type === 'basic-parent') {
+        <helper-navigation-basic-parent-item [item]="item" [name]="name"></helper-navigation-basic-parent-item>
         }
+
+        <!-- Basic-sub -->
+        @if (item.type === 'basic-sub') {
+        <helper-navigation-basic-sub-item [item]="item" [name]="name"></helper-navigation-basic-sub-item>
+        }
+
 
         <!-- Collapsable -->
         @if (item.type === 'collapsable') {

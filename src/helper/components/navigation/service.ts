@@ -90,7 +90,12 @@ export class HelperNavigationService {
         flatNavigation: HelperNavigationItem[] = []
     ): HelperNavigationItem[] {
         for (const item of navigation) {
-            if (item.type === 'basic') {
+            if (item.type === 'basic-parent') {
+                flatNavigation.push(item);
+                continue;
+            }
+
+              if (item.type === 'basic-sub') {
                 flatNavigation.push(item);
                 continue;
             }

@@ -7,6 +7,8 @@ import { UserComponent } from './a5-user/u1-listing/component';
 import { ProductComponent } from './a3-product/component';
 import { SetupLayoutComponent } from './a6-setup/component';
 import { ProductTypeComponent } from './a6-setup/s1-type/component';
+import { promotionComponent } from './a6-setup/s2-promotion/component';
+import { StockStatusComponent } from './a6-setup/s3-stock-status/component';
 
 export default [
     {
@@ -39,6 +41,16 @@ export default [
             {
                 path: 'products/types',
                 component: ProductTypeComponent,
+            },
+
+             {
+                path: 'promotion',
+                component: promotionComponent,
+            },
+
+             {
+                path: 'stock-status',
+                component: StockStatusComponent,
             },
         ],
     },

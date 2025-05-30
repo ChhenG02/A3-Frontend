@@ -10,7 +10,7 @@ import { HelperUtilsService } from 'helper/services/utils/utils.service';
 import { Subject, takeUntil } from 'rxjs';
 
 @Component({
-    selector: 'helper-navigation-basic-item',
+    selector: 'helper-navigation-basic-sub-item',
     templateUrl: './template.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
@@ -23,7 +23,7 @@ import { Subject, takeUntil } from 'rxjs';
         MatIconModule,
     ],
 })
-export class HelperNavigationBasicItemComponent
+export class HelperNavigationBasicSubItemComponent
     implements OnInit, OnDestroy {
     private _changeDetectorRef = inject(ChangeDetectorRef);
     private _helperNavigationService = inject(HelperNavigationService);

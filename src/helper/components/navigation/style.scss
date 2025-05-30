@@ -1,21 +1,19 @@
 /* Variables */
 :root {
-    --helper-navigation-width: 255px;
+    --helper-navigation-width: 200px;
 }
 
 helper-navigation {
-    position: sticky;
     display: flex;
     flex-direction: column;
     flex: 1 0 auto;
-    top: 0;
     width: var(--helper-navigation-width);
     min-width: var(--helper-navigation-width);
     max-width: var(--helper-navigation-width);
     height: 100vh;
     min-height: 100vh;
     max-height: 100vh;
-    z-index: 200;
+    z-index: 40; /* Lower z-index for side mode */
 
     /* ----------------------------------------------------------------------------------------------------- */
     /* @ Navigation Drawer
@@ -41,17 +39,22 @@ helper-navigation {
         position: fixed;
         top: 0;
         bottom: 0;
+        z-index: 60; /* Higher z-index for overlay mode */
+    }
+
+    /* Side mode */
+    &.helper-navigation-mode-side {
+        position: relative; /* Changed from sticky to relative */
+        z-index: 40; /* Lower z-index for side mode */
     }
 
     /* Left position */
     &.helper-navigation-position-left {
-
         /* Side mode */
         &.helper-navigation-mode-side {
-            margin-left: calc(#{var(--helper-navigation-width)} * -1);
-
+            /* Removed negative margin approach */
             &.helper-navigation-opened {
-                margin-left: 0;
+                /* Let flexbox handle positioning */
             }
         }
 
@@ -73,13 +76,11 @@ helper-navigation {
 
     /* Right position */
     &.helper-navigation-position-right {
-
         /* Side mode */
         &.helper-navigation-mode-side {
-            margin-right: calc(var(--helper-navigation-width) * -1);
-
+            /* Removed negative margin approach */
             &.helper-navigation-opened {
-                margin-right: 0;
+                /* Let flexbox handle positioning */
             }
         }
 
@@ -133,9 +134,8 @@ helper-navigation {
         height: 100%;
         overflow: hidden;
         z-index: 10;
-        background: #FFFFFF;
+        background: #ffffff;
         box-shadow: inset -1px 0 0 var(--helper-border);
-
 
         /* Content */
         .helper-navigation-content {
@@ -145,13 +145,14 @@ helper-navigation {
             overscroll-behavior: contain;
 
             /* Divider */
-            >helper-navigation-divider-item {
+            > helper-navigation-divider-item {
                 margin: 24px 0;
             }
         }
 
         /* Footer */
-        .helper-navigation-footer {}
+        .helper-navigation-footer {
+        }
     }
 
     /* Aside wrapper */
@@ -187,7 +188,8 @@ helper-navigation {
     /* ----------------------------------------------------------------------------------------------------- */
 
     /* Navigation items common */
-    helper-navigation-basic-item,
+    helper-navigation-basic-parent-item,
+    helper-navigation-basic-sub-item,
     helper-navigation-collapsable-item,
     helper-navigation-divider-item,
     helper-navigation-group-item {
@@ -195,11 +197,90 @@ helper-navigation {
         flex-direction: column;
         flex: 1 0 auto;
         user-select: none;
+    }
 
+    /* Parent items with vertical layout (icon above text) */
+    helper-navigation-basic-parent-item,
+    helper-navigation-collapsable-item,
+    helper-navigation-group-item {
         .helper-navigation-item-wrapper {
             .helper-navigation-item {
                 position: relative;
                 display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                padding: 16px 12px;
+                font-size: 12px;
+                font-weight: 500;
+                line-height: 16px;
+                text-decoration: none;
+                border-radius: 8px;
+                transition: all 0.2s ease-in-out;
+                min-height: 64px;
+
+                /* Disabled state */
+                &.helper-navigation-item-disabled {
+                    cursor: default;
+                    opacity: 0.4;
+                }
+
+                .helper-navigation-item-icon {
+                    margin-right: 0; /* Remove right margin */
+                    margin-bottom: 6px; /* Add bottom margin for spacing */
+                    font-size: 20px; /* Larger icon size */
+                    width: 20px;
+                    height: 20px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    transition: all 0.2s ease-in-out; /* Add transition for scale effect */
+                }
+
+                .helper-navigation-item-title-wrapper {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    text-align: center;
+
+                    .helper-navigation-item-title {
+                        font-size: 11px; /* Smaller text */
+                        font-weight: 400;
+                        line-height: 1.2;
+                        white-space: nowrap;
+                    }
+                }
+
+                .helper-navigation-item-badge {
+                    position: absolute;
+                    top: 8px;
+                    right: 8px;
+                    margin-left: 0; /* Reset margin */
+
+                    .helper-navigation-item-badge-content {
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        font-size: 10px;
+                        font-weight: 600;
+                        white-space: nowrap;
+                        height: 16px;
+                        min-width: 16px;
+                        border-radius: 8px;
+                        padding: 0 6px;
+                    }
+                }
+            }
+        }
+    }
+
+    /* Sub items with horizontal layout (original design) */
+    helper-navigation-basic-sub-item {
+        .helper-navigation-item-wrapper {
+            .helper-navigation-item {
+                position: relative;
+                display: flex;
+                flex-direction: row; /* Horizontal layout */
                 align-items: center;
                 justify-content: flex-start;
                 padding: 10px 16px;
@@ -208,6 +289,7 @@ helper-navigation {
                 line-height: 20px;
                 text-decoration: none;
                 border-radius: 6px;
+                transition: all 0.2s ease-in-out;
 
                 /* Disabled state */
                 &.helper-navigation-item-disabled {
@@ -217,10 +299,30 @@ helper-navigation {
 
                 .helper-navigation-item-icon {
                     margin-right: 12px;
+                    margin-bottom: 0;
+                    font-size: 16px;
+                    width: 16px;
+                    height: 16px;
+                }
+
+                .helper-navigation-item-title-wrapper {
+                    display: flex;
+                    align-items: center;
+                    justify-content: flex-start;
+                    text-align: left;
+
+                    .helper-navigation-item-title {
+                        font-size: 13px;
+                        font-weight: 500;
+                        line-height: 20px;
+                    }
                 }
 
                 .helper-navigation-item-badge {
                     margin-left: auto;
+                    position: relative;
+                    top: auto;
+                    right: auto;
 
                     .helper-navigation-item-badge-content {
                         display: flex;
@@ -236,52 +338,167 @@ helper-navigation {
         }
     }
 
-    /* Basic, Collapsable, Group */
-    helper-navigation-basic-item,
+    /* Basic-parent, Collapsable, Group */
+    helper-navigation-basic-parent-item,
     helper-navigation-collapsable-item,
     helper-navigation-group-item {
-        >.helper-navigation-item-wrapper {
+        > .helper-navigation-item-wrapper {
+            margin: 0 8px;
+        }
+    }
+
+    /* Basic-sub */
+    helper-navigation-basic-sub-item {
+        > .helper-navigation-item-wrapper {
             margin: 0 12px;
         }
     }
 
-    /* Basic, Collapsable */
-    helper-navigation-basic-item,
+    /* Basic-parent, Collapsable */
+    helper-navigation-basic-parent-item,
     helper-navigation-collapsable-item {
+        margin-bottom: 8px; /* Increased bottom margin for better spacing */
+
+        .helper-navigation-item {
+            cursor: pointer;
+        }
+
+        > .helper-navigation-item-wrapper {
+            .helper-navigation-item {
+                position: relative;
+
+                /* Create a pseudo-element for the square hover/active background */
+                &::before {
+                    content: "";
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    width: 80px; 
+                    height: 75px; 
+                    transform: translate(-50%, -50%);
+                    border-radius: 12px;
+                    transition: all 0.2s ease-in-out;
+                    opacity: 0;
+                    z-index: -1;
+                }
+
+                /* Hover state */
+                &:not(.helper-navigation-item-disabled):hover {
+                    &::before {
+                        @apply bg-gray-100;
+                        opacity: 1;
+                    }
+
+                    .helper-navigation-item-icon {
+                        @apply text-[#ED5950];
+                        transform: scale(1.1);
+                    }
+
+                    .helper-navigation-item-title {
+                        @apply text-[#ED5950];
+                    }
+                }
+
+                /* Active state */
+                &:not(.helper-navigation-item-disabled) {
+                    &.helper-navigation-item-active,
+                    &.helper-navigation-item-active-forced {
+                        &::before {
+                            @apply bg-[#ED5950] bg-opacity-10;
+                            opacity: 1;
+                        }
+
+                        .helper-navigation-item-icon {
+                            @apply opacity-100 text-[#ED5950];
+                        }
+
+                        .helper-navigation-item-title {
+                            @apply opacity-100 text-[#ED5950];
+                        }
+
+                        /* Enhanced hover effect when active */
+                        &:hover {
+                            &::before {
+                                @apply bg-[#ED5950] bg-opacity-15;
+                            }
+
+                            .helper-navigation-item-icon {
+                                transform: scale(1.1);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /* Basic-sub */
+    helper-navigation-basic-sub-item {
         margin-bottom: 4px;
 
         .helper-navigation-item {
             cursor: pointer;
         }
+
+        > .helper-navigation-item-wrapper {
+            .helper-navigation-item {
+                /* Hover state */
+                &:not(.helper-navigation-item-disabled):hover {
+                    @apply bg-gray-800 bg-opacity-5;
+
+                    .helper-navigation-item-icon {
+                        @apply text-[#ED5950];
+                    }
+
+                    .helper-navigation-item-title {
+                        @apply text-[#ED5950];
+                    }
+                }
+
+                /* Active state */
+                &:not(.helper-navigation-item-disabled) {
+                    &.helper-navigation-item-active,
+                    &.helper-navigation-item-active-forced {
+                        @apply bg-[#ED5950] bg-opacity-10;
+
+                        .helper-navigation-item-icon {
+                            @apply opacity-100 text-[#ED5950];
+                        }
+
+                        .helper-navigation-item-title {
+                            @apply opacity-100 text-[#ED5950];
+                        }
+                    }
+                }
+            }
+        }
     }
-
-
-    /* Basic */
-    helper-navigation-basic-item {}
 
     /* Collapsable */
     helper-navigation-collapsable-item {
-        >.helper-navigation-item-wrapper {
+        > .helper-navigation-item-wrapper {
             .helper-navigation-item {
                 .helper-navigation-item-badge {
-                    +.helper-navigation-item-arrow {
+                    + .helper-navigation-item-arrow {
                         margin-left: 8px;
                     }
                 }
 
                 .helper-navigation-item-arrow {
-                    height: 20px;
-                    line-height: 20px;
-                    margin-left: auto;
-                    transition:
-                        transform 300ms cubic-bezier(0.25, 0.8, 0.25, 1),
+                    position: absolute;
+                    bottom: 4px;
+                    right: 8px;
+                    height: 16px;
+                    line-height: 16px;
+                    margin-left: 0;
+                    transition: transform 300ms cubic-bezier(0.25, 0.8, 0.25, 1),
                         color 375ms cubic-bezier(0.25, 0.8, 0.25, 1);
                 }
             }
         }
 
         &.helper-navigation-item-expanded {
-            >.helper-navigation-item-wrapper {
+            > .helper-navigation-item-wrapper {
                 .helper-navigation-item {
                     .helper-navigation-item-arrow {
                         transform: rotate(90deg);
@@ -290,16 +507,16 @@ helper-navigation {
             }
         }
 
-        >.helper-navigation-item-children {
-            >*:first-child {
+        > .helper-navigation-item-children {
+            > *:first-child {
                 margin-top: 6px;
             }
 
-            >*:last-child {
+            > *:last-child {
                 padding-bottom: 6px;
 
-                >.helper-navigation-item-children {
-                    >*:last-child {
+                > .helper-navigation-item-children {
+                    > *:last-child {
                         padding-bottom: 0;
                     }
                 }
@@ -307,6 +524,16 @@ helper-navigation {
 
             .helper-navigation-item {
                 padding: 10px 16px;
+                flex-direction: row; /* Keep children horizontal */
+                align-items: center;
+                justify-content: flex-start;
+                min-height: auto;
+
+                .helper-navigation-item-icon {
+                    margin-bottom: 0;
+                    margin-right: 12px;
+                    font-size: 16px;
+                }
             }
         }
 
@@ -353,9 +580,8 @@ helper-navigation {
 
     /* Group */
     helper-navigation-group-item {
-        >.helper-navigation-item-wrapper {
+        > .helper-navigation-item-wrapper {
             .helper-navigation-item {
-
                 .helper-navigation-item-badge,
                 .helper-navigation-item-icon {
                     display: none !important;
@@ -387,7 +613,7 @@ helper-navigation {
     opacity: 0;
     background-color: rgba(0, 0, 0, 0.6);
 
-    +.helper-navigation-aside-overlay {
+    + .helper-navigation-aside-overlay {
         background-color: transparent;
     }
 }
@@ -411,7 +637,8 @@ helper-navigation {
 /* ----------------------------------------------------------------------------------------------------- */
 
 /* Navigation items common */
-helper-navigation-basic-item,
+helper-navigation-basic-parent-item,
+helper-navigation-basic-sub-item,
 helper-navigation-collapsable-item,
 helper-navigation-group-item {
     .helper-navigation-item-wrapper {
@@ -420,52 +647,24 @@ helper-navigation-group-item {
 
             .helper-navigation-item-icon {
                 @apply text-[#64748B];
+                transition: color 0.2s ease-in-out;
             }
 
             .helper-navigation-item-title-wrapper {
                 .helper-navigation-item-title {
                     @apply text-[#64748B];
+                    transition: color 0.2s ease-in-out;
                 }
             }
-        }
-    }
-}
-
-/* Basic, Collapsable */
-helper-navigation-basic-item,
-helper-navigation-collapsable-item {
-    >.helper-navigation-item-wrapper {
-        .helper-navigation-item {
-
-            /* Active state */
-            &:not(.helper-navigation-item-disabled) {
-
-                &.helper-navigation-item-active,
-                &.helper-navigation-item-active-forced {
-                    @apply bg-gray-800 bg-opacity-5 dark:bg-[#ED5950] dark:bg-opacity-12;
-
-                    .helper-navigation-item-icon {
-                        @apply opacity-100 text-[#ED5950]/85;
-                    }
-
-                    .helper-navigation-item-title {
-                        @apply opacity-100 text-[#ED5950]/85;
-                    }
-                }
-            }
-
-            /* Hover state */
-            
         }
     }
 }
 
 /* Collapsable */
 helper-navigation-collapsable-item {
-
     /* Expanded state */
     &.helper-navigation-item-expanded {
-        >.helper-navigation-item-wrapper {
+        > .helper-navigation-item-wrapper {
             .helper-navigation-item {
                 .helper-navigation-item-icon {
                     @apply opacity-100;
@@ -482,13 +681,45 @@ helper-navigation-collapsable-item {
 
 /* Group */
 helper-navigation-group-item {
-    >.helper-navigation-item-wrapper {
+    > .helper-navigation-item-wrapper {
         .helper-navigation-item {
             .helper-navigation-item-title-wrapper {
                 .helper-navigation-item-title {
                     @apply text-primary-600 opacity-100 dark:text-primary-400;
                 }
             }
+        }
+    }
+}
+
+/* ----------------------------------------------------------------------------------------------------- */
+/* @ Layout Container Support
+/* ----------------------------------------------------------------------------------------------------- */
+
+/* Add this section to support the layout structure */
+.layout-container {
+    display: flex;
+    height: 100vh;
+    width: 100%;
+
+    helper-navigation {
+        &.helper-navigation-mode-side {
+            flex-shrink: 0; /* Prevent navigation from shrinking */
+        }
+    }
+
+    .main-content {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 50; /* Higher than side navigation */
+            flex-shrink: 0;
         }
     }
 }

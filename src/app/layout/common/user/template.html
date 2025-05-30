@@ -1,7 +1,5 @@
 <button class="ml-1" mat-icon-button [matMenuTriggerFor]="userActions">
-    <span class="relative border min-w-10 max-w-10 min-h-10 max-h-10 flex items-center justify-center rounded-full">
-        <img class="border-2 border-blue-500 min-w-10 max-w-10 min-h-10 max-h-10 object-cover rounded-full" [src]="fileUrl + user?.avatar">
-    </span>
+    <mat-icon svgIcon="heroicons_outline:chevron-down"></mat-icon>
 </button>
 
 <mat-menu [xPosition]="'before'" #userActions="matMenu" class="absolute top-3 -right-2 py-0">
