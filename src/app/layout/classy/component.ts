@@ -2,7 +2,6 @@ import { ChangeDetectorRef, Component, OnDestroy, OnInit, ViewEncapsulation } fr
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { RouterOutlet } from '@angular/router';
-import { HelperFullscreenComponent } from 'helper/components/fullscreen';
 import { HelperLoadingBarComponent } from 'helper/components/loading-bar';
 import { HelperNavigationService, HelperNavigationComponent, HelperNavigationItem, } from 'helper/components/navigation';
 import { HelperMediaWatcherService } from 'helper/services/media-watcher';
@@ -14,6 +13,7 @@ import { UserComponent } from 'app/layout/common/user/component';
 import { Subject, takeUntil } from 'rxjs';
 import { SchemeComponent } from 'app/layout/common/scheme/component';
 import { NotificationsComponent } from '../common/notifications/component';
+import { env } from 'envs/env';
 
 @Component({
     selector: 'classy-layout',
@@ -28,7 +28,6 @@ import { NotificationsComponent } from '../common/notifications/component';
         MatIconModule,
         MatButtonModule,
         LanguagesComponent,
-        HelperFullscreenComponent,
         SchemeComponent,
         RouterOutlet
     ],
@@ -40,6 +39,8 @@ export class ClassyLayoutComponent implements OnInit, OnDestroy {
     navigations: HelperNavigationItem[];
     user: User;
     role: Role;
+      fileUrl = env.FILE_BASE_URL;
+        staticImg: string = 'assets/images/logo/avatar.png';
     private _unsubscribeAll: Subject<any> = new Subject<any>();
 
     /**

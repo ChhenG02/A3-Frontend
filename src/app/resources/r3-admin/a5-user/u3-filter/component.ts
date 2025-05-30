@@ -68,8 +68,8 @@ export class FilterUserComponent implements OnInit, OnDestroy {
     ];
 
     public types = [
-        { id: 1, name: 'អ្នកគ្រប់គ្រង' },
-        { id: 2, name: 'អ្នកគិតប្រាក់' }
+        { id: 1, name: 'Admin' },
+        { id: 2, name: 'Cashier' }
     ]
     constructor(
         @Inject(MAT_DIALOG_DATA) public setup: any,

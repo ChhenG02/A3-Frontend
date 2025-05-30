@@ -7,7 +7,7 @@ import {
 export interface HelperNavigationItem {
     id?: string;
     title?: string;
-    type: 'basic' | 'collapsable' | 'divider' | 'group';
+    type: 'basic-parent' | 'basic-sub' | 'collapsable' | 'divider' | 'group';
     hidden?: (item: HelperNavigationItem) => boolean;
     active?: boolean;
     disabled?: boolean;
@@ -37,9 +37,7 @@ export interface HelperNavigationItem {
     meta?: any;
 }
 
-export type HelperNavigationAppearance =
-    | 'default'
-    | 'dense';
+export type HelperNavigationAppearance = 'default' | 'dense';
 
 export type HelperNavigationMode = 'over' | 'side';
 

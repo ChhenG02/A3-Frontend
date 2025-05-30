@@ -1,58 +1,75 @@
 <!-- Loading bar -->
 <helper-loading-bar></helper-loading-bar>
 
-<!-- Navigation -->
-<helper-navigation class="dark bg-gray-900 print:hidden" [mode]="isScreenSmall ? 'over' : 'side'"
-    [name]="'mainNavigation'" [navigations]="navigations" [opened]="!isScreenSmall">
-    <!-- Navigation header hook -->
-    <ng-container helperNavigationContentHeader>
-        <div class="flex justify-center p-4 mb-6">
-            <!-- Logo -->
-            <div class="flex items-center gap-0.5">
-                <img class="h-13 w-full -mt-2" src="images/logo/GameSTORE.png" alt="img">
-            </div>
-        </div>
-    </ng-container>
-    <!-- Navigation footer hook -->
-    <ng-container helperNavigationContentFooter>
-        <div class="my-2 flex h-32 flex-0 items-center justify-center px-4 opacity-5">
-            <img class="max-h-32 w-auto" src="images/logo/POS_logo_white.png" />
-        </div>
-    </ng-container>
-</helper-navigation>
-
 <!-- Wrapper -->
 <div class="flex w-full min-w-0 flex-auto flex-col">
     <!-- Header -->
     <div
-        class="bg-card sticky top-0 z-49 flex h-14 w-full flex-0 items-center pl-2 md:pl-4 pr-3 shadow dark:border-b dark:shadow-none print:hidden">
+        class="bg-card fixed top-0 left-0 right-0 z-50 flex h-16 pt-3 w-full flex-0 items-center pl-2 md:pl-4 pr-3 shadow dark:border-b dark:shadow-none print:hidden"
+    >
         <!-- Navigation toggle button -->
-        <button class="block md:hidden mt-1" mat-icon-button (click)="toggleNavigation('mainNavigation')">
+        <div class="flex items-center gap-0.5">
+            <img
+                class="h-13 w-full -mt-2"
+                src="images/logo/GameSTORE.png"
+                alt="img"
+            />
+        </div>
+        <button
+            class="block md:hidden mt-1"
+            mat-icon-button
+            (click)="toggleNavigation('mainNavigation')"
+        >
             <mat-icon [svgIcon]="'heroicons_outline:bars-3'"></mat-icon>
         </button>
-        <div class="mb-0.5 ml-1 md:ml-0">
-            <p class="md:text-2xl font-semibold text-black dark:text-white sm:text-xl text-[14px]">{{role?.name}}</p>
-        </div>
+
         <!-- Components -->
-        <div class="ml-auto flex items-center space-x-0.5 pl-2 sm:space-x-2">
+        <div class="ml-auto flex items-center space-x-0.5 pl-4 sm:space-x-4">
             <scheme></scheme>
             <notifications></notifications>
             <languages></languages>
-            <helper-fullscreen class="hidden md:block"></helper-fullscreen>
+            <span
+                class="relative border min-w-10 max-w-10 min-h-10 max-h-10 flex items-center justify-center rounded-full"
+            >
+                <img
+                    class="border-2 min-w-12 max-w-12 min-h-12 max-h-12 object-cover rounded-full"
+                    [src]="fileUrl + user?.avatar"
+                />
+            </span>
+            <div class="mb-0.5 ml-1 md:ml-0">
+                <p class="text-xl md:text-xl">{{user?.name}}</p>
+                <p
+                    class="md:text-md font-extralight text-[#ED5950] dark:text-white sm:text-xl text-[14px]"
+                >
+                    {{role?.name}}
+                </p>
+            </div>
             <user></user>
+
         </div>
     </div>
 
-    <!-- Content -->
-    <div class="flex flex-auto flex-col">
-        @if (true) {
-        <router-outlet></router-outlet>
-        }
+    <!-- Content Wrapper -->
+    <div class="flex flex-auto">
+        <!-- Navigation -->
+        <helper-navigation
+            class="dark bg-gray-900 print:hidden"
+            [mode]="isScreenSmall ? 'over' : 'side'"
+            [name]="'mainNavigation'"
+            [navigations]="navigations"
+            [opened]="!isScreenSmall"
+        >
+            <!-- Navigation header hook -->
+            <ng-container helperNavigationContentHeader>
+                <div class="flex justify-center p-10 mb-6"></div>
+            </ng-container>
+            <!-- Navigation footer hook -->
+        </helper-navigation>
+        <!-- Content -->
+        <div class="flex flex-auto flex-col pt-14">
+            @if (true) {
+            <router-outlet></router-outlet>
+            }
+        </div>
     </div>
-
-    <!-- Footer -->
-    <!-- <div
-        class="sticky bottom-0 flex flex-0 items-center justify-start w-full h-14 px-4 md:px-6 z-49 border-t bg-card dark:bg-transparent print:hidden">
-        <span class="font-medium text-secondary">CamCyber &copy; {{currentYear}}</span>
-    </div> -->
 </div>

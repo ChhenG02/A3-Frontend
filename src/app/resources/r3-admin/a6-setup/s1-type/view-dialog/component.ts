@@ -30,7 +30,7 @@ import { Subject } from 'rxjs';
 import { ProductTypeService } from '../service';
 import { Data } from '../interface';
 @Component({
-    selector: 'create-car-type-component-seletor',
+    selector: 'product-type',
     templateUrl: './template.html',
     styleUrls: ['./style.scss'],
     standalone: true,

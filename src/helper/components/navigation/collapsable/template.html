@@ -52,12 +52,12 @@
         @for (item of item.children; track trackByFn($index, item)) {
             <!-- Skip the hidden items -->
             @if ((item.hidden && !item.hidden(item)) || !item.hidden) {
-                <!-- Basic -->
-                @if (item.type === 'basic') {
-                    <helper-navigation-basic-item
+                <!-- Basic-sub -->
+                @if (item.type === 'basic-sub') {
+                    <helper-navigation-basic-sub-item
                         [item]="item"
                         [name]="name"
-                    ></helper-navigation-basic-item>
+                    ></helper-navigation-basic-sub-item>
                 }
 
                 <!-- Collapsable -->

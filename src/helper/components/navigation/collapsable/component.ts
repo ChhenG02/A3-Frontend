@@ -1,17 +1,28 @@
 import { BooleanInput } from '@angular/cdk/coercion';
 import { NgClass } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, HostBinding, Input, OnDestroy, OnInit, forwardRef, inject } from '@angular/core';
+import {
+    ChangeDetectionStrategy,
+    ChangeDetectorRef,
+    Component,
+    HostBinding,
+    Input,
+    OnDestroy,
+    OnInit,
+    forwardRef,
+    inject,
+} from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { NavigationEnd, Router } from '@angular/router';
 import { helperAnimations } from 'helper/animations';
 import { HelperNavigationService } from 'helper/components/navigation/service';
 import { HelperNavigationItem } from 'helper/components/navigation/interface';
-import { HelperNavigationBasicItemComponent } from 'helper/components/navigation/basic/component';
+
 import { HelperNavigationDividerItemComponent } from 'helper/components/navigation/divider/component';
 import { HelperNavigationGroupItemComponent } from 'helper/components/navigation/group/component';
 import { HelperNavigationComponent } from 'helper/components/navigation/component';
 import { Subject, filter, takeUntil } from 'rxjs';
+import { HelperNavigationBasicSubItemComponent } from '../basic-sub/component';
 
 @Component({
     selector: 'helper-navigation-collapsable-item',
@@ -23,14 +34,15 @@ import { Subject, filter, takeUntil } from 'rxjs';
         NgClass,
         MatTooltipModule,
         MatIconModule,
-        HelperNavigationBasicItemComponent,
+        HelperNavigationBasicSubItemComponent,
         forwardRef(() => HelperNavigationCollapsableItemComponent),
         HelperNavigationDividerItemComponent,
-        HelperNavigationGroupItemComponent
+        HelperNavigationGroupItemComponent,
     ],
 })
 export class HelperNavigationCollapsableItemComponent
-    implements OnInit, OnDestroy {
+    implements OnInit, OnDestroy
+{
     /* eslint-disable @typescript-eslint/naming-convention */
     static ngAcceptInputType_autoCollapse: BooleanInput;
     /* eslint-enable @typescript-eslint/naming-convention */
