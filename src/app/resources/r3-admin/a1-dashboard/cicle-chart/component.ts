@@ -1,6 +1,13 @@
 import { NgIf } from '@angular/common';
 import {
-    ChangeDetectorRef, Component, ElementRef, Input, OnChanges, OnInit, SimpleChanges, ViewChild
+    ChangeDetectorRef,
+    Component,
+    ElementRef,
+    Input,
+    OnChanges,
+    OnInit,
+    SimpleChanges,
+    ViewChild,
 } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { SnackbarService } from 'helper/services/snack-bar/snack-bar.service';
@@ -15,22 +22,23 @@ import { DashboardResponse } from '../interface';
     styleUrls: ['./style.scss'],
     imports: [NgApexchartsModule, MatIconModule, NgIf],
 })
-
 export class CicleChartComponent implements OnInit, OnChanges {
-    @Input() selectedDate: { thisWeek: string; thisMonth: string, threeMonthAgo: string, sixMonthAgo: string } | null = null;
-    @ViewChild("chartContainer2", { read: ElementRef, static: false }) chartContainer!: ElementRef<HTMLDivElement>;
+    @Input() selectedDate: {
+        thisWeek: string;
+        thisMonth: string;
+        threeMonthAgo: string;
+        sixMonthAgo: string;
+    } | null = null;
+    @ViewChild('chartContainer2', { read: ElementRef, static: false })
+    chartContainer!: ElementRef<HTMLDivElement>;
 
     chartOptions: Partial<ApexOptions> = {};
-    
+
     constructor(
         private _cdr: ChangeDetectorRef,
         private _snackBarService: SnackbarService,
-        private _productService: DashbordService,
-        
-    ) { }
-
-    
-
+        private _productService: DashbordService
+    ) {}
 
     // Fetch data on initialization
     ngOnInit(): void {
@@ -64,7 +72,6 @@ export class CicleChartComponent implements OnInit, OnChanges {
         thisMonth?: string,
         threeMonthAgo?: string,
         sixMonthAgo?: string
-
     ): void {
         const params = {
             thisWeek: thisWeek || undefined,
@@ -75,20 +82,27 @@ export class CicleChartComponent implements OnInit, OnChanges {
 
         this._productService.getDashboardData(params).subscribe({
             next: (response: DashboardResponse) => {
-
-
-
-                if (response && response.dashboard.productTypeData.labels && response.dashboard.productTypeData.data) {
-                    this._updateChart(response.dashboard.productTypeData.labels, response.dashboard.productTypeData.data);
-
+                if (
+                    response &&
+                    response.dashboard.productTypeData.labels &&
+                    response.dashboard.productTypeData.data
+                ) {
+                    this._updateChart(
+                        response.dashboard.productTypeData.labels,
+                        response.dashboard.productTypeData.data
+                    );
                 } else {
-                    this._snackBarService.openSnackBar('No data available', 'Info');
+                    this._snackBarService.openSnackBar(
+                        'No Data available',
+                        'Info'
+                    );
                 }
             },
             error: (err) => {
-                const errorMessage = err.error?.message || 'Error fetching product data';
+                const errorMessage =
+                    err.error?.message || 'Error fetching product data';
                 this._snackBarService.openSnackBar(errorMessage, 'Error');
-            }
+            },
         });
     }
 
@@ -110,8 +124,15 @@ export class CicleChartComponent implements OnInit, OnChanges {
                 fontFamily: 'Arial, sans-serif',
             },
             colors: [
-                '#a3e635', '#16a34a', '#d9f99d', '#86efac',
-                '#81D4FA', '#80DEEA', '#A5D6A7', '#80CBC4', '#B39DDB'
+                '#a3e635',
+                '#16a34a',
+                '#d9f99d',
+                '#86efac',
+                '#81D4FA',
+                '#80DEEA',
+                '#A5D6A7',
+                '#80CBC4',
+                '#B39DDB',
             ],
             plotOptions: {
                 pie: {
@@ -125,17 +146,17 @@ export class CicleChartComponent implements OnInit, OnChanges {
                             total: {
                                 show: true,
                                 label: 'Total',
-                                formatter: () => `${totalSum}`
-                            }
-                        }
-                    }
-                }
+                                formatter: () => `${totalSum}`,
+                            },
+                        },
+                    },
+                },
             },
             tooltip: {
                 enabled: true,
                 y: {
                     formatter: (val) => `${val}`,
-                }
+                },
             },
             dataLabels: {
                 enabled: true,
@@ -145,8 +166,8 @@ export class CicleChartComponent implements OnInit, OnChanges {
                 style: {
                     fontSize: '14px',
                     fontFamily: 'Arial, sans-serif',
-                }
-            }
+                },
+            },
         };
 
         this._cdr.detectChanges(); // Trigger change detection to update the chart

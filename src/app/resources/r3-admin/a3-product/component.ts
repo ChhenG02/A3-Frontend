@@ -315,7 +315,7 @@ export class ProductComponent implements OnInit {
     update(row: Data): void {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.data = {
-            title: 'កែប្រែផលិតផល',
+            title: 'Edit Product',
             product: row,
             setup: this.setupData.productTypes,
         };
