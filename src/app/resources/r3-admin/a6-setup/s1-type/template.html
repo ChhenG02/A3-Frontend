@@ -1,130 +1,268 @@
-<div class="w-full px-2 py-2 sm:px-4 sm:py-4 md:px-8 md:py-6 bg-white dark:bg-gray-800 rounded-xl shadow-sm">
-  <!-- Header Section -->
-  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-2 sm:gap-4">
-    <div class="flex items-center gap-1 sm:gap-2 text-gray-700 dark:text-white overflow-hidden">
-      <mat-icon svgIcon="heroicons_outline:home" class="text-lg sm:text-xl flex-shrink-0"></mat-icon>
-      <span class="text-md sm:text-xl font-medium truncate">Setting</span>
-      <mat-icon svgIcon="mat_solid:chevron_right" class="text-lg sm:text-xl flex-shrink-0"></mat-icon>
-      <span class="text-md sm:text-xl font-medium truncate">Category</span>
-    </div>
-    <div class="flex gap-2 w-full sm:w-auto justify-end">
-      <button class="helpers-mat-button-sm min-w-[2.5rem] px-2" (click)="create()" mat-stroked-button>
-        <mat-icon svgIcon="heroicons_outline:plus" class="text-slate-500 text-lg"></mat-icon>
-      </button>
-    </div>
-  </div>
-<!-- Horizontal Divider Line -->
-  <div class="border-t border-gray-200 dark:border-gray-600"></div>
-
-  <!-- No Data Message -->
-  <div *ngIf="dataSource.data.length === 0 && !isLoading"
-       class="flex flex-col items-center justify-center h-40 sm:h-60 text-gray-500 dark:text-white border rounded-xl bg-white dark:bg-gray-800">
-    <mat-icon svgIcon="toc" class="text-4xl sm:text-6xl mb-2"></mat-icon>
-    <span class="text-lg sm:text-2xl text-center px-4">No Data</span>
-  </div>
-
-  <!-- Mobile Card View (visible on small screens) -->
-  <div *ngIf="dataSource.data.length > 0" class="block sm:hidden space-y-3">
-    <div *ngFor="let element of dataSource.data; let i = index" 
-         class="bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 p-4 shadow-sm">
-      <div class="flex items-start justify-between mb-3">
-        <div class="flex items-center gap-3 flex-1 min-w-0">
-          <span class="text-sm text-gray-500 dark:text-gray-400 flex-shrink-0">{{ i + 1 }}.</span>
-          <img [src]="fileUrl + element.image" alt="image"
-               class="w-8 h-8 object-cover rounded-lg border dark:bg-white dark:bg-opacity-10 flex-shrink-0">
-          <span class="font-medium text-gray-900 dark:text-white truncate">{{ element?.name }}</span>
+<div
+    class="w-full px-2 py-2 sm:px-4 sm:py-4 md:px-8 md:py-6 bg-white dark:bg-gray-800 rounded-xl shadow-sm"
+>
+    <!-- Header Section -->
+    <div
+        class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-2 sm:gap-4"
+    >
+        <div
+            class="flex items-center gap-1 sm:gap-2 text-gray-700 dark:text-white overflow-hidden"
+        >
+            <mat-icon
+                svgIcon="heroicons_outline:home"
+                class="text-lg sm:text-xl flex-shrink-0"
+            ></mat-icon>
+            <span class="text-md sm:text-xl font-medium truncate">Setting</span>
+            <mat-icon
+                svgIcon="mat_solid:chevron_right"
+                class="text-lg sm:text-xl flex-shrink-0"
+            ></mat-icon>
+            <span class="text-md sm:text-xl font-medium truncate"
+                >Category</span
+            >
         </div>
-        <button mat-icon-button [matMenuTriggerFor]="menu" class="flex-shrink-0">
-          <mat-icon svgIcon="mat_outline:more_vert" class="text-xl"></mat-icon>
-        </button>
-        <mat-menu #menu="matMenu">
-          <button mat-menu-item (click)="update(element)">
-            <mat-icon svgIcon="mdi:square-edit-outline" class="icon-size-6 mr-2"></mat-icon>
-            <span>Edit</span>
-          </button>
-          <button mat-menu-item (click)="onDelete(element)" [disabled]="element.n_of_products != 0">
-            <mat-icon svgIcon="mdi:trash-can-outline" class="icon-size-6 text-red-400 mr-2"></mat-icon>
-            <span class="text-red-400">Remove</span>
-          </button>
-        </mat-menu>
-      </div>
-      <div class="grid grid-cols-2 gap-3 text-sm">
-        <div>
-          <span class="text-gray-500 dark:text-gray-400">Product:</span>
-          <span class="ml-2 font-medium text-gray-900 dark:text-white">{{ element?.n_of_products | number }}</span>
-        </div>
-        <div>
-          <span class="text-gray-500 dark:text-gray-400">Date:</span>
-          <span class="ml-2 text-gray-700 dark:text-gray-300">{{ element?.created_at | date: 'dd-LL-yyy' }}</span>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Desktop Table View (hidden on small screens) -->
-  <div *ngIf="dataSource.data.length > 0" class="hidden sm:block overflow-auto">
-    <table mat-table [dataSource]="dataSource" class="w-full mat-elevation-z1 min-w-[600px] bg-white dark:bg-gray-800 rounded-lg overflow-hidden">
-
-      <!-- Column: No -->
-      <ng-container matColumnDef="no">
-        <th mat-header-cell *matHeaderCellDef class="w-16 text-left px-3 py-3 sm:px-4 sm:py-2">No.</th>
-        <td mat-cell *matCellDef="let row; let i = index" class="px-3 py-3 sm:px-4 sm:py-2">
-          {{ i + 1 }}.
-        </td>
-      </ng-container>
-
-      <!-- Column: Name -->
-      <ng-container matColumnDef="name">
-        <th mat-header-cell *matHeaderCellDef class="text-left px-3 py-3 sm:px-4 sm:py-2">Name</th>
-        <td mat-cell *matCellDef="let element" class="px-3 py-3 sm:px-4 sm:py-2">
-          <div class="flex items-center gap-2 min-w-0">
-            <img [src]="fileUrl + element.image" alt="image"
-                 class="w-6 h-6 sm:w-8 sm:h-8 object-cover flex-shrink-0">
-            <span class="truncate">{{ element?.name }}</span>
-          </div>
-        </td>
-      </ng-container>
-
-      <!-- Column: Number of Products -->
-      <ng-container matColumnDef="n_of_products">
-        <th mat-header-cell *matHeaderCellDef class="text-right px-3 py-3 sm:px-4 sm:py-2 w-24">Product</th>
-        <td mat-cell *matCellDef="let element" class="text-right px-3 py-3 sm:px-4 sm:py-2 text-gray-500">
-          {{ element?.n_of_products | number }}
-        </td>
-      </ng-container>
-
-      <!-- Column: Created At -->
-     <ng-container matColumnDef="created_at">
-    <th mat-header-cell *matHeaderCellDef class="text-center px-3 py-3 sm:px-4 sm:py-2 w-32 align-middle">Date</th>
-    <td mat-cell *matCellDef="let element" class="px-3 py-3 sm:px-4 sm:py-2 text-gray-500 align-middle">
-      <span class="hidden lg:inline">{{ element?.created_at | date: 'dd-LL-yyy' }}</span>
-      <span class="lg:hidden">{{ element?.created_at | date: 'dd/LL' }}</span>
-    </td>
-</ng-container>
-
-      <!-- Column: Action -->
-      <ng-container matColumnDef="action" stickyEnd>
-        <th mat-header-cell *matHeaderCellDef class="px-3 py-3 sm:px-4 sm:py-2 w-16"></th>
-        <td mat-cell *matCellDef="let element" class="px-3 py-3 sm:px-4 sm:py-2 text-right">
-          <button mat-icon-button [matMenuTriggerFor]="menu">
-            <mat-icon svgIcon="mat_outline:more_vert" class="text-xl"></mat-icon>
-          </button>
-          <mat-menu #menu="matMenu">
-            <button mat-menu-item (click)="update(element)">
-              <mat-icon svgIcon="mdi:square-edit-outline" class="icon-size-6 mr-2"></mat-icon>
-              <span>Edit</span>
+        <div class="flex gap-2 w-full sm:w-auto justify-end">
+            <button
+                class="helpers-mat-button-sm min-w-[2.5rem] px-2"
+                (click)="create()"
+                mat-stroked-button
+            >
+                <mat-icon
+                    svgIcon="heroicons_outline:plus"
+                    class="text-slate-500 text-lg"
+                ></mat-icon>
             </button>
-            <button mat-menu-item (click)="onDelete(element)" [disabled]="element.n_of_products != 0">
-              <mat-icon svgIcon="mdi:trash-can-outline" class="icon-size-6 text-red-400 mr-2"></mat-icon>
-              <span class="text-red-400">Remove</span>
-            </button>
-          </mat-menu>
-        </td>
-      </ng-container>
+        </div>
+    </div>
+    <!-- Horizontal Divider Line -->
+    <div class="border-t border-gray-200 dark:border-gray-600"></div>
 
-      <!-- Table Rows -->
-      <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
-      <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="hover:bg-gray-50 dark:hover:bg-gray-700"></tr>
-    </table>
-  </div>
+    <!-- No Data Message -->
+    <div
+        *ngIf="dataSource.data.length === 0 && !isLoading"
+        class="flex flex-col items-center justify-center h-40 sm:h-60 text-gray-500 dark:text-white border rounded-xl bg-white dark:bg-gray-800"
+    >
+        <mat-icon svgIcon="toc" class="text-4xl sm:text-6xl mb-2"></mat-icon>
+        <span class="text-lg sm:text-2xl text-center px-4">No Data</span>
+    </div>
+
+    <!-- Mobile Card View (visible on small screens) -->
+    <div *ngIf="dataSource.data.length > 0" class="block sm:hidden space-y-3">
+        <div
+            *ngFor="let element of dataSource.data; let i = index"
+            class="bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 p-4 shadow-sm"
+        >
+            <div class="flex items-start justify-between mb-3">
+                <div class="flex items-center gap-3 flex-1 min-w-0">
+                    <span
+                        class="text-sm text-gray-500 dark:text-gray-400 flex-shrink-0"
+                        >{{ i + 1 }}.</span
+                    >
+                    <img
+                        [src]="fileUrl + element.image"
+                        alt="image"
+                        class="w-8 h-8 object-cover rounded-lg border dark:bg-white dark:bg-opacity-10 flex-shrink-0"
+                    />
+                    <span
+                        class="font-medium text-gray-900 dark:text-white truncate"
+                        >{{ element?.name }}</span
+                    >
+                </div>
+                <button
+                    mat-icon-button
+                    [matMenuTriggerFor]="menu"
+                    class="flex-shrink-0"
+                >
+                    <mat-icon
+                        svgIcon="mat_outline:more_vert"
+                        class="text-xl"
+                    ></mat-icon>
+                </button>
+                <mat-menu #menu="matMenu">
+                    <button mat-menu-item (click)="update(element)">
+                        <mat-icon
+                            svgIcon="mdi:square-edit-outline"
+                            class="icon-size-6 mr-2"
+                        ></mat-icon>
+                        <span>Edit</span>
+                    </button>
+                    <button
+                        mat-menu-item
+                        (click)="onDelete(element)"
+                        [disabled]="element.n_of_products != 0"
+                    >
+                        <mat-icon
+                            svgIcon="mdi:trash-can-outline"
+                            class="icon-size-6 text-red-400 mr-2"
+                        ></mat-icon>
+                        <span class="text-red-400">Remove</span>
+                    </button>
+                </mat-menu>
+            </div>
+            <div class="grid grid-cols-2 gap-3 text-sm">
+                <div>
+                    <span class="text-gray-500 dark:text-gray-400"
+                        >Product:</span
+                    >
+                    <span class="ml-2 font-medium text-gray-900 dark:text-white"
+                        >{{ element?.n_of_products | number }}</span
+                    >
+                </div>
+                <div>
+                    <span class="text-gray-500 dark:text-gray-400">Date:</span>
+                    <span class="ml-2 text-gray-700 dark:text-gray-300"
+                        >{{ element?.created_at | date: 'dd-LL-yyy' }}</span
+                    >
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Desktop Table View (hidden on small screens) -->
+    <div
+        *ngIf="dataSource.data.length > 0"
+        class="hidden sm:block overflow-auto"
+    >
+        <table
+            mat-table
+            [dataSource]="dataSource"
+            class="w-full mat-elevation-z1 min-w-[600px] bg-white dark:bg-gray-800 rounded-lg overflow-hidden"
+        >
+            <!-- Column: No -->
+            <ng-container matColumnDef="no">
+                <th
+                    mat-header-cell
+                    *matHeaderCellDef
+                    class="w-16 text-left px-3 py-3 sm:px-4 sm:py-2"
+                >
+                    No.
+                </th>
+                <td
+                    mat-cell
+                    *matCellDef="let row; let i = index"
+                    class="px-3 py-3 sm:px-4 sm:py-2"
+                >
+                    {{ i + 1 }}.
+                </td>
+            </ng-container>
+
+            <!-- Column: Name -->
+            <ng-container matColumnDef="name">
+                <th
+                    mat-header-cell
+                    *matHeaderCellDef
+                    class="text-left px-3 py-3 sm:px-4 sm:py-2"
+                >
+                    Name
+                </th>
+                <td
+                    mat-cell
+                    *matCellDef="let element"
+                    class="px-3 py-3 sm:px-4 sm:py-2"
+                >
+                    <div class="flex items-center gap-2 min-w-0">
+                        <img
+                            [src]="fileUrl + element.image"
+                            alt="image"
+                            class="w-6 h-6 sm:w-8 sm:h-8 object-cover flex-shrink-0"
+                        />
+                        <span class="truncate">{{ element?.name }}</span>
+                    </div>
+                </td>
+            </ng-container>
+
+            <!-- Column: Number of Products -->
+            <ng-container matColumnDef="n_of_products">
+                <th
+                    mat-header-cell
+                    *matHeaderCellDef
+                    class="text-right px-3 py-3 sm:px-4 sm:py-2 w-24"
+                >
+                    Product
+                </th>
+                <td
+                    mat-cell
+                    *matCellDef="let element"
+                    class="text-right px-3 py-3 sm:px-4 sm:py-2 text-gray-500"
+                >
+                    {{ element?.n_of_products | number }}
+                </td>
+            </ng-container>
+
+            <!-- Column: Created At -->
+            <ng-container matColumnDef="created_at">
+                <th
+                    mat-header-cell
+                    *matHeaderCellDef
+                    class="text-center px-3 py-3 sm:px-4 sm:py-2 w-32 align-middle"
+                >
+                    Date
+                </th>
+                <td
+                    mat-cell
+                    *matCellDef="let element"
+                    class="px-3 py-3 sm:px-4 sm:py-2 text-gray-500 align-middle"
+                >
+                    <span class="hidden lg:inline"
+                        >{{ element?.created_at | date: 'dd-LL-yyy' }}</span
+                    >
+                    <span class="lg:hidden"
+                        >{{ element?.created_at | date: 'dd/LL' }}</span
+                    >
+                </td>
+            </ng-container>
+
+            <!-- Column: Action -->
+            <ng-container matColumnDef="action" stickyEnd>
+                <th
+                    mat-header-cell
+                    *matHeaderCellDef
+                    class="px-3 py-3 sm:px-4 sm:py-2 w-16"
+                ></th>
+                <td
+                    mat-cell
+                    *matCellDef="let element"
+                    class="px-3 py-3 sm:px-4 sm:py-2 text-right"
+                >
+                    <button mat-icon-button [matMenuTriggerFor]="menu">
+                        <mat-icon
+                            svgIcon="mat_outline:more_vert"
+                            class="text-xl"
+                        ></mat-icon>
+                    </button>
+                    <mat-menu #menu="matMenu">
+                        <button mat-menu-item (click)="update(element)">
+                            <mat-icon
+                                svgIcon="mdi:square-edit-outline"
+                                class="icon-size-6 mr-2"
+                            ></mat-icon>
+                            <span>Edit</span>
+                        </button>
+                        <button
+                            mat-menu-item
+                            (click)="onDelete(element)"
+                            [disabled]="element.n_of_products != 0"
+                        >
+                            <mat-icon
+                                svgIcon="mdi:trash-can-outline"
+                                class="icon-size-6 text-red-400 mr-2"
+                            ></mat-icon>
+                            <span class="text-red-400">Remove</span>
+                        </button>
+                    </mat-menu>
+                </td>
+            </ng-container>
+
+            <!-- Table Rows -->
+            <tr
+                mat-header-row
+                *matHeaderRowDef="displayedColumns; sticky: true"
+            ></tr>
+            <tr
+                mat-row
+                *matRowDef="let row; columns: displayedColumns;"
+                class="hover:bg-gray-50 dark:hover:bg-gray-700"
+            ></tr>
+        </table>
+    </div>
 </div>

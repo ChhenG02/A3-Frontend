@@ -59,12 +59,12 @@ export class FilterUserComponent implements OnInit, OnDestroy {
     filterForm: FormGroup;
 
     public dateType = [
-        { id: 'today', name: 'ថ្ងៃនេះ' },
-        { id: 'thisMonth', name: 'ខែនេះ' },
-        { id: 'lastMonth', name: 'ខែមុន' },
-        { id: '3MonthAgo', name: '3 ខែមុន' },
-        { id: '6MonthAgo', name: '6 ខែមុន' },
-        { id: 'startandend', name: 'ជ្រើសរើសអំឡុងពេល' }
+        { id: 'today', name: 'Today' },
+        { id: 'thisMonth', name: 'This Month' },
+        { id: 'lastMonth', name: 'Last Month' },
+        { id: '3MonthAgo', name: '3 Month Ago' },
+        { id: '6MonthAgo', name: '6 Month Ago' },
+        { id: 'startandend', name: 'Choose duration' }
     ];
 
     public types = [

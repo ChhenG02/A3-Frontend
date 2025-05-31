@@ -1,7 +1,7 @@
 <div class="user-switch-role-content">
     <div class="side-bar-header">
         <span class="text-3xl font-semibold text-slate-500">
-            ផ្លាស់ប្តូរសិទ្ធប្រើប្រាស់
+            Change Role
         </span>
         <button mat-icon-button (click)="close()">
             <mat-icon svgIcon="mat_solid:close" />
@@ -11,7 +11,7 @@
         <main class="cursor-pointer">
             <ng-container *ngFor="let item of roles; let i = index;">
                 <div (click)="setActive(item)" class="flex border-2" [ngClass]="{
-                    'border-blue-500': item?.is_default,
+                    'border-red-500': item?.is_default,
                     'border-white': !item?.is_default && i%2!=0,
                     'border-slate-100': !item?.is_default && i%2==0,
                     'bg-white': i%2!=0,
@@ -23,7 +23,7 @@
                         <p class="truncate text-xl">{{item.name}}</p>
                     </div>
                     <div *ngIf="item?.is_default" class="w-72 flex justify-end px-4 py-3">
-                        <mat-icon class="text-blue-500 mt-1" svgIcon="feather:check" />
+                        <mat-icon class="text-red-500 mt-1" svgIcon="feather:check" />
                     </div>
                 </div>
             </ng-container>

@@ -64,12 +64,12 @@ export class ReportGenerateComponent implements OnInit, OnDestroy {
     filterForm: UntypedFormGroup;
 
     public dateType = [
-        { id: 'today', name: 'ថ្ងៃនេះ', showDate: '' },
-        { id: 'thisWeek', name: 'សប្តាហ៍នេះ', showDate: '' },
-        { id: 'thisMonth', name: 'ខែនេះ', showDate: '' },
-        { id: '3MonthAgo', name: '3 ខែមុន', showDate: '' },
-        { id: '6MonthAgo', name: '6 ខែមុន', showDate: '' },
-        { id: 'startandend', name: 'ជ្រើសរើសអំឡុងពេល', showDate: '' }
+        { id: 'today', name: 'Today', showDate: '' },
+        { id: 'thisWeek', name: 'This Week', showDate: '' },
+        { id: 'thisMonth', name: 'This Month', showDate: '' },
+        { id: '3MonthAgo', name: '3 Months Ago', showDate: '' },
+        { id: '6MonthAgo', name: '6 Months Ago', showDate: '' },
+        { id: 'startandend', name: 'Choose duration', showDate: '' }
     ];
 
     constructor(
