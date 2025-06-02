@@ -50,32 +50,32 @@ export class ProfileLayoutComponent implements OnInit {
     /**
      * @set the navigation data from the core/navigation/navigation.data or we can write it here if you want.
      * */
-    public subnavigation: HelperNavigationItem[] = [
-        {
-            id: 'my-profile',
-            // title: translate('Navigation.My-Profile'),
-            title:'Account',
-            type: 'basic-sub',
-            icon: 'mdi:account-outline',
-            link: 'my-profile',
-        },
-        {
-            id: 'security',
-            // title: translate('Navigation.Security'),
-            title:'Security' ,
-            type: 'basic-sub',
-            icon: 'mdi:lock-outline',
-            link: 'security',
-        },
-        {
-            id: 'log',
-            // title: translate('Navigation.Log'),
-            title:'Log',
-            type: 'basic-sub',
-            icon: 'mdi:format-list-text',
-            link: 'log',
-        },
-    ];
+    // public subnavigation: HelperNavigationItem[] = [
+    //     {
+    //         id: 'my-profile',
+    //         // title: translate('Navigation.My-Profile'),
+    //         title:'Account',
+    //         type: 'basic-sub',
+    //         icon: 'mdi:account-outline',
+    //         link: 'my-profile',
+    //     },
+    //     {
+    //         id: 'security',
+    //         // title: translate('Navigation.Security'),
+    //         title:'Security' ,
+    //         type: 'basic-sub',
+    //         icon: 'mdi:lock-outline',
+    //         link: 'security',
+    //     },
+    //     {
+    //         id: 'log',
+    //         // title: translate('Navigation.Log'),
+    //         title:'Log',
+    //         type: 'basic-sub',
+    //         icon: 'mdi:format-list-text',
+    //         link: 'log',
+    //     },
+    // ];
 
     public user          : User;
 

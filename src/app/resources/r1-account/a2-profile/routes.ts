@@ -14,14 +14,14 @@ export default [
                 path: 'my-profile',
                 component: ProfileComponent
             },
-            {
-                path: 'security',
-                component: ProfileSecurityComponent
-            },
-            {
-                path: 'log',
-                component: ProfileLogComponent
-            },
+        //     {
+        //         path: 'security',
+        //         component: ProfileSecurityComponent
+        //     },
+        //     {
+        //         path: 'log',
+        //         component: ProfileLogComponent
+        //     },
         ]
 
     },

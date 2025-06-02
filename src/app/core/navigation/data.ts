@@ -62,7 +62,7 @@ const adminNavigation: HelperNavigationItem[] = [
         title: 'Account',
         type: 'basic-parent',
         icon: 'mdi:account-circle-outline',
-        link: '/profile',
+        link: '/profile/my-profile',
     },
     {
         id: 'Setting',
@@ -93,8 +93,9 @@ const userNavigation: HelperNavigationItem[] = [
         title: 'Account',
         type: 'basic-parent',
         icon: 'mdi:account-circle-outline',
-        link: '/profile',
+        link: '/profile/my-profile',
     },
+
 ];
 
 export const navigationData = {
