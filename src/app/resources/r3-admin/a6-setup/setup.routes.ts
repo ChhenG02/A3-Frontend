@@ -1,8 +1,9 @@
 import { Routes } from '@angular/router';
 import { SetupLayoutComponent } from './component';
 import { ProductTypeComponent } from './s1-type/component';
-import { promotionComponent } from './s2-promotion/component';
+
 import { StockStatusComponent } from './s3-stock-status/component';
+import { PromotionComponent } from './s2-promotion/component';
 
 
 export default [
@@ -17,7 +18,7 @@ export default [
             },
               {
                 path: 'promotions',
-                component: promotionComponent
+                component: PromotionComponent
             },
               {
                 path: 'stock-status',
