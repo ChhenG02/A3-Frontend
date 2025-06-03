@@ -47,7 +47,7 @@
     </div>
 
     <!-- Mobile Card View (visible on small screens) -->
-    <div *ngIf="dataSource.data.length > 0" class="block sm:hidden space-y-3">
+    <div *ngIf="dataSource.data.length > 0" class="block sm:hidden space-y-2">
         <div
             *ngFor="let element of dataSource.data; let i = index"
             class="bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 p-4 shadow-sm"
@@ -133,7 +133,7 @@
                 <th
                     mat-header-cell
                     *matHeaderCellDef
-                    class="w-16 text-left px-3 py-3 sm:px-4 sm:py-2"
+                    class="w-16 text-left px-3 py-3 sm:px-4 sm:py"
                 >
                     No.
                 </th>
