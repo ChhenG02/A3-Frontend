@@ -86,7 +86,7 @@
                                     class="text-green-600 text-lg md:text-4xl font-semibold"
                                 >
                                     {{dashboardData?.dashboard?.statistic.total
-                                    ?? 0 | number}} ៛
+                                    ?? 0 | number}} $
                                 </div>
                             </div>
 
@@ -291,8 +291,8 @@
                         Cashier
                     </span>
                     <div class="flex gap-2 cursor-pointer items-center"> -->
-                        <!-- Cashier Date Filter -->
-                        <!-- <div
+        <!-- Cashier Date Filter -->
+        <!-- <div
                             [matMenuTriggerFor]="cashierMenu"
                             class="flex gap-2 justify-between cursor-pointer items-center bg-gray-100 dark:bg-slate-700 p-2 rounded-lg min-w-[100px] mr-3"
                         >
@@ -349,8 +349,8 @@
                 </div>
 
                 <div> -->
-                    <!-- List View -->
-                    <!-- <ng-container *ngIf="listView">
+        <!-- List View -->
+        <!-- <ng-container *ngIf="listView">
                         <ng-container
                             *ngIf="cashierData?.data?.length > 0; else noDataTemplate"
                         >
@@ -410,24 +410,24 @@
                         </ng-container>
                     </ng-container> -->
 
-                    <!-- Chart View -->
-                    <!-- <ng-container *ngIf="chartView">
+        <!-- Chart View -->
+        <!-- <ng-container *ngIf="chartView">
                         <cicle-chart-sale
                             *ngIf="cashierData?.data?.length"
                             [dataSouce]="cashierData"
                         ></cicle-chart-sale>
                     </ng-container> -->
 
-                    <!-- Line Chart View -->
-                    <!-- <ng-container *ngIf="lineView">
+        <!-- Line Chart View -->
+        <!-- <ng-container *ngIf="lineView">
                         <sup-bar-chart-sale
                             *ngIf="cashierData?.data?.length"
                             [dataSouce]="cashierData"
                         ></sup-bar-chart-sale>
                     </ng-container> -->
 
-                    <!-- No Data Template -->
-                    <!-- <ng-template #noDataTemplate>
+        <!-- No Data Template -->
+        <!-- <ng-template #noDataTemplate>
                         <div
                             class="flex flex-col justify-center items-center h-full"
                         >

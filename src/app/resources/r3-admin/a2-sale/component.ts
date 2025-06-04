@@ -8,7 +8,7 @@ import { Router } from '@angular/router';
 // ===>> Material
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatButtonModule } from '@angular/material/button';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
@@ -35,6 +35,7 @@ import { SaleService } from './service';
 import FileSaver from 'file-saver';
 import GlobalConstants from 'helper/shared/constants';
 import { HttpErrorResponse } from '@angular/common/http';
+import { ViewDialogComponent } from './view-dialog/component';
 
 @Component({
     selector: 'student-listing',
@@ -68,7 +69,7 @@ export class SaleComponent implements OnInit {
         'receipt',
         'price',
         'ordered_at',
-        'device',
+        'ordered_at_time',
         'seller',
         'action',
     ];
@@ -96,6 +97,20 @@ export class SaleComponent implements OnInit {
             name: 'ថ្ងៃបញ្ជាទិញ',
         },
     ];
+
+    viewDetail(element: Data): void {
+        const dialogConfig = new MatDialogConfig();
+        dialogConfig.autoFocus = false;
+        dialogConfig.position = { right: '0px' };
+        dialogConfig.height = '100dvh';
+        dialogConfig.width = '100dvw';
+        dialogConfig.maxWidth = '750px';
+        dialogConfig.panelClass = 'custom-mat-dialog-as-mat-drawer';
+        dialogConfig.enterAnimationDuration = '0s';
+        dialogConfig.data = element;
+
+        this._matDialog.open(ViewDialogComponent, dialogConfig);
+    }
 
     public selectedShortedItem: any = this.shortedItems[0];
     public shortedOrder: string = 'desc';
@@ -320,59 +335,7 @@ export class SaleComponent implements OnInit {
     downloadInvoice(cvId: number, index: number = 0): void {
         this.selectedCVDownloadIndex = index;
         this.isDownloadingCV = true; // Indicate the download process is ongoing
-
-        // Call the service to fetch the Base64-encoded PDF
-        // this._service.downloadInvoice(cvId).subscribe({
-        //     next: (response:any) => {
-
-        //         if (response.result) {
-
-        //             savePDFFromBlob(`CV-${response.name}-`, response.result);
-
-        //         } else {
-        //             this._snackbarService.openSnackBar('No Data available for the report.', 'Close');
-        //         }
-
-        //         this.selectedCVDownloadIndex    = -1
-        //         this.isDownloadingCV            = false;
-        //     },
-        //     error: (err) => {
-
-        //         this.selectedCVDownloadIndex    = -1;
-        //         this.isDownloadingCV            = false;
-        //         this._errorHandleService.handleHttpError(err);
-
-        //     },
-        //);
     }
-
-    // // ====================================================================>> Download Report
-    // downloadReport(): void {
-
-    //     // ===>> Get Filter
-    //     const params = this.prepareSearchSortFilterParam();
-
-    //     // ===>> Set Loading
-    //     this.isDownloadingReport = true;
-
-    //     // ===>> Call API
-    //     this._service.downloadReport().subscribe({
-    //         next: (res:any) => {
-
-    //             savePDFFromBlob('របាយការណ៍លក់', res.result);
-    //             // Display Message
-    //             this._snackbarService.openSnackBar('របាយការណ័ត្រូវបានទាញយកដោយជោគជ័យ', '');
-
-    //             // Stop the spinner
-    //             this.isDownloadingReport       =   false;
-    //         },
-    //         error: (err) => {
-
-    //             this.isDownloadingReport = false;
-    //             this._errorHandleService.handleHttpError(err);
-    //         },
-    //     });
-    // }
 
     // Downloading a sale report
     isaving: boolean = false;

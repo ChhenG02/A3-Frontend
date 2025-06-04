@@ -85,5 +85,10 @@ export class SaleService {
         // const params = new HttpParams()
         return this.httpClient.get<DataSaleResponse>(`${env.API_BASE_URL}/share/report/generate-sale-report`, { params });
     }
-
+      // Method to fetch sale by ID
+    view(id: number): Observable<any> {
+        return this.httpClient.get<any>(
+            `${env.API_BASE_URL}/admin/sales/${id}`
+        );
+    }
 }
