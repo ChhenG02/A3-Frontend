@@ -1,0 +1,141 @@
+<div class="out-create-section md-form-field-appearance-outline">
+    <div
+        mat-dialog-title
+        class="min-h-14 max-h-14 flex gap-2 justify-between items-center py-2 pr-2.5"
+    >
+        <div class="flex flex-1 items-center text-slate-500">
+            <h1 class="text-3xl">{{data.title}}</h1>
+        </div>
+        <div class="flex items-center cursor-pointer">
+            <mat-icon
+                class="-mb-0.5"
+                [svgIcon]="'heroicons_outline:x-mark'"
+                (click)="closeDialog()"
+            ></mat-icon>
+        </div>
+    </div>
+    <div class="out-create-body px-4 pb-2">
+        <form
+            [formGroup]="stockStatusForm"
+            class="out-create-content border-t pt-2"
+        >
+            <div class="grid grid-cols-1 gap-4 p-5">
+                <!-- Name Field -->
+                <mat-form-field appearance="outline" class="w-full">
+                    <mat-label>Status Name</mat-label>
+                    <input
+                        matInput
+                        formControlName="name"
+                        placeholder="Enter status name"
+                        maxlength="50"
+                    />
+                    <mat-error
+                        *ngIf="stockStatusForm.get('name').hasError('required')"
+                    >
+                        Name is required
+                    </mat-error>
+                    <mat-error
+                        *ngIf="stockStatusForm.get('name').hasError('maxlength')"
+                    >
+                        Name must be less than 50 characters
+                    </mat-error>
+                </mat-form-field>
+
+                <!-- Color Field -->
+                <mat-form-field appearance="outline" class="w-full">
+                    <mat-label>Color</mat-label>
+                    <mat-select formControlName="color">
+                        <mat-option *ngFor="let color of colorOptions" [value]="color.value">
+                            <div class="flex items-center gap-2">
+                                <div class="w-4 h-4 rounded-full" [style.background]="color.value"></div>
+                                <span>{{color.label}}</span>
+                            </div>
+                        </mat-option>
+                    </mat-select>
+                    <mat-error
+                        *ngIf="stockStatusForm.get('color').hasError('required')"
+                    >
+                        Color is required
+                    </mat-error>
+                </mat-form-field>
+
+                <!-- Min and Max Items Fields -->
+                <div class="grid grid-cols-2 gap-4 mb-0">
+                    <!-- Min Items Field -->
+                    <mat-form-field appearance="outline" class="w-full">
+                        <mat-label>Min Items</mat-label>
+                        <input
+                            matInput
+                            type="number"
+                            formControlName="min_items"
+                            placeholder="Enter minimum items"
+                        />
+                        <mat-error
+                            *ngIf="stockStatusForm.get('min_items').hasError('required')"
+                        >
+                            Minimum items is required
+                        </mat-error>
+                        <mat-error
+                            *ngIf="stockStatusForm.get('min_items').hasError('min')"
+                        >
+                            Must be 0 or greater
+                        </mat-error>
+                        <mat-error
+                            *ngIf="stockStatusForm.get('min_items').hasError('pattern')"
+                        >
+                            Must be a whole number
+                        </mat-error>
+                    </mat-form-field>
+
+                    <!-- Max Items Field -->
+                    <mat-form-field appearance="outline" class="w-full">
+                        <mat-label>Max Items</mat-label>
+                        <input
+                            matInput
+                            type="number"
+                            formControlName="max_items"
+                            placeholder="Enter maximum items"
+                        />
+                        <mat-error
+                            *ngIf="stockStatusForm.get('max_items').hasError('required')"
+                        >
+                            Maximum items is required
+                        </mat-error>
+                        <mat-error
+                            *ngIf="stockStatusForm.get('max_items').hasError('min')"
+                        >
+                            Must be 0 or greater
+                        </mat-error>
+                        <mat-error
+                            *ngIf="stockStatusForm.get('max_items').hasError('pattern')"
+                        >
+                            Must be a whole number
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <!-- Range Error -->
+                <mat-error *ngIf="stockStatusForm.hasError('rangeInvalid')">
+                    Maximum items must be greater than minimum items
+                </mat-error>
+            </div>
+        </form>
+    </div>
+    <mat-dialog-actions>
+        <div class="w-full flex justify-end px-1">
+            <button
+                class="helpers-mat-button-md text-white bg-[#F15757]"
+                mat-flat-button
+                (click)="submit()"
+                [disabled]="stockStatusForm.invalid || saving"
+            >
+                <span *ngIf="!saving">Save</span>
+                <mat-progress-spinner
+                    *ngIf="saving"
+                    [diameter]="24"
+                    [mode]="'indeterminate'"
+                ></mat-progress-spinner>
+            </button>
+        </div>
+    </mat-dialog-actions>
+</div>
