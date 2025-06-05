@@ -41,29 +41,19 @@
                     </button>
                 </div>
             </div>
-            <button
-                class="helpers-mat-button-sm w-6"
-                mat-stroked-button
-                [matMenuTriggerFor]="menu"
-            >
-                <mat-icon
-                    class="icon-size-6 text-slate-500"
-                    svgIcon="mat_outline:more_vert"
-                ></mat-icon>
-            </button>
-            <mat-menu #menu="matMenu">
-                <button mat-menu-item (click)="create()">
-                    <mat-icon class="icon-size-6" svgIcon="mdi:plus"></mat-icon>
-                    <span class="text-lg">Create</span>
-                </button>
-                <button mat-menu-item (click)="getReport()">
-                    <mat-icon
-                        class="icon-size-6"
-                        svgIcon="mdi:download-outline"
-                    ></mat-icon>
-                    <span class="text-lg">Download</span>
-                </button>
-            </mat-menu>
+            <div class="flex gap-2 w-full sm:w-auto justify-end">
+    <button
+        class="helpers-mat-button-sm min-w-[2.5rem] px-2"
+        (click)="create()"
+        mat-stroked-button
+    >
+        <mat-icon
+            svgIcon="heroicons_outline:plus"
+            class="text-slate-500 text-lg"
+        ></mat-icon>
+    </button>
+</div>
+
         </div>
     </div>
     <div class="list-user-body dark:bg-gray-800">
@@ -107,7 +97,9 @@
                                 <div class="flex">
                                     <div class="p-2 pl-0">
                                         <img
-                                            class="rounded-full border border-blue-600 min-w-[45px] max-w-[45px] min-h-[45px] max-h-[45px] object-cover"
+                                            class="rounded-full border border-[#F15757] min-w-[45px] max-w-[45px] min-h-[45px] max-h-[45px] object-cover"
+                                                                        
+
                                             [src]="fileUrl+element.avatar"
                                             alt="avatar"
                                         />

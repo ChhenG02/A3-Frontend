@@ -44,8 +44,8 @@ table {
 }
 
 :host ::ng-deep .customswitch .switch.checked {
-    background: #3b82f6 !important;
-    border: #3b82f6 !important;
+    background: #ED5950 !important;
+    border: #ED5950 !important;
     height: 1.5rem !important;
 
     small {
@@ -79,8 +79,8 @@ table {
 ::-ms-input-placeholder {
     color: #94a3b8 !important;
 }
-::ng-deep .mat-mdc-paginator-container{
-    .mdc-icon-button{
-        @apply dark:bg-gray-700 #{'!important'}
+::ng-deep .mat-mdc-paginator-container {
+    .mdc-icon-button {
+        background-color: #374151 !important; // dark:bg-gray-700
     }
 }
