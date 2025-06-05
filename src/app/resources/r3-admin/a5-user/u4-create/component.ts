@@ -137,4 +137,3 @@ export class CreateUserComponent {
         this.createUser.get('avatar').setValue(base64);
     }
 }
-

@@ -76,13 +76,21 @@ export class UserService {
         return this.httpClient.post<ResponseUser>(`${env.API_BASE_URL}/admin/users`, body, this.httpOptions);
     }
 
+    // update(id: number, body: RequestUserUpdate): Observable<ResponseUser> {
+    //     return this.httpClient.put<ResponseUser>(
+    //         `${env.API_BASE_URL}/admin/users/${id}`,
+    //         body,
+    //         this.httpOptions
+    //     );
+    // }
+
     update(id: number, body: RequestUserUpdate): Observable<ResponseUser> {
-        return this.httpClient.put<ResponseUser>(
-            `${env.API_BASE_URL}/admin/users/${id}`,
-            body,
-            this.httpOptions
-        );
-    }
+    return this.httpClient.put<ResponseUser>(
+        `${env.API_BASE_URL}/admin/users/${id}`,
+        body,
+        this.httpOptions
+    );
+}
 
     delete(id: number): any {
         return this.httpClient.delete(`${env.API_BASE_URL}/admin/users/${id}`, this.httpOptions);
