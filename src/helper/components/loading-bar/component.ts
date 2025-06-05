@@ -65,13 +65,17 @@ export class HelperLoadingBarComponent implements OnChanges, OnInit, OnDestroy {
         this._helperLoadingService.progress$
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe((value) => {
-                this.progress = value;
+                setTimeout(() => {
+                    this.progress = value;
+                });
             });
 
         this._helperLoadingService.show$
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe((value) => {
-                this.show = value;
+              setTimeout(() => {
+                 this.show = value;
+                });
             });
     }
 
