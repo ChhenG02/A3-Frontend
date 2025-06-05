@@ -1,6 +1,6 @@
-export interface PromotionList {
+export interface StockStatusList {
   data: {
-    Promotion: PromotionData[];
+    StockStatus: StockStatusData[];
   };
   statusCode: number;
   success: boolean;
@@ -8,11 +8,13 @@ export interface PromotionList {
   meta: PaginationMeta;
 }
 
-export interface PromotionData {
+export interface StockStatusData {
   id: number;
-  discount_value: number;
-  start_date: string; 
-  end_date: string;  
+  name: string;
+  color: string;
+  min_items: number;
+  max_items: number;
+  created_at: string;
 }
 
 export interface PaginationMeta {
