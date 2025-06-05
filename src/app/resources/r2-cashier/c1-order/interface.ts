@@ -22,7 +22,7 @@ export interface Product {
     image   : string,
     unit_price: number;
     code: string,
-    type: ProductType
+    product_type: ProductType
 }
 
 interface ProductType{
