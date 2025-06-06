@@ -189,7 +189,7 @@ export class OrderComponent implements OnInit, OnDestroy {
                 unit_price: incomingItem.unit_price,
                 image: incomingItem.image,
                 code: incomingItem.code,
-                type: incomingItem.type,
+                type: incomingItem.product_type,
             };
             this.carts.push(newItem);
             // Set canSubmit to true, indicating that there is at least one item in the cart

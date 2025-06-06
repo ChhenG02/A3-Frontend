@@ -10,7 +10,6 @@
 
     <div class="out-create-body px-4 pb-2 border-t-2 w-full">
         <form [formGroup]="filterForm" class="out-create-content pt-4">
-
             <mat-form-field appearance="outline" class="w-full">
                 <mat-label>Role</mat-label>
                 <mat-select formControlName="type" placeholder="Role">
@@ -24,7 +23,7 @@
 
     <mat-dialog-actions>
         <div class="w-full flex justify-end px-1">
-            <button class="helpers-mat-button-md bg-[#264497] text-white" mat-flat-button (click)="submit()"
+            <button class="helpers-mat-button-md bg-[#F15757] text-white" mat-flat-button (click)="submit()"
                 [disabled]="filterForm.invalid || saving">
                 <span *ngIf="!saving">Search</span>
                 <mat-progress-spinner *ngIf="saving" [diameter]="24" [mode]="'indeterminate'">
