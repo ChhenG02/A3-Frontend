@@ -8,6 +8,32 @@
             <span class="text-2xl font-semibold"> All products </span>
         </div>
 
+          <div class="flex items-center gap-2">
+            <!-- Search & Filter -->
+            <div
+                class="flex items-center min-w-[26ch] max-w-[26ch] h-10 border border-slate-300 dark:bg-gray-800 rounded-[0.65rem] overflow-hidden">
+                <button (click)="getData()"
+                    class="min-w-10 max-w-10 pl-1 h-full pt-1.5 hover:opacity-[0.96] transition-all">
+                    <mat-icon svgIcon="heroicons_outline:magnifying-glass" />
+                </button>
+
+                <input placeholder="Search" class="w-full pr-3 h-10" [(ngModel)]="key" (keydown.enter)="getData()">
+
+                <button *ngIf=" badgeValue > 0 "
+                    mat-icon-buttonclass="min-w-10 max-w-10 h-full pt-3 bg-red-500 hover:opacity-[0.96] transition-all"
+                    (click)=" clearFilter() ">
+                    <mat-icon svgIcon="mdi:refresh" />
+                </button>
+
+
+                <button mat-icon-button [matBadge]="badgeValue" [matBadgeHidden]=" badgeValue == 0 "
+                    class="mr-1 custom-icon-button" (click)="openFilterDialog()">
+                    <mat-icon class="text-red-500" svgIcon="mdi:tune" />
+                </button>
+
+            </div>
+           
+        </div>
 
     </div>
 
