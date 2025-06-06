@@ -50,6 +50,8 @@ import {
     StataticData,
 } from './interface'; //CashierData
 import { ReportComponent } from './report/component';
+import { StockAlertComponent } from './stock-alert/component';
+import { TopProductsComponent } from './top-products/component';
 
 @Component({
     selector: 'admin-dashboard',
@@ -80,6 +82,8 @@ import { ReportComponent } from './report/component';
         MatNativeDateModule,
         SaleCashierBarChartComponent,
         SaleCicleChartComponent,
+        StockAlertComponent,
+        TopProductsComponent,
     ],
     providers: [{ provide: LocationStrategy, useClass: HashLocationStrategy }],
 })
