@@ -7,6 +7,20 @@
         <div class="flex flex-1 items-center font-medium">
             <span class="text-2xl font-semibold"> Menu </span>
         </div>
+        <div
+    class="min-h-14 max-h-14 flex gap-2 justify-between items-center py-2 pl-5 pr-2.5 border-b"
+>
+    <!-- QR Code Scan Button -->
+    <div class="flex gap-2 w-full sm:w-auto justify-end">
+      <button
+        class="helpers-mat-button-sm min-w-[2.5rem] px-2"
+        mat-stroked-button
+        (click)="openQrScanner()"
+      >
+        <mat-icon svgIcon="mdi:qrcode-scan" class="text-slate-500 text-lg"></mat-icon>
+      </button>
+    </div>
+</div>
     </div>
     <div class="pos-body">
         <!-- No Data Display -->
@@ -22,7 +36,7 @@
             <div class="list-pos-left">
                 <!-- Title -->
                 <div class="md:text-3xl font-semibold mt-4 mb-4">
-                    ប្រភេទផលិតផល
+                    Category
                 </div>
 
                 <!-- Tab Headers Custom Styling with Tailwind CSS -->
@@ -33,9 +47,9 @@
                         <div
                             *ngFor="let item of data; trackBy: trackById"
                             (click)="selectTab(item)"
-                            [class.bg-blue-500]="selectedTab?.id === item?.id"
-                            [class.text-white]="selectedTab?.id === item?.id"
-                            [class.border-blue-500]="selectedTab?.id === item?.id"
+                            [class.bg-[#FEEEEE]]="selectedTab?.id === item?.id"
+                            [class.text-[#EE635A]]="selectedTab?.id === item?.id"
+                            [class.border-[#EE635A]]="selectedTab?.id === item?.id"
                             [class.bg-gray-100]="selectedTab?.id !== item?.id"
                             [class.text-gray-600]="selectedTab?.id !== item?.id"
                             [class.border-gray-200]="selectedTab?.id !== item?.id"
@@ -54,7 +68,7 @@
                     </div>
                 </div>
 
-                <div class="md:text-3xl font-semibold mt-4">ផលិតផល</div>
+                <div class="md:text-3xl font-semibold mt-4">Product</div>
                 <!-- Mat Tab Group (Hidden, still functional) -->
                 <mat-tab-group class="hidden" disableRipple>
                     <mat-tab
@@ -72,7 +86,7 @@
                                 >
                                 </product-item>
                                 <span *ngIf="item.products.length === 0"
-                                    >គ្មានផលិតផល!!!</span
+                                    >No Products!!!</span
                                 >
                             </div>
                         </div>
@@ -93,21 +107,55 @@
                         >
                         </product-item>
                         <span *ngIf="selectedTab.products.length === 0"
-                            >គ្មានផលិតផល!!!</span
+                            >No Products!!!</span
                         >
                     </div>
                 </div>
             </div>
 
+            <!-- checkout panel -->
+
+          
+
             <div
                 class="list-pos-right bg-gray-50 mt-4 rounded-t-lg dark:bg-gray-800"
             >
+           
+<!-- <button mat-raised-button color="primary" (click)="openQrScanner()">
+  Scan QR Code
+</button> -->
+
+<!-- Scanner Dialog -->
+<ng-template #qrScannerDialog>
+  <div class="qr-scanner-dialog">
+    <!-- Camera selection dropdown -->
+    <select *ngIf="availableDevices.length > 1"
+            (change)="onDeviceSelect($event.target.value)">
+      <option *ngFor="let device of availableDevices"
+              [value]="device.deviceId"
+              [selected]="device.deviceId === selectedDevice?.deviceId">
+        {{ device.label || 'Camera ' + device.deviceId }}
+      </option>
+    </select>
+
+    <!-- QR Scanner -->
+    <zxing-scanner
+      [device]="selectedDevice"
+      (camerasFound)="onCamerasFound($event)"
+      (scanSuccess)="onQrCodeResult($event)"
+      [start]="true">
+    </zxing-scanner>
+
+    <button mat-button (click)="closeQrScanner()">Close</button>
+  </div>
+</ng-template>
+
                 <div class="w-full p-4">
                     <div
                         class="h-14 flex justify-between items-center px-3 border border-gray-300 bg-white rounded-lg dark:bg-gray-800 dark:border-gray-700"
                     >
                         <span class="text-lg"
-                            >អ្នកគិតបញ្ជី៖
+                            >Cashier:
                             <b class="text-g">{{ user?.name }}</b></span
                         >
                     </div>
@@ -117,9 +165,9 @@
                         class="border-t border-b pt-5 pb-5 flex justify-between px-5"
                     >
                         <div class="flex gap-1 items-center">
-                            <span>ចំនួនផលិតផល​​</span>
+                            <span>Products​​</span>
                             <span
-                                class="w-7 h-7 bg-blue-500 text-white text-center rounded-full text-md flex justify-center items-center"
+                                class="w-7 h-7 bg-[#F15757] text-white text-center rounded-full text-md flex justify-center items-center"
                                 >{{carts.length}}​</span
                             >
                         </div>
@@ -131,8 +179,8 @@
                                 class="icon-size-5 text-red-400 font-semibold"
                                 svgIcon="mdi:window-close"
                             ></mat-icon>
-                            <span class="text-red-400 font-semibold"
-                                >ជម្រះទាំងអស់​</span
+                            <span class="text-red-400 font-medium"
+                                >Clear</span
                             >
                         </div>
                     </div>
@@ -162,7 +210,7 @@
                                     <span>{{item?.name}}</span>
                                     <span class="text-sm text-green-600"
                                         >{{ item?.unit_price | number }}
-                                        រៀល</span
+                                        $</span
                                     >
                                 </div>
                             </div>
@@ -245,7 +293,7 @@
                             class="text-center w-full p-3 flex justify-center rounded-lg bg-[#0f172a]"
                         >
                             <span class="text-white"
-                                >សរុប​ ៖ {{ totalPrice | number }} ៛</span
+                                >Total ៖ {{ totalPrice | number }} $</span
                             >
                         </div>
                     </div>
@@ -267,11 +315,11 @@
                         <ng-template #payNowTemplate>
                             <div class="flex justify-end mt-4">
                                 <button
-                                    class="text-white font-semibold p-2 bg-[#102d71] flex justify-center min-w-[130px] rounded-full"
+                                    class="text-white font-semibold p-2 bg-[#F15757] flex justify-center min-w-[130px] rounded-full"
                                     [disabled]="!canSubmit"
                                     (click)="checkOut()"
                                 >
-                                    បញ្ជាទិញ
+                                    Checkout
                                 </button>
                             </div>
                         </ng-template>

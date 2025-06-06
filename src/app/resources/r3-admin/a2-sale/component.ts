@@ -94,7 +94,7 @@ export class SaleComponent implements OnInit {
         },
         {
             value: 'ordered_at',
-            name: 'ថ្ងៃបញ្ជាទិញ',
+            name: 'Checkout',
         },
     ];
 

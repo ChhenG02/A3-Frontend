@@ -1,7 +1,7 @@
 // ================================================================>> Core Library
 import { DecimalPipe, NgForOf, NgIf }   from '@angular/common';
 import { HttpErrorResponse }            from '@angular/common/http';
-import { ChangeDetectorRef, Component, OnDestroy, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit, TemplateRef, ViewChild, inject } from '@angular/core';
 import { FormsModule }                  from '@angular/forms';
 
 // ================================================================>> Third party Library
@@ -24,6 +24,7 @@ import { ItemComponent }    from './item/component';
 import { OrderService }     from './service';
 import { Data, Product }    from './interface';
 import { ViewDetailSaleComponent } from 'app/shared/view/component';
+import { ZXingScannerModule } from '@zxing/ngx-scanner';
 interface CartItem {
 
     id: number;
@@ -53,7 +54,8 @@ interface CartItem {
         NgIf,
         NgForOf,
         MatButtonModule,
-        MatProgressSpinnerModule
+        MatProgressSpinnerModule,
+        ZXingScannerModule,
     ]
 })
 
@@ -74,20 +76,57 @@ export class OrderComponent implements OnInit, OnDestroy {
     totalPrice: number = 0;
     selectedTab: any;
 
-    constructor(
-        private _changeDetectorRef: ChangeDetectorRef,
-        private _userService: UserService,
-        private _service: OrderService,
-        private _snackBarService: SnackbarService,
-    ) {
+ @ViewChild('qrScannerDialog') qrScannerDialog!: TemplateRef<any>;
+  qrDialogRef: any;
 
-        // Subscribe to changes in the user's data
-        this._userService.user$.pipe(takeUntil(this._unsubscribeAll)).subscribe((user: User) => {
+constructor(
+    private _changeDetectorRef: ChangeDetectorRef,
+    private dialog: MatDialog,
+    private _userService: UserService,
+    private _service: OrderService,
+    private _snackBarService: SnackbarService,
+) {
+    // Subscribe to changes in the user's data
+    this._userService.user$.pipe(takeUntil(this._unsubscribeAll)).subscribe((user: User) => {
 
-            this.user = user;
-            // Mark for check - triggers change detection manually
-            this._changeDetectorRef.markForCheck();
-        });
+        this.user = user;
+        // Mark for check - triggers change detection manually
+        this._changeDetectorRef.markForCheck();
+    });
+}
+
+openQrScanner() {
+    this.qrDialogRef = this.dialog.open(this.qrScannerDialog, {
+        width: '400px',
+        autoFocus: false,
+    });
+}
+
+closeQrScanner() {
+    if (this.qrDialogRef) {
+        this.qrDialogRef.close();
+    }
+}
+
+onQrCodeResult(result: string) {
+    this.closeQrScanner();
+    alert('Scanned QR Code: ' + result);
+    // Optionally, you can do more with the result (e.g., open the link)
+}
+
+ // === QR Camera Selection ===
+    availableDevices: MediaDeviceInfo[] = [];
+    selectedDevice: MediaDeviceInfo | undefined;
+
+    onCamerasFound(devices: MediaDeviceInfo[]): void {
+        this.availableDevices = devices;
+        // Optionally, auto-select the first non-virtual camera
+        const realCam = devices.find(d => !/obs|virtual|snap/i.test(d.label));
+        this.selectedDevice = realCam || devices[0];
+    }
+
+    onDeviceSelect(deviceId: string) {
+        this.selectedDevice = this.availableDevices.find(d => d.deviceId === deviceId);
     }
 
     // ===> onInit method to initialize the component
