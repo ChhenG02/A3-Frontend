@@ -1,0 +1,81 @@
+<div class="max-w-md mx-auto p-6 bg-white">
+  <!-- Alert Summary Cards -->
+  <div class="space-y-3 mb-8">
+    <!-- Out of Stock Alert -->
+    <div class="flex items-center justify-between p-4 bg-gradient-to-r from-red-50 to-red-100 border border-red-200 rounded-xl hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
+      <div class="flex items-center space-x-3">
+        <!-- Alert Icon -->
+        <div class="w-10 h-10 bg-red-600 rounded-full flex items-center justify-center flex-shrink-0">
+          <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+        </div>
+        
+        <!-- Alert Text -->
+        <div>
+          <div class="font-semibold text-red-700">Out of Stock</div>
+          <div class="text-sm text-gray-600">{{ outOfStockCount }} products need immediate attention</div>
+        </div>
+      </div>
+      
+      <!-- View Button -->
+      <button 
+        (click)="onViewOutOfStock()"
+        class="px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
+        View
+      </button>
+    </div>
+
+    <!-- Low Stock Alert -->
+    <div class="flex items-center justify-between p-4 bg-gradient-to-r from-yellow-50 to-yellow-100 border border-yellow-200 rounded-xl hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
+      <div class="flex items-center space-x-3">
+        <!-- Alert Icon -->
+        <div class="w-10 h-10 bg-yellow-600 rounded-full flex items-center justify-center flex-shrink-0">
+          <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path>
+            <line x1="12" y1="9" x2="12" y2="13"></line>
+            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+          </svg>
+        </div>
+        
+        <!-- Alert Text -->
+        <div>
+          <div class="font-semibold text-yellow-700">Low Stock</div>
+          <div class="text-sm text-gray-600">{{ lowStockCount }} products are running low</div>
+        </div>
+      </div>
+      
+      <!-- View Button -->
+      <button 
+        (click)="onViewLowStock()"
+        class="px-4 py-2 bg-yellow-600 text-white text-sm font-medium rounded-lg hover:bg-yellow-700 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
+        View
+      </button>
+    </div>
+  </div>
+
+  <!-- Product List -->
+  <div class="space-y-4">
+    <div 
+      *ngFor="let item of stockItems; let last = last"
+      class="flex items-center justify-between py-4"
+      [class.border-b]="!last"
+      [class.border-gray-200]="!last">
+      
+      <!-- Product Name -->
+      <div class="text-gray-500 font-normal">{{ item.name }}</div>
+      
+      <!-- Product Status -->
+      <div class="text-sm font-medium"
+           [ngClass]="{
+             'text-red-600': item.status === 'out-of-stock',
+             'text-yellow-600': item.status === 'low-stock'
+           }">
+        <span *ngIf="item.status === 'out-of-stock'">Out of Stock</span>
+        <span *ngIf="item.status === 'low-stock'">Only {{ item.quantity }} left</span>
+      </div>
+    </div>
+  </div>
+</div>
