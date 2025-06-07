@@ -1,48 +1,53 @@
 // ================================================================>> Core Library
-import { DecimalPipe, NgForOf, NgIf }   from '@angular/common';
-import { HttpErrorResponse }            from '@angular/common/http';
-import { ChangeDetectorRef, Component, OnDestroy, OnInit, TemplateRef, ViewChild, inject } from '@angular/core';
-import { FormsModule }                  from '@angular/forms';
+import { DecimalPipe, NgForOf, NgIf } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
+import {
+    ChangeDetectorRef,
+    Component,
+    OnDestroy,
+    OnInit,
+    TemplateRef,
+    ViewChild,
+    inject,
+} from '@angular/core';
+import { FormsModule } from '@angular/forms';
 
 // ================================================================>> Third party Library
-import { MatButtonModule }              from '@angular/material/button';
-import { MatDialog, MatDialogConfig }   from '@angular/material/dialog';
-import { MatIconModule }                from '@angular/material/icon';
-import { MatProgressSpinnerModule }     from '@angular/material/progress-spinner';
-import { MatTabsModule }                from '@angular/material/tabs';
+import { MatButtonModule } from '@angular/material/button';
+import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTabsModule } from '@angular/material/tabs';
 
-import { Subject, takeUntil }           from 'rxjs';
+import { Subject, takeUntil } from 'rxjs';
 
 // ================================================================>> Custom Library
-import { UserService }      from 'app/core/user/service';
-import { User }             from 'app/core/user/interface';
-import { env }              from 'envs/env';
-import { SnackbarService }  from 'helper/services/snack-bar/snack-bar.service';
-import GlobalConstants      from 'helper/shared/constants';
-import { ProductType }      from '../c2-sale/interface';
-import { ItemComponent }    from './item/component';
-import { OrderService }     from './service';
-import { Data, Product }    from './interface';
-import { ViewDetailSaleComponent } from 'app/shared/view/component';
+import { UserService } from 'app/core/user/service';
+import { User } from 'app/core/user/interface';
+import { env } from 'envs/env';
+import { SnackbarService } from 'helper/services/snack-bar/snack-bar.service';
+import GlobalConstants from 'helper/shared/constants';
+import { ProductType } from '../c2-sale/interface';
+import { ItemComponent } from './item/component';
+import { OrderService } from './order.service';
+import { Data, Product } from './order.interface';
+import { ViewDetailSaleComponent } from 'app/shared/view/view.component';
 import { ZXingScannerModule } from '@zxing/ngx-scanner';
 interface CartItem {
-
     id: number;
     name: string;
     qty: number;
     temp_qty: number;
     unit_price: number;
-    image: string,
-    code: string,
-    type: ProductType,
+    image: string;
+    code: string;
+    type: ProductType;
 }
 
-
 @Component({
-
     selector: 'app-order',
     standalone: true,
-    templateUrl: './template.html',
+    templateUrl: './order.template.html',
     styleUrls: ['./style.scss'], // Note: Corrected from 'styleUrl' to 'styleUrls'
 
     imports: [
@@ -56,11 +61,9 @@ interface CartItem {
         MatButtonModule,
         MatProgressSpinnerModule,
         ZXingScannerModule,
-    ]
+    ],
 })
-
 export class OrderComponent implements OnInit, OnDestroy {
-
     // Create a private subject to handle unsubscription
     private _unsubscribeAll: Subject<User> = new Subject<User>();
 
@@ -76,62 +79,64 @@ export class OrderComponent implements OnInit, OnDestroy {
     totalPrice: number = 0;
     selectedTab: any;
 
- @ViewChild('qrScannerDialog') qrScannerDialog!: TemplateRef<any>;
-  qrDialogRef: any;
+    @ViewChild('qrScannerDialog') qrScannerDialog!: TemplateRef<any>;
+    qrDialogRef: any;
 
-constructor(
-    private _changeDetectorRef: ChangeDetectorRef,
-    private dialog: MatDialog,
-    private _userService: UserService,
-    private _service: OrderService,
-    private _snackBarService: SnackbarService,
-) {
-    // Subscribe to changes in the user's data
-    this._userService.user$.pipe(takeUntil(this._unsubscribeAll)).subscribe((user: User) => {
-
-        this.user = user;
-        // Mark for check - triggers change detection manually
-        this._changeDetectorRef.markForCheck();
-    });
-}
-
-openQrScanner() {
-    this.qrDialogRef = this.dialog.open(this.qrScannerDialog, {
-        width: '400px',
-        autoFocus: false,
-    });
-}
-
-closeQrScanner() {
-    if (this.qrDialogRef) {
-        this.qrDialogRef.close();
+    constructor(
+        private _changeDetectorRef: ChangeDetectorRef,
+        private dialog: MatDialog,
+        private _userService: UserService,
+        private _service: OrderService,
+        private _snackBarService: SnackbarService
+    ) {
+        // Subscribe to changes in the user's data
+        this._userService.user$
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe((user: User) => {
+                this.user = user;
+                // Mark for check - triggers change detection manually
+                this._changeDetectorRef.markForCheck();
+            });
     }
-}
 
-onQrCodeResult(result: string) {
-    this.closeQrScanner();
-    alert('Scanned QR Code: ' + result);
-    // Optionally, you can do more with the result (e.g., open the link)
-}
+    openQrScanner() {
+        this.qrDialogRef = this.dialog.open(this.qrScannerDialog, {
+            width: '400px',
+            autoFocus: false,
+        });
+    }
 
- // === QR Camera Selection ===
+    closeQrScanner() {
+        if (this.qrDialogRef) {
+            this.qrDialogRef.close();
+        }
+    }
+
+    onQrCodeResult(result: string) {
+        this.closeQrScanner();
+        alert('Scanned QR Code: ' + result);
+        // Optionally, you can do more with the result (e.g., open the link)
+    }
+
+    // === QR Camera Selection ===
     availableDevices: MediaDeviceInfo[] = [];
     selectedDevice: MediaDeviceInfo | undefined;
 
     onCamerasFound(devices: MediaDeviceInfo[]): void {
         this.availableDevices = devices;
         // Optionally, auto-select the first non-virtual camera
-        const realCam = devices.find(d => !/obs|virtual|snap/i.test(d.label));
+        const realCam = devices.find((d) => !/obs|virtual|snap/i.test(d.label));
         this.selectedDevice = realCam || devices[0];
     }
 
     onDeviceSelect(deviceId: string) {
-        this.selectedDevice = this.availableDevices.find(d => d.deviceId === deviceId);
+        this.selectedDevice = this.availableDevices.find(
+            (d) => d.deviceId === deviceId
+        );
     }
 
     // ===> onInit method to initialize the component
     ngOnInit(): void {
-
         // Set isLoading to true to indicate that data is being loaded
         this.isLoading = true;
 
@@ -149,7 +154,7 @@ onQrCodeResult(result: string) {
                 this.data.unshift({
                     id: 0, // Use a unique id for the "ALL" category
                     name: 'All Categories',
-                    products: this.allProducts
+                    products: this.allProducts,
                 });
                 if (this.data && this.data.length > 0) {
                     this.selectedTab = this.data[0]; // Automatically select the first tab
@@ -158,10 +163,12 @@ onQrCodeResult(result: string) {
             },
             error: (err) => {
                 this.isLoading = false;
-                this._snackBarService.openSnackBar(err?.error?.message || GlobalConstants.genericError, GlobalConstants.error);
+                this._snackBarService.openSnackBar(
+                    err?.error?.message || GlobalConstants.genericError,
+                    GlobalConstants.error
+                );
             },
         });
-
     }
 
     // Function to handle tab selection
@@ -172,7 +179,6 @@ onQrCodeResult(result: string) {
 
     // Function to handle the ngOnDestroy
     ngOnDestroy(): void {
-
         // Emit a value through the _unsubscribeAll subject to trigger the unsubscription
         this._unsubscribeAll.next(null);
         // Complete the subject to release resources
@@ -183,7 +189,10 @@ onQrCodeResult(result: string) {
         this.carts = [];
         this.totalPrice = 0;
         this.canSubmit = false;
-        this._snackBarService.openSnackBar('Cancel order successfully', GlobalConstants.success);
+        this._snackBarService.openSnackBar(
+            'Cancel order successfully',
+            GlobalConstants.success
+        );
     }
     // Function to increment the quantity of an item
     incrementQty(index: number): void {
@@ -203,24 +212,21 @@ onQrCodeResult(result: string) {
             item.qty = item.temp_qty;
             this.getTotalPrice();
         }
-    }   
+    }
     // Function to add an item to the cart
     addToCart(incomingItem: Product, qty = 0): void {
-
         // Find an existing item in the cart with the same id as the incoming item
-        const existingItem = this.carts.find(item => item.id === incomingItem.id);
+        const existingItem = this.carts.find(
+            (item) => item.id === incomingItem.id
+        );
 
         if (existingItem) {
-
             // If the item already exists, update its quantity and temp_qty
             existingItem.qty += qty;
             existingItem.temp_qty = existingItem.qty;
-
         } else {
-
             // If the item doesn't exist, create a new CartItem and add it to the cart
             const newItem: CartItem = {
-
                 id: incomingItem.id,
                 name: incomingItem.name,
                 qty: qty,
@@ -239,20 +245,19 @@ onQrCodeResult(result: string) {
         this.getTotalPrice();
     }
 
-
     // Function to calculate the total price of the items in the cart
     getTotalPrice(): void {
-
         // Calculate the total price by iterating over items in the cart and summing the product of quantity and unit price
-        this.totalPrice = this.carts.reduce((total, item) => total + (item.qty * item.unit_price), 0);
+        this.totalPrice = this.carts.reduce(
+            (total, item) => total + item.qty * item.unit_price,
+            0
+        );
     }
 
     // Function to remove an item from the cart
     remove(value: any, index: number = -1): void {
-
         // If the value is 0, set canSubmit to true
         if (value === 0) {
-
             this.canSubmit = true;
         }
 
@@ -265,16 +270,13 @@ onQrCodeResult(result: string) {
 
     // Function to handle the blur event on the quantity input field
     blur(event: any, index: number = -1): void {
-
         // Store the current quantity before any changes
         const tempQty = this.carts[index].qty;
 
         // Check if the entered value is 0, and update canSubmit accordingly
         if (event.target.value == 0) {
-
             this.canSubmit = false;
         } else {
-
             this.canSubmit = true;
         }
 
@@ -288,12 +290,10 @@ onQrCodeResult(result: string) {
 
         // Check if the entered value is falsy (e.g., an empty string)
         if (!event.target.value) {
-
             // Restore the quantity to its previous value if the entered value is falsy
             this.carts[index].qty = tempQty;
             this.carts[index].temp_qty = tempQty;
         } else {
-
             // Update the quantity with the entered value
             this.carts[index].qty = enteredValue;
             this.carts[index].temp_qty = enteredValue;
@@ -306,19 +306,16 @@ onQrCodeResult(result: string) {
     // Function to handle the keydown event on the quantity input field
     private matDialog = inject(MatDialog);
     checkOut(): void {
-
         // Create a dictionary to represent the cart with item IDs and quantities
         const carts: { [itemId: number]: number } = {};
 
         this.carts.forEach((item: CartItem) => {
-
             carts[item.id] = item.qty;
         });
 
         // Prepare the request body with the serialized cart data
         const body = {
-
-            cart: JSON.stringify(carts)
+            cart: JSON.stringify(carts),
         };
 
         // Set the flag to indicate that an order is being made
@@ -326,9 +323,7 @@ onQrCodeResult(result: string) {
 
         // Make the API call to create an order using the order service
         this._service.create(body).subscribe({
-
-            next: response => {
-
+            next: (response) => {
                 // Reset the order in progress flag
                 this.isOrderBeingMade = false;
 
@@ -336,7 +331,10 @@ onQrCodeResult(result: string) {
                 this.carts = [];
 
                 // Display a success message
-                this._snackBarService.openSnackBar(response.message, GlobalConstants.success);
+                this._snackBarService.openSnackBar(
+                    response.message,
+                    GlobalConstants.success
+                );
 
                 // Open a dialog to display order details
                 const dialogConfig = new MatDialogConfig();
@@ -352,14 +350,15 @@ onQrCodeResult(result: string) {
             },
 
             error: (err: HttpErrorResponse) => {
-
                 // Reset the order in progress flag on error
                 this.isOrderBeingMade = false;
 
                 // Display an error message
-                this._snackBarService.openSnackBar(err?.error?.message || GlobalConstants.genericError, GlobalConstants.error);
-            }
+                this._snackBarService.openSnackBar(
+                    err?.error?.message || GlobalConstants.genericError,
+                    GlobalConstants.error
+                );
+            },
         });
     }
-
 }

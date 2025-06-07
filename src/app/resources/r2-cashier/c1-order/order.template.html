@@ -1,29 +1,34 @@
+<!-- Main POS Section -->
 <div
     class="pos-section bg-white dark:bg-gray-800 overflow-hidden h-screen mt-4 mx-4 rounded-tl-lg rounded-tr-lg"
 >
+    <!-- Header Section -->
     <div
         class="min-h-14 max-h-14 flex gap-2 justify-between items-center py-2 pl-5 pr-2.5 border-b"
     >
+        <!-- Menu Title -->
         <div class="flex flex-1 items-center font-medium">
             <span class="text-2xl font-semibold"> Menu </span>
         </div>
+        <!-- QR Code Scan Button Section -->
         <div
-    class="min-h-14 max-h-14 flex gap-2 justify-between items-center py-2 pl-5 pr-2.5 border-b"
->
-    <!-- QR Code Scan Button -->
-    <div class="flex gap-2 w-full sm:w-auto justify-end">
-      <button
-        class="helpers-mat-button-sm min-w-[2.5rem] px-2"
-        mat-stroked-button
-        (click)="openQrScanner()"
-      >
-        <mat-icon svgIcon="mdi:qrcode-scan" class="text-slate-500 text-lg"></mat-icon>
-      </button>
+            class="min-h-14 max-h-14 flex gap-2 justify-between items-center py-2 pl-5 pr-2.5 border-b"
+        >
+            <!-- QR Code Scan Button -->
+            <div class="flex gap-2 w-full sm:w-auto justify-end">
+                <button
+                    class="helpers-mat-button-sm min-w-[2.5rem] px-2"
+                    mat-stroked-button
+                    (click)="openQrScanner()"
+                >
+                    <mat-icon svgIcon="mdi:qrcode-scan" class="text-slate-500 text-lg"></mat-icon>
+                </button>
+            </div>
+        </div>
     </div>
-</div>
-    </div>
+    <!-- POS Body Section -->
     <div class="pos-body">
-        <!-- No Data Display -->
+        <!-- No Data Display Section -->
         <div *ngIf="data.length === 0 && !isLoading" class="no-data">
             <div class="flex flex-col justify-center items-center mb-4">
                 <mat-icon class="icon-size-24" svgIcon="toc"></mat-icon>
@@ -31,19 +36,21 @@
             </div>
         </div>
 
-        <!-- Data Display -->
+        <!-- Data Display Section -->
         <div *ngIf="data.length > 0" class="pos-content px-4">
+            <!-- Left Panel: Category and Product List -->
             <div class="list-pos-left">
-                <!-- Title -->
+                <!-- Category Title -->
                 <div class="md:text-3xl font-semibold mt-4 mb-4">
                     Category
                 </div>
 
-                <!-- Tab Headers Custom Styling with Tailwind CSS -->
+                <!-- Tab Headers Section -->
                 <div
                     class="overflow-x-auto scrollbar-hide whitespace-nowrap mb-4"
                 >
                     <div class="flex gap-1">
+                        <!-- Category Tabs -->
                         <div
                             *ngFor="let item of data; trackBy: trackById"
                             (click)="selectTab(item)"
@@ -68,8 +75,9 @@
                     </div>
                 </div>
 
+                <!-- Product Title -->
                 <div class="md:text-3xl font-semibold mt-4">Product</div>
-                <!-- Mat Tab Group (Hidden, still functional) -->
+                <!-- Hidden Mat Tab Group (for logic) -->
                 <mat-tab-group class="hidden" disableRipple>
                     <mat-tab
                         *ngFor="let item of data; trackBy: trackById"
@@ -93,6 +101,7 @@
                     </mat-tab>
                 </mat-tab-group>
 
+                <!-- Product List for Selected Tab -->
                 <div
                     class="container-tab-content py-4 pr-3"
                     *ngIf="selectedTab"
@@ -113,43 +122,36 @@
                 </div>
             </div>
 
-            <!-- checkout panel -->
-
-          
-
+            <!-- Right Panel: Checkout Panel -->
             <div
                 class="list-pos-right bg-gray-50 mt-4 rounded-t-lg dark:bg-gray-800"
             >
-           
-<!-- <button mat-raised-button color="primary" (click)="openQrScanner()">
-  Scan QR Code
-</button> -->
+                <!-- QR Scanner Dialog Template -->
+                <ng-template #qrScannerDialog>
+                    <div class="qr-scanner-dialog">
+                        <!-- Camera selection dropdown -->
+                        <select *ngIf="availableDevices.length > 1"
+                                (change)="onDeviceSelect($event.target.value)">
+                            <option *ngFor="let device of availableDevices"
+                                    [value]="device.deviceId"
+                                    [selected]="device.deviceId === selectedDevice?.deviceId">
+                                {{ device.label || 'Camera ' + device.deviceId }}
+                            </option>
+                        </select>
 
-<!-- Scanner Dialog -->
-<ng-template #qrScannerDialog>
-  <div class="qr-scanner-dialog">
-    <!-- Camera selection dropdown -->
-    <select *ngIf="availableDevices.length > 1"
-            (change)="onDeviceSelect($event.target.value)">
-      <option *ngFor="let device of availableDevices"
-              [value]="device.deviceId"
-              [selected]="device.deviceId === selectedDevice?.deviceId">
-        {{ device.label || 'Camera ' + device.deviceId }}
-      </option>
-    </select>
+                        <!-- QR Scanner -->
+                        <zxing-scanner
+                            [device]="selectedDevice"
+                            (camerasFound)="onCamerasFound($event)"
+                            (scanSuccess)="onQrCodeResult($event)"
+                            [start]="true">
+                        </zxing-scanner>
 
-    <!-- QR Scanner -->
-    <zxing-scanner
-      [device]="selectedDevice"
-      (camerasFound)="onCamerasFound($event)"
-      (scanSuccess)="onQrCodeResult($event)"
-      [start]="true">
-    </zxing-scanner>
+                        <button mat-button (click)="closeQrScanner()">Close</button>
+                    </div>
+                </ng-template>
 
-    <button mat-button (click)="closeQrScanner()">Close</button>
-  </div>
-</ng-template>
-
+                <!-- Cashier Info Section -->
                 <div class="w-full p-4">
                     <div
                         class="h-14 flex justify-between items-center px-3 border border-gray-300 bg-white rounded-lg dark:bg-gray-800 dark:border-gray-700"
@@ -160,6 +162,7 @@
                         >
                     </div>
                 </div>
+                <!-- Cart Products Header Section -->
                 <div class="w-full p-4" *ngIf="carts.length > 0">
                     <div
                         class="border-t border-b pt-5 pb-5 flex justify-between px-5"
@@ -185,6 +188,7 @@
                         </div>
                     </div>
                 </div>
+                <!-- Cart Items List Section -->
                 <div
                     class="list-pos-right-body max-w-[28rem] px-4"
                     *ngIf="carts.length > 0"
@@ -196,6 +200,7 @@
                         <div
                             class="space-y-4 md:flex md:items-center md:justify-between md:gap-6 md:space-y-0"
                         >
+                            <!-- Cart Item Info -->
                             <div class="flex justify-start items-center gap-4">
                                 <img
                                     class="w-12 h-full object-cover rounded-md"
@@ -214,6 +219,7 @@
                                     >
                                 </div>
                             </div>
+                            <!-- Quantity Controls -->
                             <label for="counter-input" class="sr-only"
                                 >Choose quantity:</label
                             >
@@ -286,6 +292,7 @@
                             </div>
                         </div>
                     </div>
+                    <!-- Total Price Section -->
                     <div
                         class="border-t border-b pt-5 pb-5 flex justify-between mt-4 w-full"
                     >
@@ -297,6 +304,7 @@
                             >
                         </div>
                     </div>
+                    <!-- Checkout Button Section -->
                     <div
                         class="custom-botton-flat p-2 flex justify-end dark:bg-gray-800 mb-10"
                     >
@@ -325,6 +333,7 @@
                         </ng-template>
                     </div>
                 </div>
+                <!-- Empty Cart Section -->
                 <div
                     *ngIf="carts.length === 0"
                     class="flex flex-col justify-center items-center mt-10"

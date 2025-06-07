@@ -1,5 +1,5 @@
 import { Routes } from "@angular/router";
-import { OrderComponent } from "./c1-order/component";
+import { OrderComponent } from "./c1-order/order.component";
 import { SaleComponent } from "./c2-sale/component";
 
 export default [
