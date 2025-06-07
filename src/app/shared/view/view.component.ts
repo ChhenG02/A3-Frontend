@@ -18,7 +18,7 @@ import { Subject }              from 'rxjs';
 import { DetailsService }       from '../dialog/service';
 @Component({
     selector: 'dashboard-gm-fast-view-customer',
-    templateUrl: './template.html',
+    templateUrl: './view.template.html',
     styleUrls: ['./style.scss'],
     standalone: true,
     imports: [
