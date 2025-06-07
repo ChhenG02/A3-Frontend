@@ -1,5 +1,5 @@
 // ================================================================>> Core Library
-import { DecimalPipe, NgForOf, NgIf } from '@angular/common';
+import { CommonModule, DecimalPipe, NgForOf, NgIf } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import {
     ChangeDetectorRef,
@@ -8,6 +8,7 @@ import {
     OnInit,
     TemplateRef,
     ViewChild,
+    HostListener,
     inject,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -51,6 +52,7 @@ interface CartItem {
     styleUrls: ['./style.scss'], // Note: Corrected from 'styleUrl' to 'styleUrls'
 
     imports: [
+        CommonModule,
         DecimalPipe,
         MatIconModule,
         MatTabsModule,
@@ -73,6 +75,10 @@ export class OrderComponent implements OnInit, OnDestroy {
     allProducts: Product[] = [];
     isLoading: boolean = false;
     carts: CartItem[] = [];
+    isAdjustingOrder: boolean = false;
+    isCheckoutSuccess: boolean = false;
+    orderedItems: CartItem[] = [];
+    lastOrderData: any;
     user: User;
     isOrderBeingMade: boolean = false;
     canSubmit: boolean = false;
@@ -97,6 +103,141 @@ export class OrderComponent implements OnInit, OnDestroy {
                 // Mark for check - triggers change detection manually
                 this._changeDetectorRef.markForCheck();
             });
+    }
+
+    // Payment related properties
+    selectedPaymentMethod: string = 'cash';
+    currentAmount: string = '';
+    displayAmount: string = '';
+
+    discount: number = 5 ; // set this as needed
+    tax: number = 2; // set this as needed
+
+    // Order summary (You should replace these with actual calculated values)
+    orderSummary = {
+        subtotal: 0,
+        discount: 0,
+        tax: 0,
+        total: 0,
+    };
+
+    updateOrderSummary(): void {
+        this.orderSummary.subtotal = this.totalPrice;
+        this.orderSummary.discount = this.discount;
+        this.orderSummary.tax = this.tax;
+        this.orderSummary.total = this.totalPrice - this.discount + this.tax;
+    }
+
+    // Call updateOrderSummary() whenever cart, discount, or tax changes:
+    getTotalPrice(): void {
+        this.totalPrice = this.carts.reduce(
+            (total, item) => total + item.qty * item.unit_price,
+            0
+        );
+        this.updateOrderSummary();
+    }
+
+    // 👇 Place this method inside the class
+    @HostListener('document:keydown', ['$event'])
+    handleKeyboardEvent(event: KeyboardEvent): void {
+        const key = event.key;
+
+        if (!isNaN(Number(key))) {
+            // Numeric key pressed
+            if (key === '0') {
+                this.inputNumber('0');
+            } else {
+                this.inputNumber(key); // handles 1–9
+            }
+        } else if (key === '.') {
+            this.inputDecimal();
+        } else if (key === 'Backspace') {
+            this.clearInput();
+        } else if (key.toLowerCase() === 'c') {
+            this.clearAll();
+        } else if (key === 'Enter') {
+            this.processPayment();
+        }
+    }
+
+    // Payment methods
+    selectPaymentMethod(method: string): void {
+        this.selectedPaymentMethod = method;
+    }
+
+    inputNumber(num: string): void {
+        if (this.currentAmount === '0') {
+            this.currentAmount = num;
+        } else {
+            this.currentAmount += num;
+        }
+        this.updateDisplay();
+    }
+
+    inputDecimal(): void {
+        if (!this.currentAmount.includes('.')) {
+            this.currentAmount += this.currentAmount === '' ? '0.' : '.';
+            this.updateDisplay();
+        }
+    }
+
+    clearInput(): void {
+        if (this.currentAmount.length > 0) {
+            this.currentAmount = this.currentAmount.slice(0, -1);
+            this.updateDisplay();
+        }
+    }
+
+    clearAll(): void {
+        this.currentAmount = '';
+        this.updateDisplay();
+    }
+
+    updateDisplay(): void {
+        if (this.currentAmount === '') {
+            this.displayAmount = '';
+        } else {
+            this.displayAmount = '$' + this.currentAmount;
+        }
+    }
+
+    processPayment(): void {
+        if (this.currentAmount === '') {
+            alert('Please enter payment amount.');
+            return;
+        }
+
+        const amount = parseFloat(this.currentAmount);
+        const total = this.orderSummary.total;
+
+        if (this.selectedPaymentMethod === 'cash') {
+            if (amount < total) {
+                alert('Insufficient cash amount.');
+                return;
+            }
+
+            const change = amount - total;
+            this.completePayment(amount, change);
+        } else {
+            this.processScanPayment();
+        }
+    }
+
+    completePayment(amount: number, change: number): void {
+        // Your business logic for successful payment
+        console.log(`Payment complete. Change: $${change.toFixed(2)}`);
+        this.isCheckoutSuccess = true;
+    }
+
+    processScanPayment(): void {
+        // Your QR/online payment logic
+        alert('Redirecting to ScanPay...');
+    }
+
+    goBack(): void {
+        this.isCheckoutSuccess = false;
+        this.isAdjustingOrder = true;
+        this._changeDetectorRef.detectChanges();
     }
 
     openQrScanner() {
@@ -246,7 +387,7 @@ export class OrderComponent implements OnInit, OnDestroy {
     }
 
     // Function to calculate the total price of the items in the cart
-    getTotalPrice(): void {
+    getSubTotalPrice(): void {
         // Calculate the total price by iterating over items in the cart and summing the product of quantity and unit price
         this.totalPrice = this.carts.reduce(
             (total, item) => total + item.qty * item.unit_price,
@@ -306,59 +447,55 @@ export class OrderComponent implements OnInit, OnDestroy {
     // Function to handle the keydown event on the quantity input field
     private matDialog = inject(MatDialog);
     checkOut(): void {
-        // Create a dictionary to represent the cart with item IDs and quantities
         const carts: { [itemId: number]: number } = {};
 
         this.carts.forEach((item: CartItem) => {
             carts[item.id] = item.qty;
         });
 
-        // Prepare the request body with the serialized cart data
         const body = {
             cart: JSON.stringify(carts),
         };
 
-        // Set the flag to indicate that an order is being made
         this.isOrderBeingMade = true;
 
-        // Make the API call to create an order using the order service
         this._service.create(body).subscribe({
             next: (response) => {
-                // Reset the order in progress flag
                 this.isOrderBeingMade = false;
+                this.isCheckoutSuccess = true;
+                this.lastOrderData = response.data;
 
-                // Clear the cart after a successful order
+                // Store the cart items before clearing
+                this.orderedItems = [...this.carts];
+
                 this.carts = [];
-
-                // Display a success message
                 this._snackBarService.openSnackBar(
                     response.message,
                     GlobalConstants.success
                 );
-
-                // Open a dialog to display order details
-                const dialogConfig = new MatDialogConfig();
-                dialogConfig.data = response.data;
-                dialogConfig.autoFocus = false;
-                dialogConfig.position = { right: '0px' };
-                dialogConfig.height = '100dvh';
-                dialogConfig.width = '100dvw';
-                dialogConfig.maxWidth = '550px';
-                dialogConfig.panelClass = 'custom-mat-dialog-as-mat-drawer';
-                dialogConfig.enterAnimationDuration = '0s';
-                this.matDialog.open(ViewDetailSaleComponent, dialogConfig);
             },
-
             error: (err: HttpErrorResponse) => {
-                // Reset the order in progress flag on error
                 this.isOrderBeingMade = false;
-
-                // Display an error message
                 this._snackBarService.openSnackBar(
                     err?.error?.message || GlobalConstants.genericError,
                     GlobalConstants.error
                 );
             },
         });
+    }
+    // Add this new method
+    viewReceipt(): void {
+        if (!this.lastOrderData) return;
+
+        const dialogConfig = new MatDialogConfig();
+        dialogConfig.data = this.lastOrderData;
+        dialogConfig.autoFocus = false;
+        dialogConfig.position = { right: '0px' };
+        dialogConfig.height = '100dvh';
+        dialogConfig.width = '100dvw';
+        dialogConfig.maxWidth = '550px';
+        dialogConfig.panelClass = 'custom-mat-dialog-as-mat-drawer';
+        dialogConfig.enterAnimationDuration = '0s';
+        this.matDialog.open(ViewDetailSaleComponent, dialogConfig);
     }
 }

@@ -21,7 +21,10 @@
                     mat-stroked-button
                     (click)="openQrScanner()"
                 >
-                    <mat-icon svgIcon="mdi:qrcode-scan" class="text-slate-500 text-lg"></mat-icon>
+                    <mat-icon
+                        svgIcon="mdi:qrcode-scan"
+                        class="text-slate-500 text-lg"
+                    ></mat-icon>
                 </button>
             </div>
         </div>
@@ -41,9 +44,7 @@
             <!-- Left Panel: Category and Product List -->
             <div class="list-pos-left">
                 <!-- Category Title -->
-                <div class="md:text-3xl font-semibold mt-4 mb-4">
-                    Category
-                </div>
+                <div class="md:text-3xl font-semibold mt-4 mb-4">Category</div>
 
                 <!-- Tab Headers Section -->
                 <div
@@ -130,12 +131,17 @@
                 <ng-template #qrScannerDialog>
                     <div class="qr-scanner-dialog">
                         <!-- Camera selection dropdown -->
-                        <select *ngIf="availableDevices.length > 1"
-                                (change)="onDeviceSelect($event.target.value)">
-                            <option *ngFor="let device of availableDevices"
-                                    [value]="device.deviceId"
-                                    [selected]="device.deviceId === selectedDevice?.deviceId">
-                                {{ device.label || 'Camera ' + device.deviceId }}
+                        <select
+                            *ngIf="availableDevices.length > 1"
+                            (change)="onDeviceSelect($event.target.value)"
+                        >
+                            <option
+                                *ngFor="let device of availableDevices"
+                                [value]="device.deviceId"
+                                [selected]="device.deviceId === selectedDevice?.deviceId"
+                            >
+                                {{ device.label || 'Camera ' + device.deviceId
+                                }}
                             </option>
                         </select>
 
@@ -144,202 +150,514 @@
                             [device]="selectedDevice"
                             (camerasFound)="onCamerasFound($event)"
                             (scanSuccess)="onQrCodeResult($event)"
-                            [start]="true">
+                            [start]="true"
+                        >
                         </zxing-scanner>
 
-                        <button mat-button (click)="closeQrScanner()">Close</button>
+                        <button mat-button (click)="closeQrScanner()">
+                            Close
+                        </button>
                     </div>
                 </ng-template>
 
-                <!-- Cashier Info Section -->
-                <div class="w-full p-4">
-                    <div
-                        class="h-14 flex justify-between items-center px-3 border border-gray-300 bg-white rounded-lg dark:bg-gray-800 dark:border-gray-700"
-                    >
-                        <span class="text-lg"
-                            >Cashier:
-                            <b class="text-g">{{ user?.name }}</b></span
-                        >
-                    </div>
-                </div>
-                <!-- Cart Products Header Section -->
-                <div class="w-full p-4" *ngIf="carts.length > 0">
-                    <div
-                        class="border-t border-b pt-5 pb-5 flex justify-between px-5"
-                    >
-                        <div class="flex gap-1 items-center">
-                            <span>Products​​</span>
-                            <span
-                                class="w-7 h-7 bg-[#F15757] text-white text-center rounded-full text-md flex justify-center items-center"
-                                >{{carts.length}}​</span
-                            >
-                        </div>
+                <!-- Order View -->
+                <div *ngIf="!isCheckoutSuccess">
+                    <!-- Cashier Info Section -->
+                    <div class="w-full p-4">
                         <div
-                            class="flex items-center gap-1 cursor-pointer"
-                            (click)="clearCartAll()"
+                            class="h-14 flex justify-between items-center px-3 border border-gray-300 bg-white rounded-lg dark:bg-gray-800 dark:border-gray-700"
                         >
-                            <mat-icon
-                                class="icon-size-5 text-red-400 font-semibold"
-                                svgIcon="mdi:window-close"
-                            ></mat-icon>
-                            <span class="text-red-400 font-medium"
-                                >Clear</span
+                            <span class="text-lg"
+                                >Cashier:
+                                <b class="text-g">{{ user?.name }}</b></span
                             >
                         </div>
                     </div>
-                </div>
-                <!-- Cart Items List Section -->
-                <div
-                    class="list-pos-right-body max-w-[28rem] px-4"
-                    *ngIf="carts.length > 0"
-                >
+
+                    <!-- Cart Products Header Section -->
+                    <div class="w-full p-4" *ngIf="carts.length > 0">
+                        <div
+                            class="border-t border-b pt-5 pb-5 flex justify-between px-5"
+                        >
+                            <div class="flex gap-1 items-center">
+                                <span>Products​​</span>
+                                <span
+                                    class="w-7 h-7 bg-[#F15757] text-white text-center rounded-full text-md flex justify-center items-center"
+                                    >{{carts.length}}​</span
+                                >
+                            </div>
+                            <div
+                                class="flex items-center gap-1 cursor-pointer"
+                                (click)="clearCartAll()"
+                            >
+                                <mat-icon
+                                    class="icon-size-5 text-red-400 font-semibold"
+                                    svgIcon="mdi:window-close"
+                                ></mat-icon>
+                                <span class="text-red-400 font-medium"
+                                    >Clear</span
+                                >
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Cart Items List Section -->
                     <div
-                        *ngFor="let item of carts; let i = index; trackBy: trackById"
-                        class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800 md:p-6 mt-2"
+                        class="list-pos-right-body max-w-[28rem] px-4"
+                        *ngIf="carts.length > 0"
                     >
                         <div
-                            class="space-y-4 md:flex md:items-center md:justify-between md:gap-6 md:space-y-0"
+                            *ngFor="let item of carts; let i = index; trackBy: trackById"
+                            class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800 md:p-6 mt-2"
                         >
-                            <!-- Cart Item Info -->
-                            <div class="flex justify-start items-center gap-4">
-                                <img
-                                    class="w-12 h-full object-cover rounded-md"
-                                    [src]="fileUrl + item?.image"
-                                    alt=""
-                                />
-                                <div class="flex flex-col">
-                                    <span class="text-sm"
-                                        >{{item.type.name}} |
-                                        {{item.code}}</span
-                                    >
-                                    <span>{{item?.name}}</span>
-                                    <span class="text-sm text-green-600"
-                                        >{{ item?.unit_price | number }}
-                                        $</span
-                                    >
+                            <!-- items -->
+                            <div
+                                class="space-y-4 md:flex md:items-center md:justify-between md:gap-6 md:space-y-0"
+                            >
+                                <!-- Cart Item Info -->
+                                <div
+                                    class="flex justify-start items-center gap-4"
+                                >
+                                    <img
+                                        class="w-12 h-full object-cover rounded-md"
+                                        [src]="fileUrl + item?.image"
+                                        alt=""
+                                    />
+                                    <div class="flex flex-col">
+                                        <span class="text-sm"
+                                            >{{item.type.name}} |
+                                            {{item.code}}</span
+                                        >
+                                        <span>{{item?.name}}</span>
+                                        <span class="text-sm text-green-600"
+                                            >{{ item?.unit_price | number }}
+                                            $</span
+                                        >
+                                    </div>
+                                </div>
+                                <!-- Quantity Controls -->
+                                <label for="counter-input" class="sr-only"
+                                    >Choose quantity:</label
+                                >
+                                <div
+                                    class="flex items-center justify-between md:order-3 md:justify-end"
+                                >
+                                    <div class="flex items-center">
+                                        <button
+                                            type="button"
+                                            id="decrement-button"
+                                            (click)="decrementQty(i)"
+                                            class="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md border border-gray-300 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-700"
+                                        >
+                                            <svg
+                                                class="h-2.5 w-2.5 text-gray-900 dark:text-white"
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                fill="none"
+                                                viewBox="0 0 18 2"
+                                            >
+                                                <path
+                                                    stroke="currentColor"
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    stroke-width="2"
+                                                    d="M1 1h16"
+                                                />
+                                            </svg>
+                                        </button>
+                                        <input
+                                            type="text"
+                                            id="counter-input"
+                                            class="w-10 shrink-0 border-0 bg-transparent text-center text-sm font-medium text-gray-900 focus:outline-none focus:ring-0 dark:text-white"
+                                            [(ngModel)]="item.temp_qty"
+                                            min="0"
+                                            max="1000"
+                                        />
+                                        <button
+                                            type="button"
+                                            id="increment-button"
+                                            (click)="incrementQty(i)"
+                                            class="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md border border-gray-300 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-700"
+                                        >
+                                            <svg
+                                                class="h-2.5 w-2.5 text-gray-900 dark:text-white"
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                fill="none"
+                                                viewBox="0 0 18 18"
+                                            >
+                                                <path
+                                                    stroke="currentColor"
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    stroke-width="2"
+                                                    d="M9 1v16M1 9h16"
+                                                />
+                                            </svg>
+                                        </button>
+                                        <button
+                                            color="warn"
+                                            class="remove ml-4"
+                                            mat-icon-button
+                                            (click)="remove(item.temp_qty,i)"
+                                        >
+                                            <mat-icon
+                                                class="icon-size-5 text-red-400"
+                                                svgIcon="mdi:trash-can-outline"
+                                            ></mat-icon>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
-                            <!-- Quantity Controls -->
-                            <label for="counter-input" class="sr-only"
-                                >Choose quantity:</label
-                            >
+                        </div>
+                        <!-- Order Summary (order)-->
+                        <div class="p-6 space-y-3">
+                            <div class="flex justify-between text-gray-600">
+                                <span>Subtotal</span>
+                                <span>{{ totalPrice | number }}$</span>
+                            </div>
                             <div
-                                class="flex items-center justify-between md:order-3 md:justify-end"
+                                class="flex justify-between text-gray-600"
+                                *ngIf="orderSummary?.discount > 0"
                             >
-                                <div class="flex items-center">
+                                <span>Discount</span>
+                                <span
+                                    >{{orderSummary?.discount |
+                                    currency:'USD':'symbol':'1.2-2'}}</span
+                                >
+                            </div>
+                            <div
+                                class="flex justify-between text-gray-600"
+                                *ngIf="orderSummary?.tax > 0"
+                            >
+                                <span>Tax</span>
+                                <span
+                                    >{{orderSummary?.tax |
+                                    currency:'USD':'symbol':'1.2-2'}}</span
+                                >
+                            </div>
+                            <div
+                                class="flex justify-between text-lg font-bold border-t pt-3"
+                            >
+                                <span>Total</span>
+                                <span class="text-red-500"
+                                    >{{orderSummary?.total |
+                                    currency:'USD':'symbol':'1.2-2'}}</span
+                                >
+                            </div>
+                        </div>
+                        <!-- Checkout Button Section -->
+                        <div
+                            class="custom-botton-flat p-2 flex justify-end dark:bg-gray-800 mb-10"
+                        >
+                            <ng-container
+                                *ngIf="isOrderBeingMade; else payNowTemplate"
+                            >
+                                <!-- Loading Spinner -->
+                                <div class="flex justify-center mt-4">
+                                    <mat-progress-spinner
+                                        [diameter]="24"
+                                        [mode]="'indeterminate'"
+                                        class="flex justify-center"
+                                    ></mat-progress-spinner>
+                                </div>
+                            </ng-container>
+                            <ng-template #payNowTemplate>
+                                <div class="flex justify-end mt-4">
                                     <button
-                                        type="button"
-                                        id="decrement-button"
-                                        (click)="decrementQty(i)"
-                                        class="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md border border-gray-300 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-700"
+                                        class="text-white font-semibold p-2 bg-[#F15757] flex justify-center min-w-[130px] rounded-full"
+                                        [disabled]="!canSubmit"
+                                        (click)="checkOut()"
                                     >
-                                        <svg
-                                            class="h-2.5 w-2.5 text-gray-900 dark:text-white"
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            fill="none"
-                                            viewBox="0 0 18 2"
-                                        >
-                                            <path
-                                                stroke="currentColor"
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                stroke-width="2"
-                                                d="M1 1h16"
-                                            />
-                                        </svg>
+                                        Checkout
                                     </button>
-                                    <input
-                                        type="text"
-                                        id="counter-input"
-                                        class="w-10 shrink-0 border-0 bg-transparent text-center text-sm font-medium text-gray-900 focus:outline-none focus:ring-0 dark:text-white"
-                                        [(ngModel)]="item.temp_qty"
-                                        min="0"
-                                        max="1000"
-                                    />
-                                    <button
-                                        type="button"
-                                        id="increment-button"
-                                        (click)="incrementQty(i)"
-                                        class="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md border border-gray-300 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-700"
-                                    >
-                                        <svg
-                                            class="h-2.5 w-2.5 text-gray-900 dark:text-white"
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            fill="none"
-                                            viewBox="0 0 18 18"
-                                        >
-                                            <path
-                                                stroke="currentColor"
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                stroke-width="2"
-                                                d="M9 1v16M1 9h16"
-                                            />
-                                        </svg>
-                                    </button>
-                                    <button
-                                        color="warn"
-                                        class="remove ml-4"
-                                        mat-icon-button
-                                        (click)="remove(item.temp_qty,i)"
+                                </div>
+                            </ng-template>
+                        </div>
+                    </div>
+
+                    <!-- Empty Cart Section -->
+                    <div
+                        *ngIf="carts.length === 0"
+                        class="flex flex-col justify-center items-center mt-10"
+                    >
+                        <mat-icon class="icon-size-24" svgIcon="toc"></mat-icon>
+                        <span class="text-2xl">No Data</span>
+                    </div>
+                </div>
+
+                <!-- Checkout View -->
+                <div *ngIf="isCheckoutSuccess" class="h-full flex flex-col">
+                    <!-- Header Title -->
+                    <div
+                        class="min-h-14 max-h-14 flex gap-2 justify-between items-center py-2 pl-5 pr-2.5 border-b bg-gray-50"
+                    >
+                        <!-- Title on the left -->
+                        <div class="flex-1 text-slate-700">
+                            <h1 class="text-2xl font-medium">payment</h1>
+                        </div>
+                        <!-- Back Button on the right -->
+                        <button mat-icon-button (click)="goBack()">
+                            <mat-icon
+                                class="icon-size-6 text-gray-600"
+                                svgIcon="heroicons_outline:arrow-left"
+                            ></mat-icon>
+                        </button>
+                    </div>
+
+                    <!-- Payment Interface Component -->
+                    <div class="flex-1 flex flex-col bg-white">
+                        <style>
+                            .payment-button {
+                                transition: all 0.2s ease;
+                            }
+                            .payment-button:hover {
+                                transform: translateY(-1px);
+                            }
+                            .keypad-button {
+                                transition: all 0.1s ease;
+                            }
+                            .keypad-button:active {
+                                transform: scale(0.95);
+                            }
+                        </style>
+
+                        <!-- Order Summary -->
+                        <div class="p-6 space-y-3">
+                            <div class="flex justify-between text-gray-600">
+                                <span>Subtotal</span>
+                                <span>{{ totalPrice | number }}$</span>
+                            </div>
+                            <div
+                                class="flex justify-between text-gray-600"
+                                *ngIf="orderSummary?.discount > 0"
+                            >
+                                <span>Discount</span>
+                                <span
+                                    >{{orderSummary?.discount |
+                                    currency:'USD':'symbol':'1.2-2'}}</span
+                                >
+                            </div>
+                            <div
+                                class="flex justify-between text-gray-600"
+                                *ngIf="orderSummary?.tax > 0"
+                            >
+                                <span>Tax</span>
+                                <span
+                                    >{{orderSummary?.tax |
+                                    currency:'USD':'symbol':'1.2-2'}}</span
+                                >
+                            </div>
+                            <div
+                                class="flex justify-between text-lg font-bold border-t pt-3"
+                            >
+                                <span>Total</span>
+                                <span class="text-red-500"
+                                    >{{orderSummary?.total |
+                                    currency:'USD':'symbol':'1.2-2'}}</span
+                                >
+                            </div>
+                        </div>
+
+                        <!-- Payment Method -->
+                        <div class="px-6 pb-4">
+                            <h2 class="text-lg font-semibold mb-4">
+                                Payment Method
+                            </h2>
+                            <div class="flex gap-4">
+                                <button
+                                    (click)="selectPaymentMethod('cash')"
+                                    [class]="selectedPaymentMethod === 'cash' ? 
+                    'payment-button flex-1 p-4 border-2 border-red-200 bg-red-50 rounded-xl text-center' : 
+                    'payment-button flex-1 p-4 border-2 border-gray-200 rounded-xl text-center'"
+                                >
+                                    <div
+                                        [class]="selectedPaymentMethod === 'cash' ? 'w-8 h-8 mx-auto mb-2 flex items-center justify-center' : 'w-8 h-8 mx-auto mb-2 bg-gray-100 rounded flex items-center justify-center'"
                                     >
                                         <mat-icon
-                                            class="icon-size-5 text-red-400"
-                                            svgIcon="mdi:trash-can-outline"
+                                            [class]="selectedPaymentMethod === 'cash' ? 'icon-size-10 text-red-600' : 'icon-size-5 text-gray-600'"
+                                            svgIcon="mdi:cash-multiple"
                                         ></mat-icon>
+                                    </div>
+                                    <span
+                                        [class]="selectedPaymentMethod === 'cash' ? 'text-red-600 font-medium' : 'text-gray-600 font-medium'"
+                                        >Cash</span
+                                    >
+                                </button>
+
+                                <button
+                                    (click)="selectPaymentMethod('scanpay')"
+                                    [class]="selectedPaymentMethod === 'scanpay' ? 
+                    'payment-button flex-1 p-4 border-2 border-blue-200 bg-blue-50 rounded-xl text-center' : 
+                    'payment-button flex-1 p-4 border-2 border-gray-200 rounded-xl text-center'"
+                                >
+                                    <div
+                                        [class]="selectedPaymentMethod === 'scanpay' ? 'w-8 h-8 mx-auto mb-2 bg-blue-100 rounded flex items-center justify-center' : 'w-8 h-8 mx-auto mb-2 bg-gray-100 rounded flex items-center justify-center'"
+                                    >
+                                        <mat-icon
+                                            [class]="selectedPaymentMethod === 'scanpay' ? 'icon-size-10 text-blue-600' : 'icon-size-5 text-gray-600'"
+                                            svgIcon="heroicons_outline:qr-code"
+                                        ></mat-icon>
+                                    </div>
+                                    <span
+                                        [class]="selectedPaymentMethod === 'scanpay' ? 'text-blue-600 font-medium' : 'text-gray-600 font-medium'"
+                                        >ScanPay</span
+                                    >
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Keypad or QR image-->
+                        <div class="px-6 pb-6">
+                            <!-- Keypad (Only show when NOT ScanPay)  -->
+                            <div *ngIf="selectedPaymentMethod !== 'scanpay'">
+                                <!-- Amount Input -->
+                                <div class="px-6 pb-4">
+                                    <div
+                                        class="bg-gray-50 border-2 border-red-200 rounded-3xl p-4 text-center"
+                                    >
+                                        <input
+                                            type="text"
+                                            [(ngModel)]="displayAmount"
+                                            class="bg-transparent text-xl font-semibold text-center w-full outline-none text-red-500"
+                                            placeholder="Input Amount"
+                                            readonly
+                                        />
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-4 gap-3">
+                                    <!-- Row 1 -->
+                                    <button
+                                        (click)="inputNumber('1')"
+                                        class="keypad-button bg-white border rounded-xl h-12 text-lg font-semibold shadow-sm hover:shadow-md"
+                                    >
+                                        1
+                                    </button>
+                                    <button
+                                        (click)="inputNumber('2')"
+                                        class="keypad-button bg-white border rounded-xl h-12 text-lg font-semibold shadow-sm hover:shadow-md"
+                                    >
+                                        2
+                                    </button>
+                                    <button
+                                        (click)="inputNumber('3')"
+                                        class="keypad-button bg-white border rounded-xl h-12 text-lg font-semibold shadow-sm hover:shadow-md"
+                                    >
+                                        3
+                                    </button>
+                                    <button
+                                        (click)="inputNumber('10')"
+                                        class="keypad-button bg-blue-50 border-blue-200 border rounded-xl h-12 text-lg font-semibold text-blue-600 shadow-sm hover:shadow-md"
+                                    >
+                                        10
+                                    </button>
+
+                                    <!-- Row 2 -->
+                                    <button
+                                        (click)="inputNumber('4')"
+                                        class="keypad-button bg-white border rounded-xl h-12 text-lg font-semibold shadow-sm hover:shadow-md"
+                                    >
+                                        4
+                                    </button>
+                                    <button
+                                        (click)="inputNumber('5')"
+                                        class="keypad-button bg-white border rounded-xl h-12 text-lg font-semibold shadow-sm hover:shadow-md"
+                                    >
+                                        5
+                                    </button>
+                                    <button
+                                        (click)="inputNumber('6')"
+                                        class="keypad-button bg-white border rounded-xl h-12 text-lg font-semibold shadow-sm hover:shadow-md"
+                                    >
+                                        6
+                                    </button>
+                                    <button
+                                        (click)="inputNumber('20')"
+                                        class="keypad-button bg-blue-50 border-blue-200 border rounded-xl h-12 text-lg font-semibold text-blue-600 shadow-sm hover:shadow-md"
+                                    >
+                                        20
+                                    </button>
+
+                                    <!-- Row 3 -->
+                                    <button
+                                        (click)="inputNumber('7')"
+                                        class="keypad-button bg-white border rounded-xl h-12 text-lg font-semibold shadow-sm hover:shadow-md"
+                                    >
+                                        7
+                                    </button>
+                                    <button
+                                        (click)="inputNumber('8')"
+                                        class="keypad-button bg-white border rounded-xl h-12 text-lg font-semibold shadow-sm hover:shadow-md"
+                                    >
+                                        8
+                                    </button>
+                                    <button
+                                        (click)="inputNumber('9')"
+                                        class="keypad-button bg-white border rounded-xl h-12 text-lg font-semibold shadow-sm hover:shadow-md"
+                                    >
+                                        9
+                                    </button>
+
+                                    <button
+                                        (click)="clearInput()"
+                                        class="keypad-button bg-red-50 border-red-200 border rounded-xl h-12 text-lg font-semibold text-red-600 shadow-sm hover:shadow-md"
+                                    >
+                                        <mat-icon
+                                            class="icon-size-5 text-red-600"
+                                            svgIcon="mdi:backspace"
+                                        ></mat-icon>
+                                    </button>
+
+                                    <!-- Row 4 -->
+                                    <button
+                                        (click)="clearAll()"
+                                        class="keypad-button bg-red-50 border-red-200 border rounded-xl h-12 text-lg font-semibold text-red-600 shadow-sm hover:shadow-md"
+                                    >
+                                        C
+                                    </button>
+                                    <button
+                                        (click)="inputNumber('0')"
+                                        class="keypad-button bg-white border rounded-xl h-12 text-lg font-semibold shadow-sm hover:shadow-md"
+                                    >
+                                        0
+                                    </button>
+                                    <button
+                                        (click)="inputDecimal()"
+                                        class="keypad-button bg-white border rounded-xl h-12 text-lg font-semibold shadow-sm hover:shadow-md"
+                                    >
+                                        .
+                                    </button>
+                                    <button
+                                        (click)="processPayment()"
+                                        class="keypad-button bg-green-50 border-green-200 border rounded-xl h-12 text-sm font-semibold text-green-600 shadow-sm hover:shadow-md"
+                                    >
+                                        Add
                                     </button>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                    <!-- Total Price Section -->
-                    <div
-                        class="border-t border-b pt-5 pb-5 flex justify-between mt-4 w-full"
-                    >
-                        <div
-                            class="text-center w-full p-3 flex justify-center rounded-lg bg-[#0f172a]"
-                        >
-                            <span class="text-white"
-                                >Total ៖ {{ totalPrice | number }} $</span
+                            <!-- ScanPay Image (Only show when ScanPay is selected) -->
+                            <div
+                                *ngIf="selectedPaymentMethod === 'scanpay'"
+                                class="flex items-center justify-center h-60"
                             >
+                                <img
+                                    src="https://makerworld.bblmw.com/makerworld/model/US2ab61bb7d3000c/design/2024-01-30_029b2304056c.png?x-oss-process=image/resize,w_1000/format,webp"
+                                    alt="ScanPay QR"
+                                    class="max-h-full max-w-full"
+                                />
+                            </div>
                         </div>
                     </div>
-                    <!-- Checkout Button Section -->
+
+                    <!-- View Receipt Button Section -->
                     <div
-                        class="custom-botton-flat p-2 flex justify-end dark:bg-gray-800 mb-10"
+                        class="p-4 border-t border-gray-200 dark:border-gray-700"
                     >
-                        <ng-container
-                            *ngIf="isOrderBeingMade; else payNowTemplate"
+                        <button
+                            class="w-full text-white font-semibold p-3 bg-[#F15757] flex justify-center rounded-lg"
+                            (click)="viewReceipt()"
                         >
-                            <!-- Loading Spinner -->
-                            <div class="flex justify-center mt-4">
-                                <mat-progress-spinner
-                                    [diameter]="24"
-                                    [mode]="'indeterminate'"
-                                    class="flex justify-center"
-                                ></mat-progress-spinner>
-                            </div>
-                        </ng-container>
-                        <ng-template #payNowTemplate>
-                            <div class="flex justify-end mt-4">
-                                <button
-                                    class="text-white font-semibold p-2 bg-[#F15757] flex justify-center min-w-[130px] rounded-full"
-                                    [disabled]="!canSubmit"
-                                    (click)="checkOut()"
-                                >
-                                    Checkout
-                                </button>
-                            </div>
-                        </ng-template>
+                            View Receipt
+                        </button>
                     </div>
-                </div>
-                <!-- Empty Cart Section -->
-                <div
-                    *ngIf="carts.length === 0"
-                    class="flex flex-col justify-center items-center mt-10"
-                >
-                    <mat-icon class="icon-size-24" svgIcon="toc"></mat-icon>
-                    <span class="text-2xl">No Data</span>
                 </div>
             </div>
         </div>
