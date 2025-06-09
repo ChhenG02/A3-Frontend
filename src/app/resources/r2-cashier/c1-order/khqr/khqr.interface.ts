@@ -12,6 +12,15 @@ export interface KHQRRequest {
     static: boolean;
 }
 
+export interface CheckPaymentRequest {
+    md5: string;
+}
+
+export interface CheckPaymentResponse {
+    status: 'PAID' | 'UNPAID';
+}
+
 export interface KHQRResponse {
-    qr: string;
+     qr: string;
+    md5: string;
 }
