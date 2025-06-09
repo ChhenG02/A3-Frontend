@@ -345,33 +345,24 @@
                             </div>
                         </div>
                         <!-- Checkout Button Section -->
-                        <div
-                            class="custom-botton-flat p-2 flex justify-end dark:bg-gray-800 mb-10"
-                        >
-                            <ng-container
-                                *ngIf="isOrderBeingMade; else payNowTemplate"
-                            >
-                                <!-- Loading Spinner -->
-                                <div class="flex justify-center mt-4">
-                                    <mat-progress-spinner
-                                        [diameter]="24"
-                                        [mode]="'indeterminate'"
-                                        class="flex justify-center"
-                                    ></mat-progress-spinner>
-                                </div>
-                            </ng-container>
-                            <ng-template #payNowTemplate>
-                                <div class="flex justify-end mt-4">
-                                    <button
-                                        class="text-white font-semibold p-2 bg-[#F15757] flex justify-center min-w-[130px] rounded-full"
-                                        [disabled]="!canSubmit"
-                                        (click)="checkOut()"
-                                    >
-                                        Checkout
-                                    </button>
-                                </div>
-                            </ng-template>
-                        </div>
+                        <div class="custom-botton-flat p-2 flex justify-end dark:bg-gray-800 mb-10">
+    <ng-container *ngIf="isOrderBeingMade; else payNowTemplate">
+        <div class="flex justify-center mt-4">
+            <mat-progress-spinner [diameter]="24" [mode]="'indeterminate'"></mat-progress-spinner>
+        </div>
+    </ng-container>
+    <ng-template #payNowTemplate>
+        <div class="flex justify-end mt-4">
+            <button
+                class="text-white font-semibold p-2 bg-[#F15757] flex justify-center min-w-[130px] rounded-full"
+                [disabled]="!canSubmit"
+                (click)="checkOut()"
+            >
+                Checkout
+            </button>
+        </div>
+    </ng-template>
+</div>
                     </div>
 
                     <!-- Empty Cart Section -->
@@ -403,265 +394,112 @@
                         </button>
                     </div>
 
+                    
                     <!-- Payment Interface Component -->
-                    <div class="flex-1 flex flex-col bg-white">
-                        <style>
-                            .payment-button {
-                                transition: all 0.2s ease;
-                            }
-                            .payment-button:hover {
-                                transform: translateY(-1px);
-                            }
-                            .keypad-button {
-                                transition: all 0.1s ease;
-                            }
-                            .keypad-button:active {
-                                transform: scale(0.95);
-                            }
-                        </style>
+<div class="flex-1 flex flex-col bg-white">
+    <!-- Order Summary (unchanged) -->
+    <div class="p-6 space-y-3">
+        <div class="flex justify-between text-gray-600">
+            <span>Subtotal</span>
+            <span>{{ totalPrice | number }}$</span>
+        </div>
+        <div class="flex justify-between text-gray-600" *ngIf="orderSummary?.discount > 0">
+            <span>Discount</span>
+            <span>{{orderSummary?.discount | currency:'USD':'symbol':'1.2-2'}}</span>
+        </div>
+        <div class="flex justify-between text-gray-600" *ngIf="orderSummary?.tax > 0">
+            <span>Tax</span>
+            <span>{{orderSummary?.tax | currency:'USD':'symbol':'1.2-2'}}</span>
+        </div>
+        <div class="flex justify-between text-lg font-bold border-t pt-3">
+            <span>Total</span>
+            <span class="text-red-500">{{orderSummary?.total | currency:'USD':'symbol':'1.2-2'}}</span>
+        </div>
+    </div>
 
-                        <!-- Order Summary -->
-                        <div class="p-6 space-y-3">
-                            <div class="flex justify-between text-gray-600">
-                                <span>Subtotal</span>
-                                <span>{{ totalPrice | number }}$</span>
-                            </div>
-                            <div
-                                class="flex justify-between text-gray-600"
-                                *ngIf="orderSummary?.discount > 0"
-                            >
-                                <span>Discount</span>
-                                <span
-                                    >{{orderSummary?.discount |
-                                    currency:'USD':'symbol':'1.2-2'}}</span
-                                >
-                            </div>
-                            <div
-                                class="flex justify-between text-gray-600"
-                                *ngIf="orderSummary?.tax > 0"
-                            >
-                                <span>Tax</span>
-                                <span
-                                    >{{orderSummary?.tax |
-                                    currency:'USD':'symbol':'1.2-2'}}</span
-                                >
-                            </div>
-                            <div
-                                class="flex justify-between text-lg font-bold border-t pt-3"
-                            >
-                                <span>Total</span>
-                                <span class="text-red-500"
-                                    >{{orderSummary?.total |
-                                    currency:'USD':'symbol':'1.2-2'}}</span
-                                >
-                            </div>
-                        </div>
+    <!-- Payment Method (unchanged) -->
+    <div class="px-6 pb-4">
+        <h2 class="text-lg font-semibold mb-4">Payment Method</h2>
+        <div class="flex gap-4">
+            <button
+                (click)="selectPaymentMethod('cash')"
+                [class]="selectedPaymentMethod === 'cash' ? 
+                'payment-button flex-1 p-4 border-2 border-red-200 bg-red-50 rounded-xl text-center' : 
+                'payment-button flex-1 p-4 border-2 border-gray-200 rounded-xl text-center'"
+            >
+                <div [class]="selectedPaymentMethod === 'cash' ? 'w-8 h-8 mx-auto mb-2 flex items-center justify-center' : 'w-8 h-8 mx-auto mb-2 bg-gray-100 rounded flex items-center justify-center'">
+                    <mat-icon [class]="selectedPaymentMethod === 'cash' ? 'icon-size-10 text-red-600' : 'icon-size-5 text-gray-600'" svgIcon="mdi:cash-multiple"></mat-icon>
+                </div>
+                <span [class]="selectedPaymentMethod === 'cash' ? 'text-red-600 font-medium' : 'text-gray-600 font-medium'">Cash</span>
+            </button>
+            <button
+                (click)="selectPaymentMethod('scanpay')"
+                [class]="selectedPaymentMethod === 'scanpay' ? 
+                'payment-button flex-1 p-4 border-2 border-blue-200 bg-blue-50 rounded-xl text-center' : 
+                'payment-button flex-1 p-4 border-2 border-gray-200 rounded-xl text-center'"
+            >
+                <div [class]="selectedPaymentMethod === 'scanpay' ? 'w-8 h-8 mx-auto mb-2 bg-blue-100 rounded flex items-center justify-center' : 'w-8 h-8 mx-auto mb-2 bg-gray-100 rounded flex items-center justify-center'">
+                    <mat-icon [class]="selectedPaymentMethod === 'scanpay' ? 'icon-size-10 text-blue-600' : 'icon-size-5 text-gray-600'" svgIcon="heroicons_outline:qr-code"></mat-icon>
+                </div>
+                <span [class]="selectedPaymentMethod === 'scanpay' ? 'text-blue-600 font-medium' : 'text-gray-600 font-medium'">ScanPay</span>
+            </button>
+        </div>
+    </div>
 
-                        <!-- Payment Method -->
-                        <div class="px-6 pb-4">
-                            <h2 class="text-lg font-semibold mb-4">
-                                Payment Method
-                            </h2>
-                            <div class="flex gap-4">
-                                <button
-                                    (click)="selectPaymentMethod('cash')"
-                                    [class]="selectedPaymentMethod === 'cash' ? 
-                    'payment-button flex-1 p-4 border-2 border-red-200 bg-red-50 rounded-xl text-center' : 
-                    'payment-button flex-1 p-4 border-2 border-gray-200 rounded-xl text-center'"
-                                >
-                                    <div
-                                        [class]="selectedPaymentMethod === 'cash' ? 'w-8 h-8 mx-auto mb-2 flex items-center justify-center' : 'w-8 h-8 mx-auto mb-2 bg-gray-100 rounded flex items-center justify-center'"
-                                    >
-                                        <mat-icon
-                                            [class]="selectedPaymentMethod === 'cash' ? 'icon-size-10 text-red-600' : 'icon-size-5 text-gray-600'"
-                                            svgIcon="mdi:cash-multiple"
-                                        ></mat-icon>
-                                    </div>
-                                    <span
-                                        [class]="selectedPaymentMethod === 'cash' ? 'text-red-600 font-medium' : 'text-gray-600 font-medium'"
-                                        >Cash</span
-                                    >
-                                </button>
-
-                                <button
-                                    (click)="selectPaymentMethod('scanpay')"
-                                    [class]="selectedPaymentMethod === 'scanpay' ? 
-                    'payment-button flex-1 p-4 border-2 border-blue-200 bg-blue-50 rounded-xl text-center' : 
-                    'payment-button flex-1 p-4 border-2 border-gray-200 rounded-xl text-center'"
-                                >
-                                    <div
-                                        [class]="selectedPaymentMethod === 'scanpay' ? 'w-8 h-8 mx-auto mb-2 bg-blue-100 rounded flex items-center justify-center' : 'w-8 h-8 mx-auto mb-2 bg-gray-100 rounded flex items-center justify-center'"
-                                    >
-                                        <mat-icon
-                                            [class]="selectedPaymentMethod === 'scanpay' ? 'icon-size-10 text-blue-600' : 'icon-size-5 text-gray-600'"
-                                            svgIcon="heroicons_outline:qr-code"
-                                        ></mat-icon>
-                                    </div>
-                                    <span
-                                        [class]="selectedPaymentMethod === 'scanpay' ? 'text-blue-600 font-medium' : 'text-gray-600 font-medium'"
-                                        >ScanPay</span
-                                    >
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Keypad or QR image-->
-                        <div class="px-6 pb-6">
-                            <!-- Keypad (Only show when NOT ScanPay)  -->
-                            <div *ngIf="selectedPaymentMethod !== 'scanpay'">
-                                <!-- Amount Input -->
-                                <div class="px-6 pb-4">
-                                    <div
-                                        class="bg-gray-50 border-2 border-red-200 rounded-3xl p-4 text-center"
-                                    >
-                                        <input
-                                            type="text"
-                                            [(ngModel)]="displayAmount"
-                                            class="bg-transparent text-xl font-semibold text-center w-full outline-none text-red-500"
-                                            placeholder="Input Amount"
-                                            readonly
-                                        />
-                                    </div>
-                                </div>
-                                <div class="grid grid-cols-4 gap-3">
-                                    <!-- Row 1 -->
-                                    <button
-                                        (click)="inputNumber('1')"
-                                        class="keypad-button bg-white border rounded-xl h-12 text-lg font-semibold shadow-sm hover:shadow-md"
-                                    >
-                                        1
-                                    </button>
-                                    <button
-                                        (click)="inputNumber('2')"
-                                        class="keypad-button bg-white border rounded-xl h-12 text-lg font-semibold shadow-sm hover:shadow-md"
-                                    >
-                                        2
-                                    </button>
-                                    <button
-                                        (click)="inputNumber('3')"
-                                        class="keypad-button bg-white border rounded-xl h-12 text-lg font-semibold shadow-sm hover:shadow-md"
-                                    >
-                                        3
-                                    </button>
-                                    <button
-                                        (click)="inputNumber('10')"
-                                        class="keypad-button bg-blue-50 border-blue-200 border rounded-xl h-12 text-lg font-semibold text-blue-600 shadow-sm hover:shadow-md"
-                                    >
-                                        10
-                                    </button>
-
-                                    <!-- Row 2 -->
-                                    <button
-                                        (click)="inputNumber('4')"
-                                        class="keypad-button bg-white border rounded-xl h-12 text-lg font-semibold shadow-sm hover:shadow-md"
-                                    >
-                                        4
-                                    </button>
-                                    <button
-                                        (click)="inputNumber('5')"
-                                        class="keypad-button bg-white border rounded-xl h-12 text-lg font-semibold shadow-sm hover:shadow-md"
-                                    >
-                                        5
-                                    </button>
-                                    <button
-                                        (click)="inputNumber('6')"
-                                        class="keypad-button bg-white border rounded-xl h-12 text-lg font-semibold shadow-sm hover:shadow-md"
-                                    >
-                                        6
-                                    </button>
-                                    <button
-                                        (click)="inputNumber('20')"
-                                        class="keypad-button bg-blue-50 border-blue-200 border rounded-xl h-12 text-lg font-semibold text-blue-600 shadow-sm hover:shadow-md"
-                                    >
-                                        20
-                                    </button>
-
-                                    <!-- Row 3 -->
-                                    <button
-                                        (click)="inputNumber('7')"
-                                        class="keypad-button bg-white border rounded-xl h-12 text-lg font-semibold shadow-sm hover:shadow-md"
-                                    >
-                                        7
-                                    </button>
-                                    <button
-                                        (click)="inputNumber('8')"
-                                        class="keypad-button bg-white border rounded-xl h-12 text-lg font-semibold shadow-sm hover:shadow-md"
-                                    >
-                                        8
-                                    </button>
-                                    <button
-                                        (click)="inputNumber('9')"
-                                        class="keypad-button bg-white border rounded-xl h-12 text-lg font-semibold shadow-sm hover:shadow-md"
-                                    >
-                                        9
-                                    </button>
-
-                                    <button
-                                        (click)="clearInput()"
-                                        class="keypad-button bg-red-50 border-red-200 border rounded-xl h-12 text-lg font-semibold text-red-600 shadow-sm hover:shadow-md"
-                                    >
-                                        <mat-icon
-                                            class="icon-size-5 text-red-600"
-                                            svgIcon="mdi:backspace"
-                                        ></mat-icon>
-                                    </button>
-
-                                    <!-- Row 4 -->
-                                    <button
-                                        (click)="clearAll()"
-                                        class="keypad-button bg-red-50 border-red-200 border rounded-xl h-12 text-lg font-semibold text-red-600 shadow-sm hover:shadow-md"
-                                    >
-                                        C
-                                    </button>
-                                    <button
-                                        (click)="inputNumber('0')"
-                                        class="keypad-button bg-white border rounded-xl h-12 text-lg font-semibold shadow-sm hover:shadow-md"
-                                    >
-                                        0
-                                    </button>
-                                    <button
-                                        (click)="inputDecimal()"
-                                        class="keypad-button bg-white border rounded-xl h-12 text-lg font-semibold shadow-sm hover:shadow-md"
-                                    >
-                                        .
-                                    </button>
-                                    <button
-                                        (click)="processPayment()"
-                                        class="keypad-button bg-green-50 border-green-200 border rounded-xl h-12 text-sm font-semibold text-green-600 shadow-sm hover:shadow-md"
-                                    >
-                                        Add
-                                    </button>
-                                </div>
-                            </div>
-                            <!-- ScanPay Image (Only show when ScanPay is selected) -->
-                            <div
-                                *ngIf="selectedPaymentMethod === 'scanpay'"
-                                class="flex items-center justify-center h-60"
-                            >
-                                <qrcode
-                                    *ngIf="qrData"
-                                    [qrdata]="qrData"
-                                    [width]="200"
-                                    [errorCorrectionLevel]="'M'"
-                                    class="max-h-full max-w-full"
-                                ></qrcode>
-                                <div *ngIf="!qrData && isGeneratingQR">
-                                    Generating QR...
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- View Receipt Button Section -->
-
-<div class="p-4 border-t border-gray-200 dark:border-gray-700">
-    <button
-        class="w-full text-white font-semibold p-3 bg-[#F15757] flex justify-center rounded-lg"
-        (click)="confirmPayment()"
-    >
-        Confirm Payment
-    </button>
+    <!-- Keypad or QR image -->
+<div class="px-6 pb-6">
+    <!-- Keypad (Only show when NOT ScanPay) -->
+    <div *ngIf="selectedPaymentMethod !== 'scanpay'">
+        <!-- Amount Input -->
+        <div class="px-6 pb-4">
+            <div class="bg-gray-50 border-2 border-red-200 rounded-3xl p-4 text-center">
+                <input
+                    type="text"
+                    [(ngModel)]="displayAmount"
+                    class="bg-transparent text-xl font-medium text-center w-full outline-none text-red-500"
+                    placeholder="Input Amount"
+                    readonly
+                />
+            </div>
+        </div>
+        <div class="grid grid-cols-4 gap-3">
+            <button (click)="inputNumber('1')" class="keypad-button bg-white border rounded-xl h-12 text-lg font-semibold shadow-sm hover:shadow-md">1</button>
+            <button (click)="inputNumber('2')" class="keypad-button bg-white border rounded-xl h-12 text-lg font-semibold shadow-sm hover:shadow-md">2</button>
+            <button (click)="inputNumber('3')" class="keypad-button bg-white border rounded-xl h-12 text-lg font-semibold shadow-sm hover:shadow-md">3</button>
+            <button (click)="inputNumber('10')" class="keypad-button bg-blue-50 border-blue-200 border rounded-xl h-12 text-lg font-semibold text-blue-600 shadow-sm hover:shadow-md">10</button>
+            <button (click)="inputNumber('4')" class="keypad-button bg-white border rounded-xl h-12 text-lg font-semibold shadow-sm hover:shadow-md">4</button>
+            <button (click)="inputNumber('5')" class="keypad-button bg-white border rounded-xl h-12 text-lg font-semibold shadow-sm hover:shadow-md">5</button>
+            <button (click)="inputNumber('6')" class="keypad-button bg-white border rounded-xl h-12 text-lg font-semibold shadow-sm hover:shadow-md">6</button>
+            <button (click)="inputNumber('20')" class="keypad-button bg-blue-50 border-blue-200 border rounded-xl h-12 text-lg font-semibold text-blue-600 shadow-sm hover:shadow-md">20</button>
+            <button (click)="inputNumber('7')" class="keypad-button bg-white border rounded-xl h-12 text-lg font-semibold shadow-sm hover:shadow-md">7</button>
+            <button (click)="inputNumber('8')" class="keypad-button bg-white border rounded-xl h-12 text-lg font-semibold shadow-sm hover:shadow-md">8</button>
+            <button (click)="inputNumber('9')" class="keypad-button bg-white border rounded-xl h-12 text-lg font-semibold shadow-sm hover:shadow-md">9</button>
+            <button (click)="clearInput()" class="keypad-button bg-red-50 border-red-200 border rounded-xl h-12 text-lg font-semibold text-red-600 shadow-sm hover:shadow-md">
+                <mat-icon class="icon-size-5 text-red-600" svgIcon="mdi:backspace"></mat-icon>
+            </button>
+            <button (click)="clearAll()" class="keypad-button bg-red-50 border-red-200 border rounded-xl h-12 text-lg font-semibold text-red-600 shadow-sm hover:shadow-md">C</button>
+            <button (click)="inputNumber('0')" class="keypad-button bg-white border rounded-xl h-12 text-lg font-semibold shadow-sm hover:shadow-md">0</button>
+            <button (click)="inputDecimal()" class="keypad-button bg-white border rounded-xl h-12 text-lg font-semibold shadow-sm hover:shadow-md">.</button>
+            <!-- Make Add button also confirm payment -->
+            <button
+                (click)="confirmPayment()"
+                class="keypad-button bg-green-50 border-green-200 border rounded-xl h-12 text-sm font-semibold text-green-600 shadow-sm hover:shadow-md"
+                [disabled]="isOrderBeingMade || !canConfirmPayment()"
+            >
+                Add
+            </button>
+        </div>
+    </div>
+    <!-- ScanPay Image -->
+    <div *ngIf="selectedPaymentMethod === 'scanpay'" class="flex items-center justify-center h-60">
+        <qrcode *ngIf="qrData" [qrdata]="qrData" [width]="200" [errorCorrectionLevel]="'M'" class="max-h-full max-w-full"></qrcode>
+        <div *ngIf="!qrData && isGeneratingQR">Generating QR...</div>
+    </div>
 </div>
+    
+</div>
+
+ 
                 </div>
             </div>
         </div>
