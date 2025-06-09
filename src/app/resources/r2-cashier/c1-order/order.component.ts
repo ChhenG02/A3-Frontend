@@ -93,6 +93,8 @@ export class OrderComponent implements OnInit, OnDestroy {
     currentAmount: string = '';
     displayAmount: string = '';
     discount: number = 0;
+    isWaitingForScanPay = false;
+    scanPayPollingInterval: any = null;
     tax: number = 0;
     qrData: string = '';
     isGeneratingQR = false;
@@ -136,7 +138,10 @@ export class OrderComponent implements OnInit, OnDestroy {
         this._service.getData().subscribe({
             next: (response) => {
                 this.data = response.data;
-                this.allProducts = this.data.reduce((all, item) => all.concat(item.products), []);
+                this.allProducts = this.data.reduce(
+                    (all, item) => all.concat(item.products),
+                    []
+                );
                 this.data.unshift({
                     id: 0,
                     name: 'All Categories',
@@ -158,6 +163,9 @@ export class OrderComponent implements OnInit, OnDestroy {
     }
 
     ngOnDestroy(): void {
+        if (this.scanPayPollingInterval) {
+            clearInterval(this.scanPayPollingInterval);
+        }
         this._unsubscribeAll.next(null);
         this._unsubscribeAll.complete();
     }
@@ -170,33 +178,35 @@ export class OrderComponent implements OnInit, OnDestroy {
 
     // ================================================================>> Section: Cart Management
     addToCart(incomingItem: Product, qty = 0): void {
-    if (this.isCheckoutSuccess) {
-        this._snackBarService.openSnackBar(
-            'Cannot add items to cart during payment.',
-            GlobalConstants.error
+        if (this.isCheckoutSuccess) {
+            this._snackBarService.openSnackBar(
+                'Cannot add items to cart during payment.',
+                GlobalConstants.error
+            );
+            return;
+        }
+        const existingItem = this.carts.find(
+            (item) => item.id === incomingItem.id
         );
-        return;
+        if (existingItem) {
+            existingItem.qty += qty;
+            existingItem.temp_qty = existingItem.qty;
+        } else {
+            const newItem: CartItem = {
+                id: incomingItem.id,
+                name: incomingItem.name,
+                qty: qty,
+                temp_qty: qty,
+                unit_price: incomingItem.unit_price,
+                image: incomingItem.image,
+                code: incomingItem.code,
+                type: incomingItem.product_type,
+            };
+            this.carts.push(newItem);
+            this.canSubmit = true;
+        }
+        this.getTotalPrice();
     }
-    const existingItem = this.carts.find(item => item.id === incomingItem.id);
-    if (existingItem) {
-        existingItem.qty += qty;
-        existingItem.temp_qty = existingItem.qty;
-    } else {
-        const newItem: CartItem = {
-            id: incomingItem.id,
-            name: incomingItem.name,
-            qty: qty,
-            temp_qty: qty,
-            unit_price: incomingItem.unit_price,
-            image: incomingItem.image,
-            code: incomingItem.code,
-            type: incomingItem.product_type,
-        };
-        this.carts.push(newItem);
-        this.canSubmit = true;
-    }
-    this.getTotalPrice();
-}
 
     incrementQty(index: number): void {
         const item = this.carts[index];
@@ -217,17 +227,24 @@ export class OrderComponent implements OnInit, OnDestroy {
     }
 
     remove(value: any, index: number = -1): void {
-    this.carts.splice(index, 1);
-    this.getTotalPrice();
-    if (this.carts.length === 0) {
-        this.canSubmit = false; // Disable checkout if cart is empty
+        this.carts.splice(index, 1);
+        this.getTotalPrice();
+        if (this.carts.length === 0) {
+            this.canSubmit = false; // Disable checkout if cart is empty
+        }
     }
-}
 
     clearCartAll(): void {
         this.carts = [];
         this.totalPrice = 0;
         this.canSubmit = false;
+        this.qrData = '';
+        this.khqrService.lastMd5 = '';
+        if (this.scanPayPollingInterval) {
+            clearInterval(this.scanPayPollingInterval);
+            this.scanPayPollingInterval = null;
+        }
+        this.isWaitingForScanPay = false;
         this._snackBarService.openSnackBar(
             'Cancel order successfully',
             GlobalConstants.success
@@ -235,22 +252,22 @@ export class OrderComponent implements OnInit, OnDestroy {
     }
 
     blur(event: any, index: number = -1): void {
-    const enteredValue = parseInt(event.target.value, 10);
-    if (isNaN(enteredValue) || enteredValue <= 0) {
-        this.carts.splice(index, 1); // Remove item if qty is 0 or invalid
-        this.canSubmit = this.carts.length > 0;
-    } else if (enteredValue > 1000) {
-        event.target.value = '1000';
-        this.carts[index].qty = 1000;
-        this.carts[index].temp_qty = 1000;
-        this.canSubmit = true;
-    } else {
-        this.carts[index].qty = enteredValue;
-        this.carts[index].temp_qty = enteredValue;
-        this.canSubmit = true;
+        const enteredValue = parseInt(event.target.value, 10);
+        if (isNaN(enteredValue) || enteredValue <= 0) {
+            this.carts.splice(index, 1); // Remove item if qty is 0 or invalid
+            this.canSubmit = this.carts.length > 0;
+        } else if (enteredValue > 1000) {
+            event.target.value = '1000';
+            this.carts[index].qty = 1000;
+            this.carts[index].temp_qty = 1000;
+            this.canSubmit = true;
+        } else {
+            this.carts[index].qty = enteredValue;
+            this.carts[index].temp_qty = enteredValue;
+            this.canSubmit = true;
+        }
+        this.getTotalPrice();
     }
-    this.getTotalPrice();
-}
 
     // ================================================================>> Section: Price Calculation
     getTotalPrice(): void {
@@ -270,8 +287,29 @@ export class OrderComponent implements OnInit, OnDestroy {
 
     // ================================================================>> Section: Payment & Checkout
     selectPaymentMethod(method: string): void {
+        // If switching away from scanpay, clear QR and polling state
+        if (this.selectedPaymentMethod === 'scanpay' && method !== 'scanpay') {
+            this.qrData = '';
+            this.khqrService.lastMd5 = '';
+            if (this.scanPayPollingInterval) {
+                clearInterval(this.scanPayPollingInterval);
+                this.scanPayPollingInterval = null;
+            }
+            this.isWaitingForScanPay = false;
+            this.isGeneratingQR = false;
+        }
         this.selectedPaymentMethod = method;
-        if (method === 'scanpay') this.onScanPay();
+        if (method === 'scanpay') {
+            this.qrData = '';
+            this.khqrService.lastMd5 = '';
+            if (this.scanPayPollingInterval) {
+                clearInterval(this.scanPayPollingInterval);
+                this.scanPayPollingInterval = null;
+            }
+            this.isWaitingForScanPay = false;
+            this.isGeneratingQR = false;
+            this.onScanPay();
+        }
     }
 
     inputNumber(num: string): void {
@@ -303,32 +341,33 @@ export class OrderComponent implements OnInit, OnDestroy {
     }
 
     updateDisplay(): void {
-        this.displayAmount = this.currentAmount === '' ? '' : '$' + this.currentAmount;
+        this.displayAmount =
+            this.currentAmount === '' ? '' : '$' + this.currentAmount;
     }
 
     processPayment(): void {
-    if (this.currentAmount === '') {
-        this._snackBarService.openSnackBar(
-            'Please enter payment amount.',
-            GlobalConstants.error
-        );
-        return;
-    }
-    const amount = parseFloat(this.currentAmount);
-    const total = this.orderSummary.total;
-    if (this.selectedPaymentMethod === 'cash') {
-        if (isNaN(amount) || amount < total) {
+        if (this.currentAmount === '') {
             this._snackBarService.openSnackBar(
-                `Amount must be at least $${total.toFixed(2)}.`,
+                'Please enter payment amount.',
                 GlobalConstants.error
             );
             return;
         }
-        this.confirmPayment(); // Proceed to confirm payment
-    } else {
-        this.processScanPayment();
+        const amount = parseFloat(this.currentAmount);
+        const total = this.orderSummary.total;
+        if (this.selectedPaymentMethod === 'cash') {
+            if (isNaN(amount) || amount < total) {
+                this._snackBarService.openSnackBar(
+                    `Amount must be at least $${total.toFixed(2)}.`,
+                    GlobalConstants.error
+                );
+                return;
+            }
+            this.confirmPayment(); // Proceed to confirm payment
+        } else {
+            this.processScanPayment();
+        }
     }
-}
 
     completePayment(amount: number, change: number): void {
         console.log(`Payment complete. Change: $${change.toFixed(2)}`);
@@ -340,124 +379,173 @@ export class OrderComponent implements OnInit, OnDestroy {
     }
 
     confirmPayment(): void {
-    if (!this.carts.length) {
-        this._snackBarService.openSnackBar(
-            'No items in cart.',
-            GlobalConstants.error
-        );
-        return;
-    }
-    if (this.selectedPaymentMethod === 'cash') {
-        const amount = parseFloat(this.currentAmount);
-        if (isNaN(amount) || amount < this.orderSummary.total) {
+        if (!this.carts.length) {
             this._snackBarService.openSnackBar(
-                'Invalid or insufficient cash amount.',
+                'No items in cart.',
                 GlobalConstants.error
             );
             return;
         }
+        if (this.selectedPaymentMethod === 'cash') {
+            const amount = parseFloat(this.currentAmount);
+            if (isNaN(amount) || amount < this.orderSummary.total) {
+                this._snackBarService.openSnackBar(
+                    'Invalid or insufficient cash amount.',
+                    GlobalConstants.error
+                );
+                return;
+            }
+        }
+        const carts: { [itemId: number]: number } = {};
+        this.carts.forEach((item: CartItem) => {
+            carts[item.id] = item.qty;
+        });
+        const body = { cart: JSON.stringify(carts) };
+        this.isOrderBeingMade = true;
+        this._service.create(body).subscribe({
+            next: (response) => {
+                this.isOrderBeingMade = false;
+                this.lastOrderData = response.data;
+                this.orderedItems = [...this.carts];
+                this.carts = [];
+                this.isCheckoutSuccess = false;
+                this.canSubmit = false;
+                this.currentAmount = '';
+                this.displayAmount = '';
+                // Clear QR and polling state
+                this.qrData = '';
+                this.khqrService.lastMd5 = '';
+                if (this.scanPayPollingInterval) {
+                    clearInterval(this.scanPayPollingInterval);
+                    this.scanPayPollingInterval = null;
+                }
+                this.isWaitingForScanPay = false;
+                this._snackBarService.openSnackBar(
+                    response.message || 'Payment successful!',
+                    GlobalConstants.success
+                );
+                this.viewReceipt();
+                this._changeDetectorRef.detectChanges();
+            },
+            error: (err: HttpErrorResponse) => {
+                this.isOrderBeingMade = false;
+                this._snackBarService.openSnackBar(
+                    err?.error?.message || GlobalConstants.genericError,
+                    GlobalConstants.error
+                );
+            },
+        });
     }
-    const carts: { [itemId: number]: number } = {};
-    this.carts.forEach((item: CartItem) => {
-        carts[item.id] = item.qty;
-    });
-    const body = { cart: JSON.stringify(carts) };
-    this.isOrderBeingMade = true;
-    this._service.create(body).subscribe({
-        next: (response) => {
-            this.isOrderBeingMade = false;
-            this.lastOrderData = response.data;
-            this.orderedItems = [...this.carts];
-            this.carts = []; // Clear cart
-            this.isCheckoutSuccess = false; // Reset to cart view
-            this.canSubmit = false;
-            this.currentAmount = ''; // Reset amount
-            this.displayAmount = '';
-            this._snackBarService.openSnackBar(
-                response.message || 'Payment successful!',
-                GlobalConstants.success
-            );
-            this.viewReceipt(); // Show receipt
-            this._changeDetectorRef.detectChanges();
-        },
-        error: (err: HttpErrorResponse) => {
-            this.isOrderBeingMade = false;
-            this._snackBarService.openSnackBar(
-                err?.error?.message || GlobalConstants.genericError,
-                GlobalConstants.error
-            );
-        },
-    });
-}
 
     // ================================================================>> Section: Order Submission
     private matDialog = inject(MatDialog);
 
-
     canConfirmPayment(): boolean {
-    if (this.isOrderBeingMade) return false;
-    if (this.selectedPaymentMethod === 'cash') {
-        const amount = Number(this.currentAmount);
-        return !!this.currentAmount && !isNaN(amount) && amount >= this.orderSummary.total;
+        if (this.isOrderBeingMade) return false;
+        if (this.selectedPaymentMethod === 'cash') {
+            const amount = Number(this.currentAmount);
+            return (
+                !!this.currentAmount &&
+                !isNaN(amount) &&
+                amount >= this.orderSummary.total
+            );
+        }
+        return true;
     }
-    return true;
-}
-
 
     checkOut(): void {
-    if (!this.carts.length) {
-        this._snackBarService.openSnackBar(
-            'Cart is empty.',
-            GlobalConstants.error
-        );
-        return;
+        if (!this.carts.length) {
+            this._snackBarService.openSnackBar(
+                'Cart is empty.',
+                GlobalConstants.error
+            );
+            return;
+        }
+        this.selectedPaymentMethod = 'cash';
+        this.isCheckoutSuccess = true;
+        this._changeDetectorRef.detectChanges();
     }
-    this.isCheckoutSuccess = true;
-    this._changeDetectorRef.detectChanges();
-}
 
-addPayment(): void {
-    const amount = parseFloat(this.currentAmount);
-    const total = this.orderSummary.total;
+    addPayment(): void {
+        const amount = parseFloat(this.currentAmount);
+        const total = this.orderSummary.total;
 
-    // Step 1: Handle empty/invalid/zero input with payment method check
-    if (!this.currentAmount || isNaN(amount) || amount <= 0) {
+        // Step 1: Handle empty/invalid/zero input with payment method check
+        if (!this.currentAmount || isNaN(amount) || amount <= 0) {
+            if (this.selectedPaymentMethod === 'cash') {
+                this._snackBarService.openSnackBar(
+                    `Amount must be exactly $${total.toFixed(2)}.`,
+                    GlobalConstants.error
+                );
+            } else {
+                this._snackBarService.openSnackBar(
+                    'Please input amount',
+                    GlobalConstants.error
+                );
+            }
+            return;
+        }
+
+        // Step 2: For cash, amount must be exactly equal to total
         if (this.selectedPaymentMethod === 'cash') {
-            this._snackBarService.openSnackBar(
-                `Amount must be exactly $${total.toFixed(2)}.`,
-                GlobalConstants.error
-            );
-        } else {
-            this._snackBarService.openSnackBar(
-                'Please input amount',
-                GlobalConstants.error
-            );
+            if (amount < total) {
+                this._snackBarService.openSnackBar(
+                    `Amount is less than required ($${total.toFixed(2)}).`,
+                    GlobalConstants.error
+                );
+                return;
+            } else if (amount > total) {
+                this._snackBarService.openSnackBar(
+                    `Amount must be exactly $${total.toFixed(2)}.`,
+                    GlobalConstants.error
+                );
+                return;
+            }
         }
-        return;
+
+        // Step 3: All checks passed
+        this.confirmPayment();
     }
 
-    // Step 2: For cash, amount must be exactly equal to total
-    if (this.selectedPaymentMethod === 'cash') {
-        if (amount < total) {
+    checkScanPayStatus(): void {
+        if (!this.qrData || !this.khqrService) return;
+
+        // You need the md5 from the KHQRResponse (store it when generating QR)
+        const md5 = this.khqrService.lastMd5 || ''; // Or however you store it
+        if (!md5) {
             this._snackBarService.openSnackBar(
-                `Amount is less than required ($${total.toFixed(2)}).`,
+                'No payment session found.',
                 GlobalConstants.error
             );
             return;
-        } else if (amount > total) {
-            this._snackBarService.openSnackBar(
-                `Amount must be exactly $${total.toFixed(2)}.`,
-                GlobalConstants.error
-            );
-            return;
         }
+
+        this.isOrderBeingMade = true;
+        this.khqrService.checkPaymentStatus({ md5 }).subscribe({
+            next: (res) => {
+                this.isOrderBeingMade = false;
+                if (res.status === 'PAID') {
+                    this._snackBarService.openSnackBar(
+                        'Payment received. Completing order...',
+                        GlobalConstants.success
+                    );
+                    this.confirmPayment();
+                } else {
+                    this._snackBarService.openSnackBar(
+                        'Payment not yet received. Please complete payment in your banking app.',
+                        GlobalConstants.error
+                    );
+                }
+            },
+            error: (err) => {
+                this.isOrderBeingMade = false;
+                this._snackBarService.openSnackBar(
+                    'Failed to check payment status.',
+                    GlobalConstants.error
+                );
+            },
+        });
     }
-
-    // Step 3: All checks passed
-    this.confirmPayment();
-}
-
-
 
     viewReceipt(): void {
         if (!this.lastOrderData) return;
@@ -474,12 +562,19 @@ addPayment(): void {
     }
 
     goBack(): void {
-    this.isCheckoutSuccess = false;
-    this.isAdjustingOrder = true;
-    this.currentAmount = ''; // Reset amount
-    this.displayAmount = '';
-    this._changeDetectorRef.detectChanges();
-}
+        this.isCheckoutSuccess = false;
+        this.isAdjustingOrder = true;
+        this.currentAmount = '';
+        this.displayAmount = '';
+        this.qrData = ''; // <-- Clear QR code
+        this.khqrService.lastMd5 = ''; // <-- Clear last md5
+        if (this.scanPayPollingInterval) {
+            clearInterval(this.scanPayPollingInterval);
+            this.scanPayPollingInterval = null;
+        }
+        this.isWaitingForScanPay = false;
+        this._changeDetectorRef.detectChanges();
+    }
 
     // ================================================================>> Section: QR/ScanPay
     generateKHQRRequest(amount: number): KHQRRequest {
@@ -499,21 +594,51 @@ addPayment(): void {
 
     generateBillNumber(): string {
         const now = new Date();
-        return `INV-${now.getFullYear()}${now.getMonth() + 1}${now.getDate()}-${now.getTime()}`;
+        return `INV-${now.getFullYear()}${
+            now.getMonth() + 1
+        }${now.getDate()}-${now.getTime()}`;
+    }
+
+    startScanPayPolling() {
+        // Clear any previous polling
+        if (this.scanPayPollingInterval) {
+            clearInterval(this.scanPayPollingInterval);
+        }
+        // Poll every 3 seconds (adjust as needed)
+        this.scanPayPollingInterval = setInterval(() => {
+            this.khqrService
+                .checkPaymentStatus({ md5: this.khqrService.lastMd5 })
+                .subscribe({
+                    next: (res) => {
+                        if (res.status === 'PAID') {
+                            clearInterval(this.scanPayPollingInterval);
+                            this.isWaitingForScanPay = false;
+                            this.confirmPayment();
+                        }
+                    },
+                    error: () => {
+                        // Optionally handle error
+                    },
+                });
+        }, 3000);
     }
 
     onScanPay() {
         const amount = this.orderSummary?.total ?? 0;
         const requestData = this.generateKHQRRequest(amount);
         this.isGeneratingQR = true;
+        this.isWaitingForScanPay = true;
+        this.startScanPayPolling();
         this.khqrService.generateQRCode(requestData).subscribe({
             next: (res) => {
                 this.qrData = res.qr;
+                this.khqrService.lastMd5 = res.md5 || ''; // Store md5 for later use
                 this.isGeneratingQR = false;
             },
             error: (err) => {
                 console.error('KHQR generation failed', err);
                 this.isGeneratingQR = false;
+                this.isWaitingForScanPay = false;
             },
         });
     }
@@ -561,6 +686,6 @@ addPayment(): void {
             this.clearInput();
         } else if (key.toLowerCase() === 'c') {
             this.clearAll();
-        } 
+        }
     }
 }
