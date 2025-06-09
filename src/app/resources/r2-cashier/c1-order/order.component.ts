@@ -1,6 +1,8 @@
 // ================================================================>> Core Library
 import { CommonModule, DecimalPipe, NgForOf, NgIf } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
+import { QRCodeComponent } from 'angularx-qrcode';
+
 import {
     ChangeDetectorRef,
     Component,
@@ -34,6 +36,8 @@ import { OrderService } from './order.service';
 import { Data, Product } from './order.interface';
 import { ViewDetailSaleComponent } from 'app/shared/view/view.component';
 import { ZXingScannerModule } from '@zxing/ngx-scanner';
+import { KhqrService } from './khqr/khqr.service';
+import { KHQRRequest } from './khqr/khqr.interface';
 interface CartItem {
     id: number;
     name: string;
@@ -63,6 +67,7 @@ interface CartItem {
         MatButtonModule,
         MatProgressSpinnerModule,
         ZXingScannerModule,
+        QRCodeComponent,
     ],
 })
 export class OrderComponent implements OnInit, OnDestroy {
@@ -72,6 +77,8 @@ export class OrderComponent implements OnInit, OnDestroy {
     // Define the base URL for file uploads
     fileUrl: string = env.FILE_BASE_URL;
     data: Data[] = [];
+    qrData: string = '';
+    isGeneratingQR = false;
     allProducts: Product[] = [];
     isLoading: boolean = false;
     carts: CartItem[] = [];
@@ -93,7 +100,8 @@ export class OrderComponent implements OnInit, OnDestroy {
         private dialog: MatDialog,
         private _userService: UserService,
         private _service: OrderService,
-        private _snackBarService: SnackbarService
+        private _snackBarService: SnackbarService,
+        private khqrService: KhqrService
     ) {
         // Subscribe to changes in the user's data
         this._userService.user$
@@ -110,7 +118,7 @@ export class OrderComponent implements OnInit, OnDestroy {
     currentAmount: string = '';
     displayAmount: string = '';
 
-    discount: number = 5 ; // set this as needed
+    discount: number = 5; // set this as needed
     tax: number = 2; // set this as needed
 
     // Order summary (You should replace these with actual calculated values)
@@ -120,6 +128,46 @@ export class OrderComponent implements OnInit, OnDestroy {
         tax: 0,
         total: 0,
     };
+
+    generateKHQRRequest(amount: number): KHQRRequest {
+        return {
+            bank_account: env.KHQR_BANK_ACCOUNT,
+            merchant_name: env.KHQR_MERCHANT_NAME,
+            merchant_city: env.KHQR_MERCHANT_CITY,
+            amount,
+            currency: env.KHQR_CURRENCY,
+            store_label: env.KHQR_STORE_LABEL,
+            phone_number: env.KHQR_PHONE_NUMBER,
+            bill_number: this.generateBillNumber(),
+            terminal_label: env.KHQR_TERMINAL_LABEL,
+            static: env.KHQR_STATIC,
+        };
+    }
+
+    // Generates a unique bill number (e.g., using timestamp)
+    generateBillNumber(): string {
+        const now = new Date();
+        return `INV-${now.getFullYear()}${
+            now.getMonth() + 1
+        }${now.getDate()}-${now.getTime()}`;
+    }
+
+    onScanPay() {
+        const amount = this.orderSummary?.total ?? 0;
+        const requestData = this.generateKHQRRequest(amount);
+
+        this.isGeneratingQR = true;
+        this.khqrService.generateQRCode(requestData).subscribe({
+            next: (res) => {
+                this.qrData = res.qr;
+                this.isGeneratingQR = false;
+            },
+            error: (err) => {
+                console.error('KHQR generation failed', err);
+                this.isGeneratingQR = false;
+            },
+        });
+    }
 
     updateOrderSummary(): void {
         this.orderSummary.subtotal = this.totalPrice;
@@ -163,6 +211,9 @@ export class OrderComponent implements OnInit, OnDestroy {
     // Payment methods
     selectPaymentMethod(method: string): void {
         this.selectedPaymentMethod = method;
+        if (method === 'scanpay') {
+            this.onScanPay();
+        }
     }
 
     inputNumber(num: string): void {
@@ -473,6 +524,52 @@ export class OrderComponent implements OnInit, OnDestroy {
                     response.message,
                     GlobalConstants.success
                 );
+            },
+            error: (err: HttpErrorResponse) => {
+                this.isOrderBeingMade = false;
+                this._snackBarService.openSnackBar(
+                    err?.error?.message || GlobalConstants.genericError,
+                    GlobalConstants.error
+                );
+            },
+        });
+    }
+
+    confirmPayment(): void {
+        // Validate cash amount if needed
+        if (this.selectedPaymentMethod === 'cash') {
+            const amount = parseFloat(this.currentAmount);
+            if (isNaN(amount) || amount < this.orderSummary.total) {
+                this._snackBarService.openSnackBar(
+                    'Please enter a valid cash amount (must be at least the total).',
+                    GlobalConstants.error
+                );
+                return;
+            }
+        }
+        // Now create the order
+        const carts: { [itemId: number]: number } = {};
+        this.orderedItems.forEach((item: CartItem) => {
+            carts[item.id] = item.qty;
+        });
+
+        const body = {
+            cart: JSON.stringify(carts),
+        };
+
+        this.isOrderBeingMade = true;
+
+        this._service.create(body).subscribe({
+            next: (response) => {
+                this.isOrderBeingMade = false;
+                this.lastOrderData = response.data;
+                this._snackBarService.openSnackBar(
+                    response.message,
+                    GlobalConstants.success
+                );
+                // Show receipt
+                this.viewReceipt();
+                // Optionally, clear payment state here
             },
             error: (err: HttpErrorResponse) => {
                 this.isOrderBeingMade = false;

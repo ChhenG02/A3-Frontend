@@ -638,26 +638,30 @@
                                 *ngIf="selectedPaymentMethod === 'scanpay'"
                                 class="flex items-center justify-center h-60"
                             >
-                                <img
-                                    src="https://makerworld.bblmw.com/makerworld/model/US2ab61bb7d3000c/design/2024-01-30_029b2304056c.png?x-oss-process=image/resize,w_1000/format,webp"
-                                    alt="ScanPay QR"
+                                <qrcode
+                                    *ngIf="qrData"
+                                    [qrdata]="qrData"
+                                    [width]="200"
+                                    [errorCorrectionLevel]="'M'"
                                     class="max-h-full max-w-full"
-                                />
+                                ></qrcode>
+                                <div *ngIf="!qrData && isGeneratingQR">
+                                    Generating QR...
+                                </div>
                             </div>
                         </div>
                     </div>
 
                     <!-- View Receipt Button Section -->
-                    <div
-                        class="p-4 border-t border-gray-200 dark:border-gray-700"
-                    >
-                        <button
-                            class="w-full text-white font-semibold p-3 bg-[#F15757] flex justify-center rounded-lg"
-                            (click)="viewReceipt()"
-                        >
-                            View Receipt
-                        </button>
-                    </div>
+
+<div class="p-4 border-t border-gray-200 dark:border-gray-700">
+    <button
+        class="w-full text-white font-semibold p-3 bg-[#F15757] flex justify-center rounded-lg"
+        (click)="confirmPayment()"
+    >
+        Confirm Payment
+    </button>
+</div>
                 </div>
             </div>
         </div>
