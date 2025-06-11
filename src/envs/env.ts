@@ -1,6 +1,6 @@
 export const env = {
     production: true,
-    API_BASE_URL: 'http://localhost:7000/api',
+    API_BASE_URL: 'http://localhost:8000/api',
     FILE_BASE_URL: 'http://localhost:8080/',
     WEB_BASE_URL: 'http://localhost:3000',
 
