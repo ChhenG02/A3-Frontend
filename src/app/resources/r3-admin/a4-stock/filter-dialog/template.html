@@ -1,0 +1,46 @@
+<!-- Header -->
+<div mat-dialog-title class="w-full flex justify-between">
+    <span class="w-full text-2xl font-medium">Filter</span>
+    <button (click)="closeDialog()" mat-icon-button>
+        <mat-icon svgIcon="mdi:close" />
+    </button>
+</div>
+
+<mat-dialog-content class="border-t">
+    <form [formGroup]="form" class="md-form-field-appearance-outline">
+
+
+        <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Category</mat-label>
+            <!-- <mat-icon class="icon-size-5" matPrefix [svgIcon]="'heroicons_solid:map-pin'"></mat-icon> -->
+            <mat-select formControlName="productTypes" placeholder="Select Category">
+                <mat-option *ngFor=" let item of setup?.productTypes" [value]=" item.id ">
+                    {{ item.name }}
+                </mat-option>
+            </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Insert Data</mat-label>
+            <!-- <mat-icon class="icon-size-5" matPrefix [svgIcon]="'feather:check-square'"></mat-icon> -->
+            <mat-select formControlName="users" placeholder="Insert by">
+                <mat-option *ngFor=" let item of setup?.users " [value]=" item.id ">
+                    {{ item.name }}
+                </mat-option>
+            </mat-select>
+        </mat-form-field>
+
+    </form>
+</mat-dialog-content>
+
+<mat-dialog-actions class="flex items-center justify-end">
+    <button class="text-slate-800 gap-1" mat-stroked-button (click)="reset()">
+        <mat-icon mat-icon-button [svgIcon]="'mdi:refresh'"/>
+        <span>Clear</span>
+    </button>
+    <button class="bg-[#F15757] text-white gap-1" mat-flat-button (click)="submit()">
+        <mat-icon mat-icon-button class="" [svgIcon]="'heroicons_outline:magnifying-glass'"/>
+        <span>Search</span>
+    </button>
+</mat-dialog-actions>
+

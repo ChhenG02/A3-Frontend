@@ -23,32 +23,12 @@ const adminNavigation: HelperNavigationItem[] = [
         link: '/admin/products',
     },
 
-    // {
-    //     id: 'product',
-    //     title: 'ផលិតផល',
-    //     type: 'collapsable',
-    //     icon: 'mdi:package-variant-closed',
-    //     children: [
-    //         {
-    //             id: 'product.all',
-    //             title: 'ទាំងអស់',
-    //             type: 'basic',
-    //             link: '/admin/product/all',
-    //         },
-    //         {
-    //             id: 'product.type',
-    //             title: 'ប្រភេទ',
-    //             type: 'basic',
-    //             link: '/admin/product/type',
-    //         },
-    //     ],
-    // },
     {
-        id: 'stock',
+        id: 'stocks',
         title: 'Stock',
         type: 'basic-parent',
         icon: 'mdi:file-check-outline',
-        link: '/admin/stock',
+        link: '/admin/stocks',
     },
     {
         id: 'users',
