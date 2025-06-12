@@ -82,7 +82,7 @@
                         </form>
                     </div>
 
-                    <div>
+                    <div class="mt-16">
                         <button class="helper-mat-button-large w-full bg-[#F15757] rounded-[10px] text-center"
                             mat-flat-button [color]="'primary'" [disabled]="signInForm.disabled"
                             (click)="signIn()">
@@ -90,7 +90,7 @@
                             <mat-progress-spinner *ngIf="signInForm.disabled" [diameter]="24"
                                 [mode]="'indeterminate'"></mat-progress-spinner>
                         </button>
-                        <div class="flex items-center w-full">
+                        <!-- <div class="flex items-center w-full">
                             <hr class="flex-grow">
                             <span class="px-2 text-center">or</span>
                             <hr class="flex-grow">
@@ -100,7 +100,7 @@
                             <span *ngIf="!signInForm.disabled" class="text-[#F15757] text-center">Sign Up</span>
                             <mat-progress-spinner *ngIf="signInForm.disabled" [diameter]="24"
                                 mode="indeterminate"></mat-progress-spinner>
-                        </button>
+                        </button> -->
                     </div>
                 </div>
 
