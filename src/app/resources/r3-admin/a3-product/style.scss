@@ -82,7 +82,7 @@ table {
 
 ::ng-deep .mat-mdc-paginator-container {
     .mdc-icon-button {
-        @apply dark:bg-gray-700 #{'!important'}
+        background-color: #374151 !important; /* dark:bg-gray-700 */
     }
 }
 
@@ -120,17 +120,18 @@ table {
 ::ng-deep .mat-badge {
     &.mat-badge-hidden {
         .mat-icon {
-            @apply text-slate-500 #{'!important'} /* Icon color when badge is hidden */
+            color: #64748b !important; /* Icon color when badge is hidden (Tailwind's text-slate-500) */
         }
     }
 
     &:not(.mat-badge-hidden) {
         .mat-icon {
-            @apply text-blue-500 #{'!important'} /* Icon color when badge is visible */
+            color: #3b82f6 !important; /* Icon color when badge is visible (Tailwind's text-blue-500) */
         }
 
         .mat-badge-content{
-            @apply -translate-x-2 translate-y-2 scale-90 bg-red-500 #{'!important'}
+            transform: translateX(-0.5rem) translateY(0.5rem) scale(0.9) !important;
+            background-color: #ef4444 !important; /* Tailwind's bg-red-500 */
         }
     }
 }

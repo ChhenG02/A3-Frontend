@@ -39,6 +39,8 @@ import { FilterDialogComponent } from './filter-dialog/component';
 import { ViewDialogComponent } from './view-dialog/component';
 import { ProductsDialogComponent } from './create-dialog/component';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { PromotionService } from '../a6-setup/s2-promotion/service';
+import { PromotionData } from '../a6-setup/s2-promotion/interface';
 
 @Component({
     selector: 'app-product',
@@ -72,6 +74,8 @@ export class ProductComponent implements OnInit {
     private matDialog = inject(MatDialog);
     public data: Data[] = [];
     public setupData: any = {};
+
+    public promotions: PromotionData[] = [];
     // Component properties
     getDisplayedColumns(): string[] {
     const columns = [
@@ -101,6 +105,7 @@ export class ProductComponent implements OnInit {
     public limit: number = 20;
     public page: number = 1;
     public isLoading: boolean = false;
+    public selectedPromotionId: number | null = null;
 
     // Search,sort and filter
     public key: string = '';
@@ -133,7 +138,8 @@ export class ProductComponent implements OnInit {
         private cdr: ChangeDetectorRef,
         private _matDialog: MatDialog,
         private _errorHandleService: ErrorHandleService,
-        private _dialogConfigService: DialogConfigService
+        private _dialogConfigService: DialogConfigService,
+        private promotionService: PromotionService
     ) {}
 
     // Initialization logic
@@ -141,6 +147,35 @@ export class ProductComponent implements OnInit {
     ngOnInit(): void {
         this.getSetupData();
         this.getData();
+        this.getPromotions();
+    }
+
+    getPromotionDiscount(promotionId: number): number {
+    const promotion = this.promotions.find(p => p.id === promotionId);
+    return promotion ? promotion.discount_value : 0;
+    }
+
+
+    calculateDiscountedPrice(product: Data): number {
+    if (!product.promotion_id) return product.unit_price;
+    
+    const promotion = this.promotions.find(p => p.id === product.promotion_id);
+    if (!promotion) return product.unit_price;
+    
+    const discount = promotion.discount_value / 100;
+    return product.unit_price * (1 - discount);
+    }
+
+    getPromotions(): void {
+    this.promotionService.getData().subscribe({
+        next: (res) => {
+        this.promotions = res.data.Promotion;
+        },
+        error: (err) => {
+        // handle error if needed
+        this.promotions = [];
+        }
+    });
     }
 
     // Toggle checkbox visibility and selection bar
@@ -211,23 +246,37 @@ isSelected(item: Data): boolean {
     
     // Apply promotion to selected items
     applyPromotion(): void {
-        if (this.selectedItems.length === 0) {
-            this.snackBarService.openSnackBar('No items selected', GlobalConstants.error);
-            return;
-        }
-        
-        // Implement your promotion logic here
-        console.log('Applying promotion to:', this.selectedItems);
-        
-        // Example: Show success message
+    if (this.selectedItems.length === 0) {
+        this.snackBarService.openSnackBar('No items selected', GlobalConstants.error);
+        return;
+    }
+    
+    if (!this.selectedPromotionId) {
+        // Remove promotion if None is selected
+        this.selectedItems.forEach(item => {
+            item.promotion_id = null;
+        });
+        this.snackBarService.openSnackBar(
+            `Promotion removed from ${this.selectedItems.length} item(s)`, 
+            GlobalConstants.success
+        );
+    } else {
+        // Apply promotion
+        this.selectedItems.forEach(item => {
+            item.promotion_id = this.selectedPromotionId;
+        });
         this.snackBarService.openSnackBar(
             `Promotion applied to ${this.selectedItems.length} item(s)`, 
             GlobalConstants.success
         );
-        
-        // Clear selection after action
-        this.clearSelection();
     }
+    
+    // Clear selection after action
+    this.clearSelection();
+    
+    // Refresh the view
+    this.cdr.detectChanges();
+}
 
 
     // Remove selected items
