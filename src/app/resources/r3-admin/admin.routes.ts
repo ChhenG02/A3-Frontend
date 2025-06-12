@@ -10,6 +10,7 @@ import { ProductTypeComponent } from './a6-setup/s1-type/component';
 
 import { StockStatusComponent } from './a6-setup/s3-stock-status/component';
 import { PromotionComponent } from './a6-setup/s2-promotion/component';
+import { StockComponent } from './a4-stock/stock.component';
 
 export default [
     {
@@ -25,10 +26,10 @@ export default [
         component: ProductComponent,
     },
 
-    //  {
-    //     path: 'stock',
-    //     component: StockComponent,
-    // },
+     {
+        path: 'stocks',
+        component: StockComponent,
+    },
 
     {
         path: 'users',

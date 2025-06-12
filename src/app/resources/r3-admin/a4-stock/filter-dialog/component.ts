@@ -1,18 +1,30 @@
 // ================================================================================>> Core Library
-import { CommonModule }                                                           from '@angular/common';
-import { Component, EventEmitter, Inject, Output }                                from '@angular/core';
-import { FormsModule, ReactiveFormsModule, UntypedFormBuilder, UntypedFormGroup } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { Component, EventEmitter, Inject, Output } from '@angular/core';
+import {
+    FormsModule,
+    ReactiveFormsModule,
+    UntypedFormBuilder,
+    UntypedFormGroup,
+} from '@angular/forms';
 
 // ================================================================================>> Third Party Library
 // ===>> Material
-import { MatButtonModule }                                                        from '@angular/material/button';
-import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef }                         from '@angular/material/dialog';
-import { MatIconModule }                                                          from '@angular/material/icon';
-import { MatFormFieldModule }                                                     from '@angular/material/form-field';
-import { MatInputModule }                                                         from '@angular/material/input';
-import { MatSelectModule }                                                        from '@angular/material/select';
-import { MatProgressSpinnerModule }                                               from '@angular/material/progress-spinner';
-import { SetupResponse }                                                          from '../../interface';
+import { MatButtonModule } from '@angular/material/button';
+import {
+    MAT_DIALOG_DATA,
+    MatDialogModule,
+    MatDialogRef,
+} from '@angular/material/dialog';
+import { MatIconModule } from '@angular/material/icon';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { SetupResponse } from '../stock.interface';
+
+
+
 @Component({
     selector: 'admin-product-filter-dialog',
     standalone: true,
@@ -32,21 +44,18 @@ import { SetupResponse }                                                        
     ],
 })
 export class FilterDialogComponent {
-
     @Output() filterSubmitted = new EventEmitter<any>();
 
     public form: UntypedFormGroup;
     public setup: SetupResponse | null = null;
 
-    
     constructor(
         public dialogRef: MatDialogRef<FilterDialogComponent>,
-        @Inject(MAT_DIALOG_DATA) public data : any,
+        @Inject(MAT_DIALOG_DATA) public data: any,
         private _formBuilder: UntypedFormBuilder
     ) {}
 
     ngOnInit(): void {
-
         this.setup = this.data.setup;
         this.ngBuilderForm();
     }
@@ -69,7 +78,6 @@ export class FilterDialogComponent {
 
     reset(): void {
         this.form.reset();
-        
     }
 
     closeDialog(): void {
