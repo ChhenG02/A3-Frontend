@@ -38,6 +38,7 @@ import { Data, List } from './interface';
 import { FilterDialogComponent } from './filter-dialog/component';
 import { ViewDialogComponent } from './view-dialog/component';
 import { ProductsDialogComponent } from './create-dialog/component';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 
 @Component({
     selector: 'app-product',
@@ -59,6 +60,7 @@ import { ProductsDialogComponent } from './create-dialog/component';
         MatPaginatorModule,
         MatMenuModule,
         MatBadgeModule,
+        MatCheckboxModule,
     ],
 })
 export class ProductComponent implements OnInit {
@@ -71,7 +73,8 @@ export class ProductComponent implements OnInit {
     public data: Data[] = [];
     public setupData: any = {};
     // Component properties
-    displayedColumns: string[] = [
+    getDisplayedColumns(): string[] {
+    const columns = [
         'no',
         'product',
         'price',
@@ -79,13 +82,21 @@ export class ProductComponent implements OnInit {
         'total_sale_price',
         'created',
         'seller',
-        'action',
+        'action'
     ];
+    
+    if (this.showCheckboxes) {
+        columns.unshift('select');
+    }
+    
+    return columns;
+}
 
     dataSource: MatTableDataSource<Data> = new MatTableDataSource<Data>([]);
 
     fileUrl: string = env.FILE_BASE_URL;
 
+    public showCheckboxes: boolean = false;
     public total: number = 0;
     public limit: number = 20;
     public page: number = 1;
@@ -98,6 +109,11 @@ export class ProductComponent implements OnInit {
     public users: number = 0;
     public productTypes: number = 0;
     public creator: number = 0;
+
+    // Selection related properties
+    public selectedItems: Data[] = [];
+    public isAllSelected: boolean = false;
+    public showSelectionBar: boolean = false;
 
     public shortedItems: any[] = [
         { name: 'ឈ្មោះផលិតផល', value: 'name' },
@@ -127,6 +143,152 @@ export class ProductComponent implements OnInit {
         this.getData();
     }
 
+    // Toggle checkbox visibility and selection bar
+    toggleCheckboxes(): void {
+    this.showCheckboxes = !this.showCheckboxes;
+    if (!this.showCheckboxes) {
+        this.clearSelection();
+    }
+    // Force change detection to update the table columns
+    this.cdr.detectChanges();
+}
+
+    // Toggle selection for individual item
+    toggleSelection(item: Data): void {
+        const index = this.selectedItems.findIndex(selected => selected.id === item.id);
+        
+        if (index > -1) {
+            // Item is selected, remove it
+            this.selectedItems.splice(index, 1);
+        } else {
+            // Item is not selected, add it
+            this.selectedItems.push(item);
+        }
+        
+        // Update selection state
+        this.updateSelectionState();
+    }
+
+    // Check if item is selected
+isSelected(item: Data): boolean {
+    return this.selectedItems.some(selected => selected.id === item.id);
+}
+
+// Toggle select all
+    toggleSelectAll(): void {
+        if (this.isAllSelected) {
+            // Deselect all
+            this.selectedItems = [];
+            this.isAllSelected = false;
+        } else {
+            // Select all current page items
+            this.selectedItems = [...this.dataSource.data];
+            this.isAllSelected = true;
+        }
+        
+        this.updateSelectionState();
+    }
+
+    // Update selection state
+    private updateSelectionState(): void {
+        const currentPageItems = this.dataSource.data;
+        const selectedFromCurrentPage = this.selectedItems.filter(selected => 
+            currentPageItems.some(item => item.id === selected.id)
+        );
+        
+        this.isAllSelected = currentPageItems.length > 0 && 
+                            selectedFromCurrentPage.length === currentPageItems.length;
+        
+        this.showSelectionBar = this.selectedItems.length > 0;
+    }
+
+    // Clear all selections
+    clearSelection(): void {
+        this.selectedItems = [];
+        this.isAllSelected = false;
+        this.showSelectionBar = false;
+    }
+    
+    // Apply promotion to selected items
+    applyPromotion(): void {
+        if (this.selectedItems.length === 0) {
+            this.snackBarService.openSnackBar('No items selected', GlobalConstants.error);
+            return;
+        }
+        
+        // Implement your promotion logic here
+        console.log('Applying promotion to:', this.selectedItems);
+        
+        // Example: Show success message
+        this.snackBarService.openSnackBar(
+            `Promotion applied to ${this.selectedItems.length} item(s)`, 
+            GlobalConstants.success
+        );
+        
+        // Clear selection after action
+        this.clearSelection();
+    }
+
+
+    // Remove selected items
+    removeSelectedItems(): void {
+        if (this.selectedItems.length === 0) {
+            this.snackBarService.openSnackBar('No items selected', GlobalConstants.error);
+            return;
+        }
+
+        const configAction: HelperConfirmationConfig = {
+            title: `Remove ${this.selectedItems.length} Selected Items`,
+            message: 'Are you sure you want to remove these items permanently? <span class="font-medium">This action cannot be undone!</span>',
+            icon: {
+                show: true,
+                name: 'heroicons_outline:exclamation-triangle',
+                color: 'warn',
+            },
+            actions: {
+                confirm: {
+                    show: true,
+                    label: 'Remove',
+                    color: 'warn',
+                },
+                cancel: {
+                    show: true,
+                    label: 'Cancel',
+                },
+            },
+            dismissible: true,
+        };
+
+        const dialogRef = this.helpersConfirmationService.open(configAction);
+
+        dialogRef.afterClosed().subscribe((result: string) => {
+            if (result === 'confirmed') {
+                // Create array of delete requests
+                const deleteRequests = this.selectedItems.map(item => 
+                    this._service.delete(item.id)
+                );
+
+                // Execute all delete requests
+                // Note: You might want to implement a batch delete API instead
+                Promise.all(deleteRequests.map(req => req.toPromise()))
+                    .then(() => {
+                        this.getData(); // Refresh data
+                        this.snackBarService.openSnackBar(
+                            `${this.selectedItems.length} items removed successfully`,
+                            GlobalConstants.success
+                        );
+                        this.clearSelection();
+                    })
+                    .catch((err) => {
+                        this.snackBarService.openSnackBar(
+                            'Error removing some items',
+                            GlobalConstants.error
+                        );
+                    });
+            }
+        });
+    }
+
     // ===>> Get Setup Data for Filtering
     getSetupData(): void {
         // ===>> Call API
@@ -143,29 +305,32 @@ export class ProductComponent implements OnInit {
 
     // ===>> Get Data for Listing
     getData() {
-        // ===>> Set Loading UI
-        this.isLoading = true;
+    // ===>> Set Loading UI
+    this.isLoading = true;
 
-        // ===>> Get Filter
-        const params = this.prepareSearchSortFilterParam();
+    // ===>> Get Filter
+    const params = this.prepareSearchSortFilterParam();
 
-        this._service.getData(params).subscribe({
-            next: (res: List) => {
-                this.dataSource.data = res.data;
-                this.total = res.pagination.total;
-                this.limit = res.pagination.limit;
-                this.page = res.pagination.totalPage;
-                this.isLoading = false;
-            },
-            error: (err: HttpErrorResponse) => {
-                this.isLoading = false;
-                this.snackBarService.openSnackBar(
-                    err?.error?.message || GlobalConstants.genericError,
-                    GlobalConstants.error
-                );
-            },
-        });
-    }
+    this._service.getData(params).subscribe({
+        next: (res: List) => {
+            this.dataSource.data = res.data;
+            this.total = res.pagination.total;
+            this.limit = res.pagination.limit;
+            this.page = res.pagination.totalPage;
+            this.isLoading = false;
+            
+            // Update selection state after data refresh
+            this.updateSelectionState();
+        },
+        error: (err: HttpErrorResponse) => {
+            this.isLoading = false;
+            this.snackBarService.openSnackBar(
+                err?.error?.message || GlobalConstants.genericError,
+                GlobalConstants.error
+            );
+        },
+    });
+}
 
     prepareSearchSortFilterParam(): any {
         const params: any = {
