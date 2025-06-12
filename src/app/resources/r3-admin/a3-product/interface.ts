@@ -19,6 +19,7 @@ export interface Data {
     created_at: Date,
     type: { id: number, name: string }
     creator: { id: number, name: string, avatar: string }
+    promotion_id?: number;
 }
 
 export interface ProductType {
