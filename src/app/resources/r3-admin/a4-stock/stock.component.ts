@@ -168,7 +168,7 @@ export class StockComponent implements OnInit {
       this.type_id = res.productTypes;
       this.creator = res.users;
       this.stock_status_id = res.stockStatuses;
-      this.badgeValue = [this.type_id, this.creator, this.stock_status_id].filter(v => v !== 0).length;
+      this.badgeValue = [this.type_id, this.creator].filter(v => v !== 0).length;
       this.getData();
     });
   }
@@ -349,7 +349,6 @@ export class StockComponent implements OnInit {
     this.key = '';
     this.type_id = 0;
     this.creator = 0;
-    this.stock_status_id = 0;
     this.badgeValue = 0;
     this.getData();
   }

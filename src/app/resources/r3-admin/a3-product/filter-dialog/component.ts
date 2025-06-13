@@ -21,7 +21,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { SetupResponse } from '../interface';
+import { SetupResponse } from '../product.interface';
 @Component({
     selector: 'admin-product-filter-dialog',
     standalone: true,

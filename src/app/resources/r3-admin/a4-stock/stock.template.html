@@ -27,14 +27,6 @@
                     (keydown.enter)="getData()"
                 />
                 <button
-                    *ngIf="badgeValue > 0"
-                    mat-icon-button
-                    class="min-w-10 max-w-10 h-full pt-3 bg-red-500 hover:opacity-[0.96] transition-all"
-                    (click)="clearFilter()"
-                >
-                    <mat-icon svgIcon="mdi:refresh" />
-                </button>
-                <button
                     mat-icon-button
                     [matBadge]="badgeValue"
                     [matBadgeHidden]="badgeValue == 0"

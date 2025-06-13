@@ -28,7 +28,7 @@ import { User } from 'app/core/user/interface';
 import { env } from 'envs/env';
 import { SnackbarService } from 'helper/services/snack-bar/snack-bar.service';
 import GlobalConstants from 'helper/shared/constants';
-import { ProductType } from '../c2-sale/interface';
+import { ProductType } from '../c2-sale/sale.interface';
 import { ItemComponent } from './item/component';
 import { OrderService } from './order.service';
 import { Data, Product } from './order.interface';

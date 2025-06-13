@@ -33,8 +33,8 @@ import GlobalConstants from 'helper/shared/constants';
 import { DialogConfigService } from 'app/shared/dialog-config.service';
 import { ErrorHandleService } from 'app/shared/error-handle.service';
 import { MatBadgeModule } from '@angular/material/badge';
-import { ProductService } from './service';
-import { Data, List } from './interface';
+import { ProductService } from './product.service';
+import { Data, List } from './product.interface';
 import { FilterDialogComponent } from './filter-dialog/component';
 import { ViewDialogComponent } from './view-dialog/component';
 import { ProductsDialogComponent } from './create-dialog/component';
@@ -45,7 +45,7 @@ import { PromotionData } from '../a6-setup/s2-promotion/interface';
 @Component({
     selector: 'app-product',
     standalone: true,
-    templateUrl: './template.html',
+    templateUrl: './product.template.html',
     styleUrl: './style.scss',
     imports: [
         CommonModule,
@@ -78,23 +78,23 @@ export class ProductComponent implements OnInit {
     public promotions: PromotionData[] = [];
     // Component properties
     getDisplayedColumns(): string[] {
-    const columns = [
-        'no',
-        'product',
-        'price',
-        'total_sale',
-        'total_sale_price',
-        'created',
-        'seller',
-        'action'
-    ];
-    
-    if (this.showCheckboxes) {
-        columns.unshift('select');
+        const columns = [
+            'no',
+            'product',
+            'price',
+            'total_sale',
+            'total_sale_price',
+            'created',
+            'seller',
+            'action',
+        ];
+
+        if (this.showCheckboxes) {
+            columns.unshift('select');
+        }
+
+        return columns;
     }
-    
-    return columns;
-}
 
     dataSource: MatTableDataSource<Data> = new MatTableDataSource<Data>([]);
 
@@ -151,47 +151,50 @@ export class ProductComponent implements OnInit {
     }
 
     getPromotionDiscount(promotionId: number): number {
-    const promotion = this.promotions.find(p => p.id === promotionId);
-    return promotion ? promotion.discount_value : 0;
+        const promotion = this.promotions.find((p) => p.id === promotionId);
+        return promotion ? promotion.discount_value : 0;
     }
 
-
     calculateDiscountedPrice(product: Data): number {
-    if (!product.promotion_id) return product.unit_price;
-    
-    const promotion = this.promotions.find(p => p.id === product.promotion_id);
-    if (!promotion) return product.unit_price;
-    
-    const discount = promotion.discount_value / 100;
-    return product.unit_price * (1 - discount);
+        if (!product.promotion_id) return product.unit_price;
+
+        const promotion = this.promotions.find(
+            (p) => p.id === product.promotion_id
+        );
+        if (!promotion) return product.unit_price;
+
+        const discount = promotion.discount_value / 100;
+        return product.unit_price * (1 - discount);
     }
 
     getPromotions(): void {
-    this.promotionService.getData().subscribe({
-        next: (res) => {
-        this.promotions = res.data.Promotion;
-        },
-        error: (err) => {
-        // handle error if needed
-        this.promotions = [];
-        }
-    });
+        this.promotionService.getData().subscribe({
+            next: (res) => {
+                this.promotions = res.data.Promotion;
+            },
+            error: (err) => {
+                // handle error if needed
+                this.promotions = [];
+            },
+        });
     }
 
     // Toggle checkbox visibility and selection bar
     toggleCheckboxes(): void {
-    this.showCheckboxes = !this.showCheckboxes;
-    if (!this.showCheckboxes) {
-        this.clearSelection();
+        this.showCheckboxes = !this.showCheckboxes;
+        if (!this.showCheckboxes) {
+            this.clearSelection();
+        }
+        // Force change detection to update the table columns
+        this.cdr.detectChanges();
     }
-    // Force change detection to update the table columns
-    this.cdr.detectChanges();
-}
 
     // Toggle selection for individual item
     toggleSelection(item: Data): void {
-        const index = this.selectedItems.findIndex(selected => selected.id === item.id);
-        
+        const index = this.selectedItems.findIndex(
+            (selected) => selected.id === item.id
+        );
+
         if (index > -1) {
             // Item is selected, remove it
             this.selectedItems.splice(index, 1);
@@ -199,17 +202,17 @@ export class ProductComponent implements OnInit {
             // Item is not selected, add it
             this.selectedItems.push(item);
         }
-        
+
         // Update selection state
         this.updateSelectionState();
     }
 
     // Check if item is selected
-isSelected(item: Data): boolean {
-    return this.selectedItems.some(selected => selected.id === item.id);
-}
+    isSelected(item: Data): boolean {
+        return this.selectedItems.some((selected) => selected.id === item.id);
+    }
 
-// Toggle select all
+    // Toggle select all
     toggleSelectAll(): void {
         if (this.isAllSelected) {
             // Deselect all
@@ -220,20 +223,21 @@ isSelected(item: Data): boolean {
             this.selectedItems = [...this.dataSource.data];
             this.isAllSelected = true;
         }
-        
+
         this.updateSelectionState();
     }
 
     // Update selection state
     private updateSelectionState(): void {
         const currentPageItems = this.dataSource.data;
-        const selectedFromCurrentPage = this.selectedItems.filter(selected => 
-            currentPageItems.some(item => item.id === selected.id)
+        const selectedFromCurrentPage = this.selectedItems.filter((selected) =>
+            currentPageItems.some((item) => item.id === selected.id)
         );
-        
-        this.isAllSelected = currentPageItems.length > 0 && 
-                            selectedFromCurrentPage.length === currentPageItems.length;
-        
+
+        this.isAllSelected =
+            currentPageItems.length > 0 &&
+            selectedFromCurrentPage.length === currentPageItems.length;
+
         this.showSelectionBar = this.selectedItems.length > 0;
     }
 
@@ -243,52 +247,58 @@ isSelected(item: Data): boolean {
         this.isAllSelected = false;
         this.showSelectionBar = false;
     }
-    
+
     // Apply promotion to selected items
     applyPromotion(): void {
-    if (this.selectedItems.length === 0) {
-        this.snackBarService.openSnackBar('No items selected', GlobalConstants.error);
-        return;
-    }
-    
-    if (!this.selectedPromotionId) {
-        // Remove promotion if None is selected
-        this.selectedItems.forEach(item => {
-            item.promotion_id = null;
-        });
-        this.snackBarService.openSnackBar(
-            `Promotion removed from ${this.selectedItems.length} item(s)`, 
-            GlobalConstants.success
-        );
-    } else {
-        // Apply promotion
-        this.selectedItems.forEach(item => {
-            item.promotion_id = this.selectedPromotionId;
-        });
-        this.snackBarService.openSnackBar(
-            `Promotion applied to ${this.selectedItems.length} item(s)`, 
-            GlobalConstants.success
-        );
-    }
-    
-    // Clear selection after action
-    this.clearSelection();
-    
-    // Refresh the view
-    this.cdr.detectChanges();
-}
+        if (this.selectedItems.length === 0) {
+            this.snackBarService.openSnackBar(
+                'No items selected',
+                GlobalConstants.error
+            );
+            return;
+        }
 
+        if (!this.selectedPromotionId) {
+            // Remove promotion if None is selected
+            this.selectedItems.forEach((item) => {
+                item.promotion_id = null;
+            });
+            this.snackBarService.openSnackBar(
+                `Promotion removed from ${this.selectedItems.length} item(s)`,
+                GlobalConstants.success
+            );
+        } else {
+            // Apply promotion
+            this.selectedItems.forEach((item) => {
+                item.promotion_id = this.selectedPromotionId;
+            });
+            this.snackBarService.openSnackBar(
+                `Promotion applied to ${this.selectedItems.length} item(s)`,
+                GlobalConstants.success
+            );
+        }
+
+        // Clear selection after action
+        this.clearSelection();
+
+        // Refresh the view
+        this.cdr.detectChanges();
+    }
 
     // Remove selected items
     removeSelectedItems(): void {
         if (this.selectedItems.length === 0) {
-            this.snackBarService.openSnackBar('No items selected', GlobalConstants.error);
+            this.snackBarService.openSnackBar(
+                'No items selected',
+                GlobalConstants.error
+            );
             return;
         }
 
         const configAction: HelperConfirmationConfig = {
             title: `Remove ${this.selectedItems.length} Selected Items`,
-            message: 'Are you sure you want to remove these items permanently? <span class="font-medium">This action cannot be undone!</span>',
+            message:
+                'Are you sure you want to remove these items permanently? <span class="font-medium">This action cannot be undone!</span>',
             icon: {
                 show: true,
                 name: 'heroicons_outline:exclamation-triangle',
@@ -313,13 +323,13 @@ isSelected(item: Data): boolean {
         dialogRef.afterClosed().subscribe((result: string) => {
             if (result === 'confirmed') {
                 // Create array of delete requests
-                const deleteRequests = this.selectedItems.map(item => 
+                const deleteRequests = this.selectedItems.map((item) =>
                     this._service.delete(item.id)
                 );
 
                 // Execute all delete requests
                 // Note: You might want to implement a batch delete API instead
-                Promise.all(deleteRequests.map(req => req.toPromise()))
+                Promise.all(deleteRequests.map((req) => req.toPromise()))
                     .then(() => {
                         this.getData(); // Refresh data
                         this.snackBarService.openSnackBar(
@@ -354,32 +364,32 @@ isSelected(item: Data): boolean {
 
     // ===>> Get Data for Listing
     getData() {
-    // ===>> Set Loading UI
-    this.isLoading = true;
+        // ===>> Set Loading UI
+        this.isLoading = true;
 
-    // ===>> Get Filter
-    const params = this.prepareSearchSortFilterParam();
+        // ===>> Get Filter
+        const params = this.prepareSearchSortFilterParam();
 
-    this._service.getData(params).subscribe({
-        next: (res: List) => {
-            this.dataSource.data = res.data;
-            this.total = res.pagination.total;
-            this.limit = res.pagination.limit;
-            this.page = res.pagination.totalPage;
-            this.isLoading = false;
-            
-            // Update selection state after data refresh
-            this.updateSelectionState();
-        },
-        error: (err: HttpErrorResponse) => {
-            this.isLoading = false;
-            this.snackBarService.openSnackBar(
-                err?.error?.message || GlobalConstants.genericError,
-                GlobalConstants.error
-            );
-        },
-    });
-}
+        this._service.getData(params).subscribe({
+            next: (res: List) => {
+                this.dataSource.data = res.data;
+                this.total = res.pagination.total;
+                this.limit = res.pagination.limit;
+                this.page = res.pagination.totalPage;
+                this.isLoading = false;
+
+                // Update selection state after data refresh
+                this.updateSelectionState();
+            },
+            error: (err: HttpErrorResponse) => {
+                this.isLoading = false;
+                this.snackBarService.openSnackBar(
+                    err?.error?.message || GlobalConstants.genericError,
+                    GlobalConstants.error
+                );
+            },
+        });
+    }
 
     prepareSearchSortFilterParam(): any {
         const params: any = {
