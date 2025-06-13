@@ -14,22 +14,7 @@
         class="min-h-14 max-h-14 flex gap-2 justify-between items-center py-2 pl-5 pr-2.5 border-b"
     >
         <div class="flex flex-1 items-center text-slate-500 gap-3">
-            <h1 class="text-3xl">Invoice {{ row?.receipt_number }} .</h1>
-            <mat-icon
-                *ngIf="row.platform === 'Web'"
-                class="icon-size-6 text-gray-500"
-                svgIcon="mdi:monitor"
-            ></mat-icon>
-            <mat-icon
-                *ngIf="row.platform === 'Mobile'"
-                class="icon-size-6 text-gray-500"
-                svgIcon="mdi:cellphone"
-            ></mat-icon>
-            <mat-icon
-                *ngIf="row.platform === 'Unknown' || row.platform === null"
-                class="icon-size-6 text-gray-500"
-                svgIcon="mdi:crosshairs-question"
-            ></mat-icon>
+            <h1 class="text-3xl">Invoice {{ row?.receipt_number }}</h1>
         </div>
 
         <!-- Print Button -->

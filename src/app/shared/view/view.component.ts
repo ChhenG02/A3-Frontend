@@ -1,21 +1,31 @@
-import { CommonModule }         from '@angular/common';
-import { HttpErrorResponse }    from '@angular/common/http';
-import { ChangeDetectorRef, Component, Inject, OnDestroy, OnInit } from '@angular/core';
-import { MatButtonModule }      from '@angular/material/button';
-import { MatCheckboxModule }    from '@angular/material/checkbox';
-import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { MatDividerModule }     from '@angular/material/divider';
-import { MatIconModule }        from '@angular/material/icon';
-import { MatMenuModule }        from '@angular/material/menu';
+import { CommonModule } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
+import {
+    ChangeDetectorRef,
+    Component,
+    Inject,
+    OnDestroy,
+    OnInit,
+} from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import {
+    MAT_DIALOG_DATA,
+    MatDialog,
+    MatDialogRef,
+} from '@angular/material/dialog';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatIconModule } from '@angular/material/icon';
+import { MatMenuModule } from '@angular/material/menu';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
-import { MatTabsModule }        from '@angular/material/tabs';
-import { SaleService }          from 'app/resources/r2-cashier/c2-sale/service';
-import { env }                  from 'envs/env';
-import FileSaver                from 'file-saver';
-import { SnackbarService }      from 'helper/services/snack-bar/snack-bar.service';
-import GlobalConstants          from 'helper/shared/constants';
-import { Subject }              from 'rxjs';
-import { DetailsService }       from '../dialog/service';
+import { MatTabsModule } from '@angular/material/tabs';
+import { SaleService } from 'app/resources/r2-cashier/c2-sale/sale.service';
+import { env } from 'envs/env';
+import FileSaver from 'file-saver';
+import { SnackbarService } from 'helper/services/snack-bar/snack-bar.service';
+import GlobalConstants from 'helper/shared/constants';
+import { Subject } from 'rxjs';
+import { DetailsService } from '../dialog/service';
 @Component({
     selector: 'dashboard-gm-fast-view-customer',
     templateUrl: './view.template.html',
@@ -30,12 +40,18 @@ import { DetailsService }       from '../dialog/service';
         MatTabsModule,
         MatMenuModule,
         MatCheckboxModule,
-    ]
+    ],
 })
 export class ViewDetailSaleComponent implements OnInit, OnDestroy {
     private _unsubscribeAll: Subject<any> = new Subject<any>();
     // Component properties
-    displayedColumns: string[] = ['number', 'name', 'unit_price', 'qty', 'total'];
+    displayedColumns: string[] = [
+        'number',
+        'name',
+        'unit_price',
+        'qty',
+        'total',
+    ];
     dataSource: MatTableDataSource<any> = new MatTableDataSource<any>([]);
     fileUrl = env.FILE_BASE_URL;
     public isLoading: boolean;
@@ -48,7 +64,7 @@ export class ViewDetailSaleComponent implements OnInit, OnDestroy {
         private _snackbar: SnackbarService,
         private saleService: SaleService,
         private detailsService: DetailsService
-    ) { }
+    ) {}
 
     // Method to initialize the component
     ngOnInit(): void {
@@ -60,31 +76,36 @@ export class ViewDetailSaleComponent implements OnInit, OnDestroy {
 
     // Method to calculate the total of the sale
     getTotal(): number {
-        return this.dataSource.data.reduce((sum, item) => sum + (item.unit_price * item.qty), 0);
+        return this.dataSource.data.reduce(
+            (sum, item) => sum + item.unit_price * item.qty,
+            0
+        );
     }
 
     downloading: boolean = false;
 
     // Method to initiate the download of a sale invoice
     print(row: any) {
-
         this.downloading = true;
 
         // Calling the details service to download the invoice
         this.detailsService.download(row.receipt_number).subscribe({
-
-            next: res => {
-
+            next: (res) => {
                 this.downloading = false;
                 let blob = this.b64toBlob(res.data, 'application/pdf');
-                FileSaver.saveAs(blob, 'Invoice-' + row.receipt_number + '.pdf');
+                FileSaver.saveAs(
+                    blob,
+                    'Invoice-' + row.receipt_number + '.pdf'
+                );
             },
             error: (err: HttpErrorResponse) => {
-                this._snackbar.openSnackBar(err.error?.message || GlobalConstants.genericError, GlobalConstants.error);
-            }
+                this._snackbar.openSnackBar(
+                    err.error?.message || GlobalConstants.genericError,
+                    GlobalConstants.error
+                );
+            },
         });
     }
-
 
     // Method to convert base64 data to a blob
     b64toBlob(b64Data: string, contentType: string, sliceSize?: number) {
@@ -94,7 +115,11 @@ export class ViewDetailSaleComponent implements OnInit, OnDestroy {
         var byteCharacters = atob(b64Data);
         var byteArrays = [];
 
-        for (var offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+        for (
+            var offset = 0;
+            offset < byteCharacters.length;
+            offset += sliceSize
+        ) {
             var slice = byteCharacters.slice(offset, offset + sliceSize);
             var byteNumbers = new Array(slice.length);
             for (var i = 0; i < slice.length; i++) {
@@ -107,12 +132,10 @@ export class ViewDetailSaleComponent implements OnInit, OnDestroy {
         return blob;
     }
 
-
     // Method to close the dialog
     closeDialog() {
         this._dialogRef.close();
     }
-
 
     // Method to unsubscribe from all subscriptions
     ngOnDestroy(): void {

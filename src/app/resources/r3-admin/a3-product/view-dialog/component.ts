@@ -1,5 +1,12 @@
 import { CommonModule, DatePipe } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, OnDestroy, OnInit } from '@angular/core';
+import {
+    ChangeDetectionStrategy,
+    ChangeDetectorRef,
+    Component,
+    Inject,
+    OnDestroy,
+    OnInit,
+} from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
@@ -13,7 +20,7 @@ import { SnackbarService } from 'helper/services/snack-bar/snack-bar.service';
 import { Subject } from 'rxjs';
 
 import { Data } from './interface';
-import { ProductService } from '../service';
+import { ProductService } from '../product.service';
 
 @Component({
     selector: 'dashboard-gm-fast-view-customer',
@@ -31,11 +38,18 @@ import { ProductService } from '../service';
         MatMenuModule,
         MatCheckboxModule,
         DatePipe,
-    ]
+    ],
 })
 export class ViewDialogComponent implements OnInit, OnDestroy {
     private _unsubscribeAll: Subject<any> = new Subject<any>();
-    displayedColumns: string[] = ['no', 'receipt', 'price', 'ordered_at', 'ordered_at_time', 'seller'];
+    displayedColumns: string[] = [
+        'no',
+        'receipt',
+        'price',
+        'ordered_at',
+        'ordered_at_time',
+        'seller',
+    ];
     dataSource: MatTableDataSource<Data> = new MatTableDataSource<Data>([]);
     fileUrl = env.FILE_BASE_URL;
     public isLoading: boolean;
@@ -45,8 +59,8 @@ export class ViewDialogComponent implements OnInit, OnDestroy {
         private _dialogRef: MatDialogRef<ViewDialogComponent>,
         private cdr: ChangeDetectorRef,
         private _snackbar: SnackbarService,
-        private productService: ProductService,
-    ) { }
+        private productService: ProductService
+    ) {}
 
     ngOnInit(): void {
         this.viewData();

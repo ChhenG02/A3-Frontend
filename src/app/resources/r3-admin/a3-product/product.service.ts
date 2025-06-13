@@ -13,8 +13,7 @@ import { Observable, catchError, of, switchMap, throwError } from 'rxjs';
 // ================================================================>> Custom Library (Application-specific)
 import { env } from 'envs/env';
 
-
-import { Data, List, SetupResponse } from './interface';
+import { Data, List, SetupResponse } from './product.interface';
 import { DataSaleResponse } from '../a1-dashboard/interface';
 
 @core.Injectable({

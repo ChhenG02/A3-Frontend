@@ -66,7 +66,7 @@ export const appRoutes: Route[] = [
                 resolve: {
                     role: roleResolver([RoleEnum.CASHIER])
                 },
-                loadChildren: () => import('app/resources/r2-cashier/routes')
+                loadChildren: () => import('app/resources/r2-cashier/cashier.routes')
             },
 
             {

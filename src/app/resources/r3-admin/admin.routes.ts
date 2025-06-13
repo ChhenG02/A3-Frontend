@@ -4,7 +4,7 @@ import { DashboardComponent } from './a1-dashboard/component';
 import { SaleComponent } from './a2-sale/component';
 
 import { UserComponent } from './a5-user/u1-listing/component';
-import { ProductComponent } from './a3-product/component';
+import { ProductComponent } from './a3-product/product.component';
 import { SetupLayoutComponent } from './a6-setup/component';
 import { ProductTypeComponent } from './a6-setup/s1-type/component';
 
