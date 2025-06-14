@@ -56,6 +56,7 @@ export class StockComponent implements OnInit {
   private snackBarService = inject(SnackbarService);
   private matDialog = inject(MatDialog);
   private helpersConfirmationService = inject(HelperConfirmationService);
+  public selectedSortOrder: 'asc' | 'desc' = 'asc';
 
   // ========== Data Properties ==========
   data: Data[] = [];
@@ -107,6 +108,11 @@ export class StockComponent implements OnInit {
     this.getData();
   }
 
+
+  selectSortOrder(): void {
+    this.selectedSortOrder = this.selectedSortOrder === 'asc' ? 'desc' : 'asc';
+    this.getData(); // or whatever method reloads your data
+}
   // ========== Dialogs Section ==========
 
   /**
@@ -329,10 +335,12 @@ export class StockComponent implements OnInit {
   /**
    * Select sorting item
    */
-  selectShortedItem(item: any): void {
-    this.selectedShortedItem = item;
-    this.getData();
-  }
+ selectSortOption(option: any): void {
+  this.selectedSortOption = option;
+  this.selectedShortedItem = { value: option.value }; // Keep for backward compatibility
+  this.shortedOrder = option.order;
+  this.getData();
+}
 
   /**
    * Toggle sorting order
@@ -341,6 +349,14 @@ export class StockComponent implements OnInit {
     this.shortedOrder = this.shortedOrder === 'desc' ? 'asc' : 'desc';
     this.getData();
   }
+
+  // sort option
+  sortOptions: any[] = [
+  { name: 'Qty: High to Low', value: 'qty', order: 'desc' },
+  { name: 'Qty: Low to High', value: 'qty', order: 'asc' },
+  { name: 'Stock Status', value: 'stock_status_id', order: 'asc' }
+];
+selectedSortOption: any = this.sortOptions[0];
 
   /**
    * Clear all filters
