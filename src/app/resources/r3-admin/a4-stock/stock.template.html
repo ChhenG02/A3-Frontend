@@ -20,12 +20,27 @@
                 >
                     <mat-icon svgIcon="heroicons_outline:magnifying-glass" />
                 </button>
+
                 <input
                     placeholder="Search"
-                    class="w-full pr-3 h-10"
+                    class="w-full pr-1 h-10"
                     [(ngModel)]="key"
                     (keydown.enter)="getData()"
                 />
+
+                <!-- Clear Button -->
+                <button
+                    *ngIf="badgeValue > 0"
+                    mat-icon-button
+                    (click)="clearFilter()"
+                    class="ml-1"
+                    matTooltip="Clear filters"
+                >
+                    <mat-icon
+                        class="text-red-500"
+                        svgIcon="mdi:close-circle-outline"
+                    ></mat-icon>
+                </button>
                 <button
                     mat-icon-button
                     [matBadge]="badgeValue"
@@ -36,6 +51,50 @@
                     <mat-icon class="text-red-500" svgIcon="mdi:tune" />
                 </button>
             </div>
+
+            <!-- Sort Dropdown -->
+            <!-- <mat-form-field class="helpers-mat-form-field-sm">
+            <mat-label>Sort By</mat-label>
+            <mat-select [(value)]="selectedSortOption" (selectionChange)="selectSortOption($event.value)">
+                <mat-option *ngFor="let option of sortOptions" [value]="option">
+                {{ option.name }}
+                </mat-option>
+            </mat-select>
+            </mat-form-field> -->
+
+            <!-- Sort Dropdown -->
+            <div
+                class="flex items-center min-w-[20ch] max-w-[20ch] h-10 border border-slate-300 dark:bg-gray-800 rounded-[0.65rem] overflow-hidden"
+            >
+                <!-- Trigger for Dropdown Menu -->
+                <button
+                    [matMenuTriggerFor]="sortMenu"
+                    type="button"
+                    class="inline-flex w-full justify-between items-center px-3 py-2 text-gray-700 dark:text-gray-300 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition"
+                    aria-haspopup="true"
+                    aria-expanded="true"
+                >
+                    {{ selectedSortOption.name }}
+                    <mat-icon
+                        class="ml-2 text-base"
+                        svgIcon="mdi:sort"
+                    ></mat-icon>
+                </button>
+
+                <!-- Dropdown Menu -->
+                <mat-menu #sortMenu="matMenu">
+                    <ng-container *ngFor="let option of sortOptions">
+                        <button
+                            mat-menu-item
+                            (click)="selectSortOption(option)"
+                        >
+                            {{ option.name }}
+                        </button>
+                    </ng-container>
+                </mat-menu>
+            </div>
+
+            <!-- create button -->
             <button
                 class="helpers-mat-button-sm min-w-[2.5rem] px-2"
                 (click)="create()"

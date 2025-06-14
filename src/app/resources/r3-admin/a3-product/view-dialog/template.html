@@ -263,32 +263,7 @@
                                                     [src]="fileUrl + element.cashier?.avatar"
                                                     alt="profile"
                                                 />
-
-                                                <!-- Status Indicator with Icon -->
-                                                <span
-                                                    class="absolute bottom-0 right-0 w-4 h-4 bg-white border-2 border-white dark:border-gray-800 rounded-full flex items-center justify-center"
-                                                >
-                                                    <mat-icon
-                                                        *ngIf="element.platform === 'Web'"
-                                                        class="icon-size-4"
-                                                        svgIcon="mdi:monitor"
-                                                    >
-                                                    </mat-icon>
-
-                                                    <mat-icon
-                                                        *ngIf="element.platform === 'Mobile'"
-                                                        class="icon-size-4"
-                                                        svgIcon="mdi:cellphone"
-                                                    >
-                                                    </mat-icon>
-
-                                                    <mat-icon
-                                                        *ngIf="element.platform === 'Unknown' || element.platform === null"
-                                                        class="icon-size-4"
-                                                        svgIcon="mdi:crosshairs-question"
-                                                    >
-                                                    </mat-icon>
-                                                </span>
+                                                
                                             </div>
                                         </div>
                                     </td>

@@ -439,12 +439,10 @@ export class ProductComponent implements OnInit {
 
     // ===>> Clear Short Filter
     clearFilter(): void {
-        // Set all filters to 0
-        // this.users              = 0;
-        // this.productTypes       = 0;
+        this.key = '';
+        this.productTypes = 0;
+        this.users = 0;
         this.badgeValue = 0;
-
-        // Refresh Data
         this.getData();
     }
 
