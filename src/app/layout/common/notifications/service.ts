@@ -83,47 +83,15 @@ export class NotificationsService implements OnDestroy {
     }
 
     getAll(): Observable<Notification[]> {
-        const staticNotifications: Notification[] = [
-            {
-                id: 1,
-                receipt_number: 10001,
-                total_price: 49.99,
-                ordered_at: new Date('2025-05-06T10:00:00Z'),
-                cashier: {
-                    id: 1,
-                    name: 'Sok Dara',
-                    avatar: 'static/avatars/dara.png',
-                },
-                read: false,
-            },
-            {
-                id: 2,
-                receipt_number: 10002,
-                total_price: 75.5,
-                ordered_at: new Date('2025-05-07T09:30:00Z'),
-                cashier: {
-                    id: 2,
-                    name: 'Chan Nita',
-                    avatar: 'static/avatars/nita.png',
-                },
-                read: true,
-            },
-            {
-                id: 3,
-                receipt_number: 10003,
-                total_price: 120.0,
-                ordered_at: new Date('2025-05-07T11:15:00Z'),
-                cashier: {
-                    id: 3,
-                    name: 'Rithy',
-                    avatar: 'static/avatars/rithy.png',
-                },
-                read: false,
-            },
-        ];
+         const apiUrl = `${env.API_BASE_URL}/share/notifications`;
 
-        this.notifications = staticNotifications;
-        return of(staticNotifications);
+        return this._httpClient.get<{ data: Notification[] }>(apiUrl).pipe(
+            map(response => {
+                const notifications = response.data;
+                this.notifications = notifications;
+                return notifications;
+            })
+        );
     }
 
     markAllAsRead(): Observable<boolean> {
