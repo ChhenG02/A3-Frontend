@@ -4,10 +4,10 @@
     <!-- Selection Action Bar - Shows when items are selected -->
     <div
         *ngIf="showCheckboxes && showSelectionBar"
-        class="bg-blue-50 dark:bg-blue-900/20 border-b border-blue-200 dark:border-blue-800 px-4 py-3 flex items-center justify-between animate-in slide-in-from-top-2 duration-300"
+        class="bg-slate-100 dark:bg-blue-900/20 border-b border-blue-200 dark:border-blue-800 px-4 py-3 flex items-center justify-between animate-in slide-in-from-top-2 duration-300"
     >
         <div class="flex items-center gap-4">
-            <span class="text-sm font-medium text-blue-900 dark:text-blue-100">
+            <span class="text-base font-medium text-slate-500 dark:text-blue-100">
                 {{ selectedItems.length }} items selected
             </span>
         </div>
@@ -20,8 +20,10 @@
                 [style.--mdc-outlined-text-field-container-height]="'36px'"
             >
                 <mat-label>Apply Promotion</mat-label>
-                <mat-select [(ngModel)]="selectedPromotionId" required>
-                    <mat-option [value]="null">None</mat-option>
+                <mat-select
+                    [(ngModel)]="selectedPromotionId"
+                    (selectionChange)="onPromotionChange($event.value)"
+                >
                     <mat-option
                         *ngFor="let promo of promotions"
                         [value]="promo.id"
@@ -31,13 +33,26 @@
                 </mat-select>
             </mat-form-field>
 
-            <!-- Confirm Button -->
+            <!-- Remove Promotion Button -->
             <button
-                class="helpers-mat-button-sm min-w-[2.5rem] px-2 border-none self-center"
+                class="helpers-mat-button-sm min-w-[2.5rem] px-2"
+                (click)="removePromotion()"
+                mat-stroked-button
+            >
+                <span class="text-red-500 pr-1 pl-1">Remove</span>
+                <mat-icon
+                    svgIcon="mdi:trash-can-outline"
+                    class="text-red-500 text-lg"
+                ></mat-icon>
+            </button>
+
+            <!-- Confirm Button -->
+              <button
+                class="helpers-mat-button-sm min-w-[2.5rem] px-2"
                 (click)="applyPromotion()"
                 mat-stroked-button
             >
-                <span class="text-slate-500 text-lg">Confirm</span>
+                <span class="text-slate-500 pr-1 pl-1">Confirm</span>
             </button>
         </div>
     </div>
@@ -86,7 +101,7 @@
 
                 <!-- Clear Button -->
                 <button
-                     *ngIf="badgeValue > 0"
+                    *ngIf="badgeValue > 0"
                     mat-icon-button
                     (click)="clearFilter()"
                     class="ml-1"
@@ -182,10 +197,11 @@
                                     />
                                     <!-- Promotion badge -->
                                     <div
-                                        *ngIf="element.promotion_id"
+                                        *ngIf="element.promotion_id && parseDiscount(element.discount) > 0"
                                         class="absolute -top-0 -right-0 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold"
                                     >
-                                        -{{getPromotionDiscount(element.promotion_id)}}%
+                                        -{{parseDiscount(element.discount) |
+                                        number:'1.0-0'}}%
                                     </div>
                                 </div>
                                 <div class="flex flex-col gap-1">
@@ -215,19 +231,19 @@
                             <div class="flex flex-col items-end">
                                 <!-- Original price with strikethrough if discounted -->
                                 <span
-                                    [class.line-through]="element.promotion_id"
-                                    [class.text-gray-400]="element.promotion_id"
+                                    [class.line-through]="parseDiscount(element.discount) > 0"
+                                    [class.text-gray-400]="parseDiscount(element.discount) > 0"
                                     class="text-gray-500"
                                 >
                                     {{element.unit_price | number}}
                                 </span>
                                 <!-- Discounted price -->
                                 <span
-                                    *ngIf="element.promotion_id"
+                                    *ngIf="parseDiscount(element.discount) > 0"
                                     class="text-red-500 font-semibold"
                                 >
-                                    {{calculateDiscountedPrice(element) |
-                                    number}}
+                                    {{calculateDiscountPrice(element) |
+                                    number:'1.2-2'}}
                                 </span>
                             </div>
                         </td>

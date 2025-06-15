@@ -8,7 +8,7 @@ import {
 import * as core from '@angular/core';
 
 // ================================================================>> Third party Library
-import { Observable, catchError, of, switchMap, throwError } from 'rxjs';
+import { Observable, catchError, map, of, switchMap, throwError } from 'rxjs';
 
 // ================================================================>> Custom Library (Application-specific)
 import { env } from 'envs/env';
@@ -38,11 +38,19 @@ export class ProductService {
     }
 
     // Method to fetch all products
+    // In product.service.ts (frontend)
     getData(params = null) {
-        return this.httpClient.get<List>(`${env.API_BASE_URL}/admin/products`, {
-            headers: this._httpOptions.headers,
-            params,
-        });
+        return this.httpClient
+            .get<any>(`${env.API_BASE_URL}/admin/products`, {
+                headers: this._httpOptions.headers,
+                params,
+            })
+            .pipe(
+                map((response) => ({
+                    data: response.data.products,
+                    pagination: response.pagination,
+                }))
+            );
     }
 
     // Method to create a new product
@@ -61,6 +69,17 @@ export class ProductService {
                     'application/json'
                 ),
             }
+        );
+    }
+
+    applyPromotion(body: {
+        promotionId: number | null;
+        productIds: number[];
+    }): Observable<any> {
+        return this.httpClient.post<any>(
+            `${env.API_BASE_URL}/admin/products/promotion`,
+            body,
+            this._httpOptions
         );
     }
 
