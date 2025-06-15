@@ -105,7 +105,7 @@ export class ProductComponent implements OnInit {
     public limit: number = 20;
     public page: number = 1;
     public isLoading: boolean = false;
-    public selectedPromotionId: number | null = null;
+    public selectedPromotionId: number = 0;
 
     // Search,sort and filter
     public key: string = '';
@@ -150,34 +150,38 @@ export class ProductComponent implements OnInit {
         this.getPromotions();
     }
 
+    onPromotionChange(value: number | null): void {
+        console.log('Selected promotion ID:', value);
+        this.selectedPromotionId = value;
+    }
+
     getPromotionDiscount(promotionId: number): number {
         const promotion = this.promotions.find((p) => p.id === promotionId);
         return promotion ? promotion.discount_value : 0;
     }
 
-    calculateDiscountedPrice(product: Data): number {
-        if (!product.promotion_id) return product.unit_price;
-
-        const promotion = this.promotions.find(
-            (p) => p.id === product.promotion_id
-        );
-        if (!promotion) return product.unit_price;
-
-        const discount = promotion.discount_value / 100;
-        return product.unit_price * (1 - discount);
-    }
-
     getPromotions(): void {
         this.promotionService.getData().subscribe({
             next: (res) => {
-                this.promotions = res.data.Promotion;
+                console.log('Promotions data:', res);
+                this.promotions = res.data.Promotion || [];
+                // Set default promotion if available
+                if (this.promotions.length > 0) {
+                    this.selectedPromotionId = this.promotions[0].id;
+                }
             },
             error: (err) => {
-                // handle error if needed
+                console.error('Error fetching promotions:', err);
                 this.promotions = [];
+                this.snackBarService.openSnackBar(
+                    'Failed to load promotions',
+                    GlobalConstants.error
+                );
             },
         });
     }
+
+    
 
     // Toggle checkbox visibility and selection bar
     toggleCheckboxes(): void {
@@ -187,6 +191,21 @@ export class ProductComponent implements OnInit {
         }
         // Force change detection to update the table columns
         this.cdr.detectChanges();
+    }
+
+    // Add this method to your ProductComponent class
+    parseDiscount(discount: string | number | undefined): number {
+        if (!discount) return 0;
+        if (typeof discount === 'number') return discount;
+        return parseFloat(discount);
+    }
+
+    calculateDiscountPrice(product: Data): number {
+        const discount = this.parseDiscount(product.discount);
+        if (discount <= 0) {
+            return product.unit_price;
+        }
+        return product.unit_price * (1 - discount / 100);
     }
 
     // Toggle selection for individual item
@@ -246,6 +265,83 @@ export class ProductComponent implements OnInit {
         this.selectedItems = [];
         this.isAllSelected = false;
         this.showSelectionBar = false;
+        this.selectedPromotionId =
+            this.promotions.length > 0 ? this.promotions[0].id : 0;
+    }
+
+    isPromotionChanged(): boolean {
+        if (this.selectedItems.length === 0) {
+            return false;
+        }
+
+        // If selectedPromotionId is null, we're removing promotion
+        if (this.selectedPromotionId === null) {
+            return this.selectedItems.some(
+                (item) => item.promotion_id !== null
+            );
+        }
+
+        // Otherwise check if any selected item has a different promotion
+        return this.selectedItems.some(
+            (item) => item.promotion_id !== this.selectedPromotionId
+        );
+    }
+
+    removePromotion(): void {
+        if (this.selectedItems.length === 0) {
+            this.snackBarService.openSnackBar(
+                'No items selected',
+                GlobalConstants.error
+            );
+            return;
+        }
+
+        const productIds = this.selectedItems.map((item) => item.id);
+
+        this._service
+            .applyPromotion({
+                promotionId: null,
+                productIds: productIds,
+            })
+            .subscribe({
+                next: (response) => {
+                    if (response.status === 'success') {
+                        this.dataSource.data = this.dataSource.data.map(
+                            (item) => {
+                                if (productIds.includes(item.id)) {
+                                    return {
+                                        ...item,
+                                        promotion_id: null,
+                                        discount: 0,
+                                    };
+                                }
+                                return item;
+                            }
+                        );
+
+                        this.snackBarService.openSnackBar(
+                            `Promotion removed from ${productIds.length} products`,
+                            GlobalConstants.success
+                        );
+                        this.clearSelection();
+                        this.cdr.detectChanges();
+                        this.getData();
+                    } else {
+                        console.error('Unexpected response:', response);
+                        this.snackBarService.openSnackBar(
+                            response.message || 'Failed to remove promotion',
+                            GlobalConstants.error
+                        );
+                    }
+                },
+                error: (err: HttpErrorResponse) => {
+                    console.error('Remove promotion error:', err);
+                    this.snackBarService.openSnackBar(
+                        err.error?.message || 'Failed to remove promotion',
+                        GlobalConstants.error
+                    );
+                },
+            });
     }
 
     // Apply promotion to selected items
@@ -258,31 +354,59 @@ export class ProductComponent implements OnInit {
             return;
         }
 
-        if (!this.selectedPromotionId) {
-            // Remove promotion if None is selected
-            this.selectedItems.forEach((item) => {
-                item.promotion_id = null;
-            });
-            this.snackBarService.openSnackBar(
-                `Promotion removed from ${this.selectedItems.length} item(s)`,
-                GlobalConstants.success
-            );
-        } else {
-            // Apply promotion
-            this.selectedItems.forEach((item) => {
-                item.promotion_id = this.selectedPromotionId;
-            });
-            this.snackBarService.openSnackBar(
-                `Promotion applied to ${this.selectedItems.length} item(s)`,
-                GlobalConstants.success
-            );
-        }
+        const productIds = this.selectedItems.map((item) => item.id);
 
-        // Clear selection after action
-        this.clearSelection();
+        this._service
+            .applyPromotion({
+                promotionId: this.selectedPromotionId,
+                productIds: productIds,
+            })
+            .subscribe({
+                next: (response) => {
+                    if (response.status === 'success') {
+                        this.dataSource.data = this.dataSource.data.map(
+                            (item) => {
+                                if (productIds.includes(item.id)) {
+                                    return {
+                                        ...item,
+                                        promotion_id: this.selectedPromotionId,
+                                        discount: this.selectedPromotionId
+                                            ? this.getPromotionDiscount(
+                                                  this.selectedPromotionId
+                                              )
+                                            : 0,
+                                    };
+                                }
+                                return item;
+                            }
+                        );
 
-        // Refresh the view
-        this.cdr.detectChanges();
+                        const message = this.selectedPromotionId
+                            ? `Promotion applied to ${productIds.length} products`
+                            : `Promotion removed from ${productIds.length} products`;
+
+                        this.snackBarService.openSnackBar(
+                            message,
+                            GlobalConstants.success
+                        );
+                        this.clearSelection();
+                        this.cdr.detectChanges();
+                        this.getData();
+                    } else {
+                        this.snackBarService.openSnackBar(
+                            response.message,
+                            GlobalConstants.error
+                        );
+                    }
+                },
+                error: (err) => {
+                    console.error('Apply promotion error:', err);
+                    this.snackBarService.openSnackBar(
+                        err.error?.message || 'Failed to apply promotion',
+                        GlobalConstants.error
+                    );
+                },
+            });
     }
 
     // Remove selected items
