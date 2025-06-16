@@ -4,7 +4,7 @@
     <div class="relative overflow-hidden rounded-lg border border-gray-200 dark:border-gray-800">
         <!-- Discount Badge -->
         <div *ngIf="data.promotion_id && parseDiscount(data.discount) > 0"
-            class="absolute top-1 right-1 bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center text-xs font-bold z-10">
+            class="absolute top-1 right-1 bg-red-500 text-white rounded-full w-10 h-10 flex items-center justify-center text-xs font-bold z-10">
             -{{parseDiscount(data.discount) | number:'1.0-0'}}%
         </div>
 
