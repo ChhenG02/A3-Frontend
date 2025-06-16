@@ -296,17 +296,6 @@
                 </div>
 
                 <!-- Remove Button -->
-                <!-- <button
-                    (click)="remove(item.temp_qty,i)"
-                    class="w-8 h-8 flex items-center justify-center text-red-60 rounded-lg transition-colors duration-200"
-                >
-                    <mat-icon
-                        class="text-base"
-                        svgIcon="mdi:trash-can-outline"
-                    ></mat-icon>
-                </button> -->
-
-
                 <button
                     class="helpers-mat-button-sm min-w-[2.5rem] px-2 border-none"
                     mat-stroked-button
@@ -321,42 +310,24 @@
         </div>
     </div>
     
-    <!-- Order Summary (order)-->
-    <div class="p-6 space-y-3">
-        <div class="flex justify-between text-gray-600">
-            <span>Subtotal</span>
-            <span>{{ totalPrice | number }}$</span>
-        </div>
-        <div
-            class="flex justify-between text-gray-600"
-            *ngIf="orderSummary?.discount > 0"
-        >
-            <span>Discount</span>
-            <span
-                >{{orderSummary?.discount |
-                currency:'USD':'symbol':'1.2-2'}}</span
-            >
-        </div>
-        <div
-            class="flex justify-between text-gray-600"
-            *ngIf="orderSummary?.tax > 0"
-        >
-            <span>Tax</span>
-            <span
-                >{{orderSummary?.tax |
-                currency:'USD':'symbol':'1.2-2'}}</span
-            >
-        </div>
-        <div
-            class="flex justify-between text-lg font-bold border-t pt-3"
-        >
-            <span>Total</span>
-            <span class="text-red-500"
-                >{{orderSummary?.total |
-                currency:'USD':'symbol':'1.2-2'}}</span
-            >
-        </div>
+    <!-- Order Summary (order) -->
+<div class="p-6 space-y-3">
+    <!-- Subtotal -->
+    <div class="flex justify-between text-gray-600">
+        <span>Subtotal</span>
+        <span>{{ orderSummary.subtotal | number:'1.2-2' }}$</span>
     </div>
+    <!-- Discount -->
+    <div class="flex justify-between text-gray-600" *ngIf="orderSummary.discount > 0">
+        <span>Discount</span>
+        <span class="text-green-600">-{{ orderSummary.discount | number:'1.2-2' }}$</span>
+    </div>
+    <!-- Total -->
+    <div class="flex justify-between text-lg font-bold border-t pt-3">
+        <span>Total</span>
+        <span class="text-red-500">{{ orderSummary.total | number:'1.2-2' }}$</span>
+    </div>
+</div>
     
     <!-- Checkout Button Section -->
     <div
@@ -417,44 +388,23 @@
 
                     <!-- Payment Interface Component -->
                     <div class="flex-1 flex flex-col bg-white">
-                        <!-- Order Summary (unchanged) -->
+                        <!-- Order Summary -->
                         <div class="p-6 space-y-3">
                             <div class="flex justify-between text-gray-600">
                                 <span>Subtotal</span>
-                                <span>{{ totalPrice | number }}$</span>
+                                <span>{{ orderSummary.subtotal | number:'1.2-2' }}$</span>
                             </div>
-                            <div
-                                class="flex justify-between text-gray-600"
-                                *ngIf="orderSummary?.discount > 0"
-                            >
+                            <div class="flex justify-between text-gray-600" *ngIf="orderSummary.discount > 0">
                                 <span>Discount</span>
-                                <span
-                                    >{{orderSummary?.discount |
-                                    currency:'USD':'symbol':'1.2-2'}}</span
-                                >
+                                <span class="text-green-600">-{{ orderSummary.discount | number:'1.2-2' }}$</span>
                             </div>
-                            <div
-                                class="flex justify-between text-gray-600"
-                                *ngIf="orderSummary?.tax > 0"
-                            >
-                                <span>Tax</span>
-                                <span
-                                    >{{orderSummary?.tax |
-                                    currency:'USD':'symbol':'1.2-2'}}</span
-                                >
-                            </div>
-                            <div
-                                class="flex justify-between text-lg font-bold border-t pt-3"
-                            >
+                            <div class="flex justify-between text-lg font-bold border-t pt-3">
                                 <span>Total</span>
-                                <span class="text-red-500"
-                                    >{{orderSummary?.total |
-                                    currency:'USD':'symbol':'1.2-2'}}</span
-                                >
+                                <span class="text-red-500">{{ orderSummary.total | number:'1.2-2' }}$</span>
                             </div>
                         </div>
 
-                        <!-- Payment Method (unchanged) -->
+                        <!-- Payment Method  -->
                         <div class="px-6 pb-4">
                             <h2 class="text-lg font-semibold mb-4">
                                 Payment Method
@@ -615,8 +565,12 @@
                                     </button>
                                     <!-- Make Add button also confirm payment -->
                                     <button
-                                        (click)="confirmPayment()"
-                                        class="keypad-button bg-green-50 border-green-200 border rounded-xl h-12 text-sm font-semibold text-green-600 shadow-sm hover:shadow-md"
+                                        (click)="addPayment()"
+                                        class="keypad-button border rounded-xl h-12 text-sm font-semibold shadow-sm hover:shadow-md"
+                                        [ngClass]="{
+                                            'bg-green-50 border-green-200 text-green-600': !isOrderBeingMade && canConfirmPayment(),
+                                            'bg-gray-200 border-gray-300 text-gray-400 cursor-not-allowed': isOrderBeingMade || !canConfirmPayment()
+                                        }"
                                         [disabled]="isOrderBeingMade || !canConfirmPayment()"
                                     >
                                         Add
