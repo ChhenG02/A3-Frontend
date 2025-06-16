@@ -96,7 +96,6 @@ export class OrderComponent implements OnInit, OnDestroy {
     discount: number = 0;
     isWaitingForScanPay = false;
     scanPayPollingInterval: any = null;
-    tax: number = 0;
     qrData: string = '';
     isGeneratingQR = false;
 
@@ -105,7 +104,6 @@ export class OrderComponent implements OnInit, OnDestroy {
     orderSummary = {
         subtotal: 0,
         discount: 0,
-        tax: 0,
         total: 0,
     };
 
@@ -179,38 +177,37 @@ export class OrderComponent implements OnInit, OnDestroy {
 
     // ================================================================>> Section: Cart Management
     addToCart(incomingItem: Product, qty = 0): void {
-        if (this.isCheckoutSuccess) {
-            this._snackBarService.openSnackBar(
-                'Cannot add items to cart during payment.',
-                GlobalConstants.error
-            );
-            return;
-        }
-        const existingItem = this.carts.find(
-            (item) => item.id === incomingItem.id
+    if (this.isCheckoutSuccess) {
+        this._snackBarService.openSnackBar(
+            'Cannot add items to cart during payment.',
+            GlobalConstants.error
         );
-        if (existingItem) {
-            existingItem.qty += qty;
-            existingItem.temp_qty = existingItem.qty;
-        } else {
-            const newItem: CartItem = {
-                id: incomingItem.id,
-                name: incomingItem.name,
-                qty: qty,
-                temp_qty: qty,
-                unit_price: incomingItem.unit_price,
-                image: incomingItem.image,
-                code: incomingItem.code,
-                type: incomingItem.product_type,
-                promotion_id: incomingItem.promotion_id, // Add this
-                discount: incomingItem.discount, // And this
-            };
-
-            this.carts.push(newItem);
-            this.canSubmit = true;
-        }
-        this.getTotalPrice();
+        return;
     }
+    const existingItem = this.carts.find(
+        (item) => item.id === incomingItem.id
+    );
+    if (existingItem) {
+        existingItem.qty += qty;
+        existingItem.temp_qty = existingItem.qty;
+    } else {
+        const newItem: CartItem = {
+            id: incomingItem.id,
+            name: incomingItem.name,
+            qty: qty,
+            temp_qty: qty,
+            unit_price: incomingItem.unit_price,
+            image: incomingItem.image,
+            code: incomingItem.code,
+            type: incomingItem.product_type,
+            promotion_id: incomingItem.promotion_id,
+            discount: incomingItem.discount ?? 0, // Default to 0 if undefined
+        };
+        this.carts.push(newItem);
+        this.canSubmit = true;
+    }
+    this.getTotalPrice();
+}
 
     incrementQty(index: number): void {
         const item = this.carts[index];
@@ -275,22 +272,32 @@ export class OrderComponent implements OnInit, OnDestroy {
 
     // ================================================================>> Section: Price Calculation
     getTotalPrice(): void {
-        this.totalPrice = this.carts.reduce((total, item) => {
-            // Calculate discounted price if promotion exists
+        // Calculate subtotal (total without discounts)
+        const subtotal = this.carts.reduce((total, item) => {
+            return total + item.qty * item.unit_price;
+        }, 0);
+
+        // Calculate total after discounts
+        const totalAfterDiscount = this.carts.reduce((total, item) => {
             const price =
                 item.promotion_id && item.discount > 0
                     ? item.unit_price * (1 - item.discount / 100)
                     : item.unit_price;
             return total + item.qty * price;
         }, 0);
+
+        // Calculate discount as subtotal minus total after discounts
+        const discount = subtotal - totalAfterDiscount;
+
+        this.totalPrice = totalAfterDiscount;
+        this.discount = discount;
         this.updateOrderSummary();
     }
 
     updateOrderSummary(): void {
-        this.orderSummary.subtotal = this.totalPrice;
+        this.orderSummary.subtotal = this.totalPrice + this.discount; // Subtotal is total before discounts
         this.orderSummary.discount = this.discount;
-        this.orderSummary.tax = this.tax;
-        this.orderSummary.total = this.totalPrice - this.discount + this.tax;
+        this.orderSummary.total = this.totalPrice; // Total after discounts, no tax
     }
 
     // ================================================================>> Section: Payment & Checkout
@@ -387,79 +394,85 @@ export class OrderComponent implements OnInit, OnDestroy {
     }
 
     confirmPayment(): void {
-        if (!this.carts.length) {
+    if (!this.carts.length) {
+        this._snackBarService.openSnackBar(
+            'No items in cart.',
+            GlobalConstants.error
+        );
+        return;
+    }
+    if (this.selectedPaymentMethod === 'cash') {
+        const amount = parseFloat(this.currentAmount);
+        if (isNaN(amount)) {
             this._snackBarService.openSnackBar(
-                'No items in cart.',
+                'Please enter a valid payment amount.',
                 GlobalConstants.error
             );
             return;
         }
-        if (this.selectedPaymentMethod === 'cash') {
-            const amount = parseFloat(this.currentAmount);
-            if (isNaN(amount) || amount < this.orderSummary.total) {
-                this._snackBarService.openSnackBar(
-                    'Invalid or insufficient cash amount.',
-                    GlobalConstants.error
-                );
-                return;
-            }
+        if (Math.abs(amount - this.orderSummary.total) >= 0.01) {
+            this._snackBarService.openSnackBar(
+                `Amount ($${amount.toFixed(2)}) must exactly equal total ($${this.orderSummary.total.toFixed(2)}).`,
+                GlobalConstants.error
+            );
+            return;
         }
-        const carts: { [itemId: number]: number } = {};
-        this.carts.forEach((item: CartItem) => {
-            carts[item.id] = item.qty;
-        });
-        const body = { cart: JSON.stringify(carts) };
-        this.isOrderBeingMade = true;
-        this._service.create(body).subscribe({
-            next: (response) => {
-                this.isOrderBeingMade = false;
-                this.lastOrderData = response.data;
-                this.orderedItems = [...this.carts];
-                this.carts = [];
-                this.isCheckoutSuccess = false;
-                this.canSubmit = false;
-                this.currentAmount = '';
-                this.displayAmount = '';
-                // Clear QR and polling state
-                this.qrData = '';
-                this.khqrService.lastMd5 = '';
-                if (this.scanPayPollingInterval) {
-                    clearInterval(this.scanPayPollingInterval);
-                    this.scanPayPollingInterval = null;
-                }
-                this.isWaitingForScanPay = false;
-                this._snackBarService.openSnackBar(
-                    response.message || 'Payment successful!',
-                    GlobalConstants.success
-                );
-                this.viewReceipt();
-                this._changeDetectorRef.detectChanges();
-            },
-            error: (err: HttpErrorResponse) => {
-                this.isOrderBeingMade = false;
-                this._snackBarService.openSnackBar(
-                    err?.error?.message || GlobalConstants.genericError,
-                    GlobalConstants.error
-                );
-            },
-        });
     }
+    const carts: { [itemId: number]: number } = {};
+    this.carts.forEach((item: CartItem) => {
+        carts[item.id] = item.qty;
+    });
+    const body = { cart: JSON.stringify(carts) };
+    this.isOrderBeingMade = true;
+    this._service.create(body).subscribe({
+        next: (response) => {
+            this.isOrderBeingMade = false;
+            this.lastOrderData = response.data;
+            this.orderedItems = [...this.carts];
+            this.carts = [];
+            this.isCheckoutSuccess = false;
+            this.canSubmit = false;
+            this.currentAmount = '';
+            this.displayAmount = '';
+            this.qrData = '';
+            this.khqrService.lastMd5 = '';
+            if (this.scanPayPollingInterval) {
+                clearInterval(this.scanPayPollingInterval);
+                this.scanPayPollingInterval = null;
+            }
+            this.isWaitingForScanPay = false;
+            this._snackBarService.openSnackBar(
+                response.message || 'Payment successful!',
+                GlobalConstants.success
+            );
+            this.viewReceipt();
+            this._changeDetectorRef.detectChanges();
+        },
+        error: (err: HttpErrorResponse) => {
+            this.isOrderBeingMade = false;
+            this._snackBarService.openSnackBar(
+                err?.error?.message || GlobalConstants.genericError,
+                GlobalConstants.error
+            );
+        },
+    });
+}
 
     // ================================================================>> Section: Order Submission
     private matDialog = inject(MatDialog);
 
     canConfirmPayment(): boolean {
-        if (this.isOrderBeingMade) return false;
-        if (this.selectedPaymentMethod === 'cash') {
-            const amount = Number(this.currentAmount);
-            return (
-                !!this.currentAmount &&
-                !isNaN(amount) &&
-                amount >= this.orderSummary.total
-            );
-        }
-        return true;
+    if (this.isOrderBeingMade) return false;
+    if (this.selectedPaymentMethod === 'cash') {
+        const amount = Number(this.currentAmount);
+        return (
+            !!this.currentAmount &&
+            !isNaN(amount) &&
+            Math.abs(amount - this.orderSummary.total) < 0.01 // Exact match with tolerance
+        );
     }
+    return true; // For ScanPay, no amount input required
+}
 
     checkOut(): void {
         if (!this.carts.length) {
@@ -475,45 +488,32 @@ export class OrderComponent implements OnInit, OnDestroy {
     }
 
     addPayment(): void {
-        const amount = parseFloat(this.currentAmount);
-        const total = this.orderSummary.total;
+    const amount = parseFloat(this.currentAmount);
+    const total = this.orderSummary.total;
 
-        // Step 1: Handle empty/invalid/zero input with payment method check
-        if (!this.currentAmount || isNaN(amount) || amount <= 0) {
-            if (this.selectedPaymentMethod === 'cash') {
-                this._snackBarService.openSnackBar(
-                    `Amount must be exactly $${total.toFixed(2)}.`,
-                    GlobalConstants.error
-                );
-            } else {
-                this._snackBarService.openSnackBar(
-                    'Please input amount',
-                    GlobalConstants.error
-                );
-            }
+    // Step 1: Handle empty/invalid input
+    if (!this.currentAmount || isNaN(amount)) {
+        this._snackBarService.openSnackBar(
+            'Please enter a valid amount.',
+            GlobalConstants.error
+        );
+        return;
+    }
+
+    // Step 2: For cash, amount must exactly equal total
+    if (this.selectedPaymentMethod === 'cash') {
+        if (Math.abs(amount - total) >= 0.01) {
+            this._snackBarService.openSnackBar(
+                `Amount ($${amount.toFixed(2)}) must exactly equal total ($${total.toFixed(2)}).`,
+                GlobalConstants.error
+            );
             return;
         }
-
-        // Step 2: For cash, amount must be exactly equal to total
-        if (this.selectedPaymentMethod === 'cash') {
-            if (amount < total) {
-                this._snackBarService.openSnackBar(
-                    `Amount is less than required ($${total.toFixed(2)}).`,
-                    GlobalConstants.error
-                );
-                return;
-            } else if (amount > total) {
-                this._snackBarService.openSnackBar(
-                    `Amount must be exactly $${total.toFixed(2)}.`,
-                    GlobalConstants.error
-                );
-                return;
-            }
-        }
-
-        // Step 3: All checks passed
-        this.confirmPayment();
     }
+
+    // Step 3: All checks passed
+    this.confirmPayment();
+}
 
     checkScanPayStatus(): void {
         if (!this.qrData || !this.khqrService) return;
