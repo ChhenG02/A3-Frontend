@@ -1,5 +1,5 @@
 // ================================================================>> Core Library (Angular)
-import { DecimalPipe } from '@angular/common';
+import { CommonModule, DecimalPipe } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 
 // ================================================================>> Third-Party Libraries
@@ -14,7 +14,7 @@ import { Product } from '../order.interface';
     standalone: true,
     templateUrl: './template.html',
     styleUrl: './style.scss',
-    imports: [MatIconModule, DecimalPipe],
+    imports: [CommonModule, MatIconModule, DecimalPipe],
 })
 export class ItemComponent {
     @Input() data: Product;
@@ -24,5 +24,21 @@ export class ItemComponent {
     // ===> Method to emit the data to the parent component
     onOutput() {
         this.result.emit(this.data);
+    }
+
+
+     parseDiscount(discount: string | number | undefined): number {
+        if (!discount) return 0;
+        if (typeof discount === 'number') return discount;
+        return parseFloat(discount) || 0;
+    }
+
+    // Calculate discounted price based on unit price and discount
+    calculateDiscountPrice(product: Product): number {
+        const discount = this.parseDiscount(product.discount);
+        if (discount <= 0 || !product.promotion_id) {
+            return product.unit_price;
+        }
+        return product.unit_price * (1 - discount / 100);
     }
 }
