@@ -47,8 +47,9 @@ interface CartItem {
     image: string;
     code: string;
     type: ProductType;
+    promotion_id?: number;
+    discount?: number;
 }
-
 @Component({
     selector: 'app-order',
     standalone: true,
@@ -201,7 +202,10 @@ export class OrderComponent implements OnInit, OnDestroy {
                 image: incomingItem.image,
                 code: incomingItem.code,
                 type: incomingItem.product_type,
+                promotion_id: incomingItem.promotion_id, // Add this
+                discount: incomingItem.discount, // And this
             };
+
             this.carts.push(newItem);
             this.canSubmit = true;
         }
@@ -271,10 +275,14 @@ export class OrderComponent implements OnInit, OnDestroy {
 
     // ================================================================>> Section: Price Calculation
     getTotalPrice(): void {
-        this.totalPrice = this.carts.reduce(
-            (total, item) => total + item.qty * item.unit_price,
-            0
-        );
+        this.totalPrice = this.carts.reduce((total, item) => {
+            // Calculate discounted price if promotion exists
+            const price =
+                item.promotion_id && item.discount > 0
+                    ? item.unit_price * (1 - item.discount / 100)
+                    : item.unit_price;
+            return total + item.qty * price;
+        }, 0);
         this.updateOrderSummary();
     }
 

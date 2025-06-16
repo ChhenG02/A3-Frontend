@@ -21,7 +21,10 @@ export interface Product {
     unit_price: number;
     code: string;
     product_type: ProductType;
+    promotion_id?: number; 
+    discount?: number;     
 }
+
 
 interface ProductType {
     name: string;
