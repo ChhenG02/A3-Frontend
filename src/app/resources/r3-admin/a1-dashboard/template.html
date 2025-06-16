@@ -204,7 +204,7 @@
                                
                             <div>
                                 <div class="font-medium text-red-800 dark:text-red-300">Out of Stock</div>
-                                <div class="text-sm text-red-600 dark:text-red-400">1 products need immediate attention
+                                <div class="text-sm text-red-600 dark:text-red-400">{{ count_out }} products need immediate attention
                                 </div>
                             </div>
                         </div>
@@ -224,7 +224,7 @@
                             </div>
                             <div>
                                 <div class="font-medium text-yellow-800 dark:text-yellow-300">Low Stock</div>
-                                <div class="text-sm text-yellow-600 dark:text-yellow-400">2 products are running low
+                                <div class="text-sm text-yellow-600 dark:text-yellow-400">{{ count_low }} products are running low
                                 </div>
                             </div>
                         </div>
@@ -232,18 +232,20 @@
                             class="text-yellow-600 dark:text-yellow-400 text-sm font-medium hover:underline border px-2 py-1 border-yellow-200 rounded-lg">View</button>
                     </div>
                 </div>
-                <div class="space-y-2">
-                    <div class="flex items-center justify-between py-1">
-                        <span class="text-gray-600 dark:text-gray-400 text-sm">Cyberpunk 2077</span>
+                <div class="space-y-2 overflow-y-auto h-[150px]">
+                    <div 
+                        *ngFor="let item of product_out"
+                        class="flex items-center justify-between py-1"
+                    >
+                        <span class="text-gray-600 dark:text-gray-400 text-sm">{{ item.name }}</span>
                         <span class="text-red-600 dark:text-red-400 text-sm">Out of Stock</span>
                     </div>
-                    <div class="flex items-center justify-between py-1">
-                        <span class="text-gray-600 dark:text-gray-400 text-sm">The Last of Us</span>
-                        <span class="text-yellow-600 dark:text-yellow-400 text-sm">Only 3 left</span>
-                    </div>
-                    <div class="flex items-center justify-between py-1">
-                        <span class="text-gray-600 dark:text-gray-400 text-sm">Elden Ring</span>
-                        <span class="text-yellow-600 dark:text-yellow-400 text-sm">Only 5 left</span>
+                    <div 
+                        *ngFor="let item of product_low"
+                        class="flex items-center justify-between py-1"
+                    >
+                        <span class="text-gray-600 dark:text-gray-400 text-sm">{{ item.name }}</span>
+                        <span class="text-yellow-600 dark:text-yellow-400 text-sm">Only {{ item.qty }} left</span>
                     </div>
                 </div>
             </div>

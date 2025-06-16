@@ -1,5 +1,5 @@
 <section class="section">
-    <div class="container">
+    <div class="container ">
 
         <!-- Header  -->
         <div class="shared-header-section">
@@ -9,6 +9,7 @@
 
                 <button class="block md:hidden pt-1" mat-icon-button (click)="toggleNavigation('subNavigation')">
                     <mat-icon [svgIcon]="'heroicons_outline:bars-3'"></mat-icon>
+                    <span></span>
                 </button>
 
                 <span class="text-2xl font-semibold"> Setting </span>
@@ -18,7 +19,7 @@
         </div>
 
         <!-- Body  -->
-        <div class="body">
+        <div class="body dark:bg-gray-800">
             <!-- Navigation -->
             <helper-navigation class="md:bg-transparent mt-2 bg-white side-nav" appearance="default" [mode]="isScreenSmall ? 'over' : 'side'"
                 [name]="'subNavigation'" [navigations]="subnavigation" [opened]="!isScreenSmall">
