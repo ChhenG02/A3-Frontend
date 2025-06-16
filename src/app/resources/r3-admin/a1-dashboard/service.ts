@@ -60,5 +60,10 @@ export class DashbordService {
         return this._httpClient.get<DataSaleResponse>(`${env.API_BASE_URL}/share/report/generate-product-report`, { params });
     }
 
+    getDataOutOfStock(): Observable<any> {
+        
+        return this._httpClient.get<any>(`${env.API_BASE_URL}/admin/dashboard/stock-status`);
+    }
+
 }
 

@@ -164,7 +164,20 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.getProductType(
             this.selectedDateNameSale ? { thisWeek: this.thisWeek } : undefined
         );
+        this._service.getDataOutOfStock().subscribe({
+            next:(res)=>{
+                this.count_out = res.data.outOfStock.count
+                this.product_out = res.data.outOfStock.products
+                this.count_low = res.data.lowStock.count
+                this.product_low = res.data.lowStock.products
+                console.log("res", res);
+            }
+        })
     }
+    count_out: number
+    product_out: any
+    count_low: number
+    product_low: number
 
     // Initialize the form
     initializeForm(): void {
