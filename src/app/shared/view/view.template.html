@@ -57,9 +57,26 @@
                     </p>
                 </div>
             </div>
-            <!-- Order Date -->
+
+
+            <!-- Payment Method -->
             <div
                 class="flex justify-start items-center gap-2 p-1 w-full dark:bg-gray-800 h-[3rem]"
+            >
+                <div class="flex justify-start items-center gap-2 w-[150px]">
+                    <mat-icon svgIcon="mdi:cash-clock" class="icon-size-6 text-gray-500"></mat-icon>
+                    <p class="text-lg md:text-xl leading-8">Payment</p>
+                </div>
+                <div class="flex justify-start items-center gap-2">
+                    <p class="text-lg md:text-xl leading-8">៖</p>
+                    <p class="text-lg md:text-xl leading-8 pl-5 text-gray-600">
+                        Cash
+                    </p>
+                </div>
+            </div>
+            <!-- Order Date -->
+            <div
+                class="flex justify-start items-center gap-2 p-1 w-full bg-gray-50 dark:bg-gray-800 h-[3rem]"
             >
                 <div class="flex justify-start items-center gap-2 w-[150px]">
                     <mat-icon
@@ -79,7 +96,7 @@
 
             <!-- Cashier By -->
             <div
-                class="flex justify-start items-center gap-2 p-1 w-full bg-gray-50 dark:bg-gray-800 h-[3rem]"
+                class="flex justify-start items-center gap-2 p-1 w-full dark:bg-gray-800 h-[3rem]"
             >
                 <div class="flex justify-start items-center gap-2 w-[150px]">
                     <mat-icon
@@ -144,15 +161,29 @@
                             class="px-2 py-2 border-b border-gray-200 hover:bg-gray-50 transition-colors text-sm"
                         >
                             <div class="flex gap-2 items-center">
-                                <img
-                                    class="w-8 h-8 rounded-md object-cover"
-                                    alt="image"
-                                    [src]="fileUrl + element.product?.image"
-                                />
-                                <div class="flex flex-col">
-                                    <span class="font-medium text-gray-800"
-                                        >{{ element.product?.name }}</span
+                                <!-- Product image with badge -->
+                                <div class="relative w-8 h-8">
+                                    <img
+                                        class="w-full h-full rounded-md object-cover"
+                                        alt="image"
+                                        [src]="fileUrl + element.product?.image"
+                                    />
+                                    <div
+                                        class="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold"
                                     >
+                                        -50%
+                                    </div>
+                                </div>
+
+                                <!-- Product name and info -->
+                                <div class="flex flex-col">
+                                    <div class="max-w-[180px] truncate">
+                                        <span
+                                            class="font-medium text-sm text-gray-800 truncate inline-block w-full"
+                                        >
+                                            {{ element.product?.name }}
+                                        </span>
+                                    </div>
                                     <span class="text-xs text-gray-500">
                                         {{ element.product?.code }} | {{
                                         element.product?.product_type?.name ||
@@ -177,7 +208,12 @@
                             *matCellDef="let element"
                             class="text-right px-2 py-2 border-b border-gray-200 text-sm"
                         >
-                            {{ element.unit_price | number }}
+                            <div class="flex flex-col items-end gap-0.5">
+                                <span class="text-sm text-gray-400 line-through"
+                                    >$99.99</span
+                                >
+                                <span class="text-red-500 font-semibold">$50.99</span>
+                            </div>
                         </td>
                     </ng-container>
 
@@ -227,11 +263,28 @@
                         *matRowDef="let row; columns: displayedColumns;"
                     ></tr>
                 </table>
-                <div
-                    class="flex justify-end text-gray-700 font-semibold border-t border-gray-200 pt-2 pr-2 text-base"
-                >
-                    Total ($) ៖ {{ getTotal() | number }}
-                </div>
+
+
+
+                <!-- Order Summary Section -->
+<div class="px-4 pt-4 space-y-1 text-sm text-gray-600">
+    <!-- Subtotal -->
+    <div class="flex justify-between">
+        <span>Subtotal</span>
+        <span>99.99$</span>
+    </div>
+    <!-- Discount -->
+    <div class="flex justify-between">
+        <span>Discount</span>
+        <span class="text-green-600">-49.00$</span>
+    </div>
+    <!-- Total -->
+    <div class="flex justify-between text-base font-semibold border-t pt-2">
+        <span>Total</span>
+        <span class="text-red-500">{{ getTotal() | number }}</span>
+    </div>
+</div>
+
             </div>
         </div>
     </div>
