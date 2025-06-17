@@ -44,27 +44,27 @@ export class SharedDetailsComponent implements OnInit {
     }
 
     //===> Download invoice
-    downloading: boolean = false;
-    print() {
-        this.downloading = true;
-        this.detailsService.download(this.data.receipt_number).subscribe({
-            next: (res) => {
-                this.downloading = false;
-                this.dialogRef.close();
-                let blob = this.b64toBlob(res.data, 'application/pdf');
-                FileSaver.saveAs(
-                    blob,
-                    'Invoice-' + this.data.receipt_number + '.pdf'
-                );
-            },
-            error: (err: HttpErrorResponse) => {
-                this.snackBarService.openSnackBar(
-                    err.error?.message || GlobalConstants.genericError,
-                    GlobalConstants.error
-                );
-            },
-        });
-    }
+    // downloading: boolean = false;
+    // print() {
+    //     this.downloading = true;
+    //     this.detailsService.download(this.data.receipt_number).subscribe({
+    //         next: (res) => {
+    //             this.downloading = false;
+    //             this.dialogRef.close();
+    //             let blob = this.b64toBlob(res.data, 'application/pdf');
+    //             FileSaver.saveAs(
+    //                 blob,
+    //                 'Invoice-' + this.data.receipt_number + '.pdf'
+    //             );
+    //         },
+    //         error: (err: HttpErrorResponse) => {
+    //             this.snackBarService.openSnackBar(
+    //                 err.error?.message || GlobalConstants.genericError,
+    //                 GlobalConstants.error
+    //             );
+    //         },
+    //     });
+    // }
 
     // =================================>> Convert base64 to blob
     b64toBlob(b64Data: string, contentType: string, sliceSize?: number) {
