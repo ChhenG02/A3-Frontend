@@ -78,7 +78,7 @@ export class StockStatusDialogComponent implements OnInit, OnDestroy {
             const min = group.get('min_items')?.value;
             const max = group.get('max_items')?.value;
 
-            if (min !== null && max !== null && min >= max) {
+            if (min !== null && max !== null && min > max) {
                 return { rangeInvalid: true };
             }
 
