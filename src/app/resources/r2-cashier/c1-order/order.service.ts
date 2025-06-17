@@ -36,15 +36,14 @@ export class OrderService {
     create(body: {
         cart: string;
         platform?: string;
+        payment_method: string;
     }): Observable<ResponseOrder> {
-        // Set default platform to "Web" if not provided
-        const { cart, platform = 'Web' } = body;
-
+        const { cart, platform = 'Web', payment_method } = body;
         const requestBody = {
             cart,
             platform,
+            payment_method,
         };
-
         return this.httpClient.post<ResponseOrder>(
             `${env.API_BASE_URL}/cashier/ordering/order`,
             requestBody,

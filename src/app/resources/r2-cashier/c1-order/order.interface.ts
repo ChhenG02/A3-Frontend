@@ -1,19 +1,15 @@
-// ================================================================>> Custom Library
 import { Data as DataSale } from '../c2-sale/sale.interface';
 
-// Interface for the list of sales orders
 export interface List {
-    data: Data[]; // An array of Data objects representing sales orders
+    data: DataOrder[];
 }
 
-// Interface for a single sales order
-export interface Data {
+export interface DataOrder {
     id: number;
     name: string;
     products: Product[];
 }
 
-// Interface for a product within a sales order
 export interface Product {
     id: number;
     name: string;
@@ -21,15 +17,14 @@ export interface Product {
     unit_price: number;
     code: string;
     product_type: ProductType;
-    promotion_id?: number; 
-    discount?: number;     
+    promotion_id?: number;
+    discount?: number;
 }
-
 
 interface ProductType {
     name: string;
 }
-// Interface for the response of creating or updating a sales order
+
 export interface ResponseOrder {
     data: DataSale;
     message: string;

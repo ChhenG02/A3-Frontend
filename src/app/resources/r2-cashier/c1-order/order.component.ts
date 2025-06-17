@@ -31,7 +31,8 @@ import GlobalConstants from 'helper/shared/constants';
 import { ProductType } from '../c2-sale/sale.interface';
 import { ItemComponent } from './item/component';
 import { OrderService } from './order.service';
-import { Data, Product } from './order.interface';
+import { DataOrder, Product } from './order.interface';
+import { Data as DataSale } from '../c2-sale/sale.interface';
 import { ViewDetailSaleComponent } from 'app/shared/view/view.component';
 import { ZXingScannerModule } from '@zxing/ngx-scanner';
 import { KhqrService } from './khqr/khqr.service';
@@ -74,11 +75,11 @@ export class OrderComponent implements OnInit, OnDestroy {
     // ================================================================>> Section: State & Data Properties
     private _unsubscribeAll: Subject<User> = new Subject<User>();
     fileUrl: string = env.FILE_BASE_URL;
-    data: Data[] = [];
+    data: DataOrder[] = [];
     allProducts: Product[] = [];
     carts: CartItem[] = [];
     orderedItems: CartItem[] = [];
-    lastOrderData: any;
+    lastOrderData: DataSale | null = null;
     user: User;
     selectedTab: any;
 
@@ -105,6 +106,7 @@ export class OrderComponent implements OnInit, OnDestroy {
         subtotal: 0,
         discount: 0,
         total: 0,
+        payment_method: 'cash' as 'cash' | 'scanpay',
     };
 
     // ================================================================>> Section: QR Scanner
@@ -177,37 +179,37 @@ export class OrderComponent implements OnInit, OnDestroy {
 
     // ================================================================>> Section: Cart Management
     addToCart(incomingItem: Product, qty = 0): void {
-    if (this.isCheckoutSuccess) {
-        this._snackBarService.openSnackBar(
-            'Cannot add items to cart during payment.',
-            GlobalConstants.error
+        if (this.isCheckoutSuccess) {
+            this._snackBarService.openSnackBar(
+                'Cannot add items to cart during payment.',
+                GlobalConstants.error
+            );
+            return;
+        }
+        const existingItem = this.carts.find(
+            (item) => item.id === incomingItem.id
         );
-        return;
+        if (existingItem) {
+            existingItem.qty += qty;
+            existingItem.temp_qty = existingItem.qty;
+        } else {
+            const newItem: CartItem = {
+                id: incomingItem.id,
+                name: incomingItem.name,
+                qty: qty,
+                temp_qty: qty,
+                unit_price: incomingItem.unit_price,
+                image: incomingItem.image,
+                code: incomingItem.code,
+                type: incomingItem.product_type,
+                promotion_id: incomingItem.promotion_id,
+                discount: incomingItem.discount ?? 0, // Default to 0 if undefined
+            };
+            this.carts.push(newItem);
+            this.canSubmit = true;
+        }
+        this.getTotalPrice();
     }
-    const existingItem = this.carts.find(
-        (item) => item.id === incomingItem.id
-    );
-    if (existingItem) {
-        existingItem.qty += qty;
-        existingItem.temp_qty = existingItem.qty;
-    } else {
-        const newItem: CartItem = {
-            id: incomingItem.id,
-            name: incomingItem.name,
-            qty: qty,
-            temp_qty: qty,
-            unit_price: incomingItem.unit_price,
-            image: incomingItem.image,
-            code: incomingItem.code,
-            type: incomingItem.product_type,
-            promotion_id: incomingItem.promotion_id,
-            discount: incomingItem.discount ?? 0, // Default to 0 if undefined
-        };
-        this.carts.push(newItem);
-        this.canSubmit = true;
-    }
-    this.getTotalPrice();
-}
 
     incrementQty(index: number): void {
         const item = this.carts[index];
@@ -236,21 +238,19 @@ export class OrderComponent implements OnInit, OnDestroy {
     }
 
     clearCartAll(): void {
-        this.carts = [];
-        this.totalPrice = 0;
-        this.canSubmit = false;
-        this.qrData = '';
-        this.khqrService.lastMd5 = '';
-        if (this.scanPayPollingInterval) {
-            clearInterval(this.scanPayPollingInterval);
-            this.scanPayPollingInterval = null;
-        }
-        this.isWaitingForScanPay = false;
-        this._snackBarService.openSnackBar(
-            'Cancel order successfully',
-            GlobalConstants.success
-        );
+    this.carts = [];
+    this.totalPrice = 0;
+    this.canSubmit = false;
+    this.qrData = '';
+    this.khqrService.lastMd5 = '';
+    if (this.scanPayPollingInterval) {
+        clearInterval(this.scanPayPollingInterval);
+        this.scanPayPollingInterval = null;
     }
+    this.isWaitingForScanPay = false;
+    this.orderSummary = { subtotal: 0, discount: 0, total: 0, payment_method: 'cash' };
+    this._snackBarService.openSnackBar('Cancel order successfully', GlobalConstants.success);
+}
 
     blur(event: any, index: number = -1): void {
         const enteredValue = parseInt(event.target.value, 10);
@@ -272,12 +272,9 @@ export class OrderComponent implements OnInit, OnDestroy {
 
     // ================================================================>> Section: Price Calculation
     getTotalPrice(): void {
-        // Calculate subtotal (total without discounts)
         const subtotal = this.carts.reduce((total, item) => {
             return total + item.qty * item.unit_price;
         }, 0);
-
-        // Calculate total after discounts
         const totalAfterDiscount = this.carts.reduce((total, item) => {
             const price =
                 item.promotion_id && item.discount > 0
@@ -285,47 +282,45 @@ export class OrderComponent implements OnInit, OnDestroy {
                     : item.unit_price;
             return total + item.qty * price;
         }, 0);
-
-        // Calculate discount as subtotal minus total after discounts
-        const discount = subtotal - totalAfterDiscount;
-
+        this.discount = subtotal - totalAfterDiscount;
         this.totalPrice = totalAfterDiscount;
-        this.discount = discount;
         this.updateOrderSummary();
     }
 
     updateOrderSummary(): void {
-        this.orderSummary.subtotal = this.totalPrice + this.discount; // Subtotal is total before discounts
+        this.orderSummary.subtotal = this.totalPrice + this.discount;
         this.orderSummary.discount = this.discount;
-        this.orderSummary.total = this.totalPrice; // Total after discounts, no tax
+        this.orderSummary.total = this.totalPrice;
+        this.orderSummary.payment_method = this.selectedPaymentMethod as 'cash' | 'scanpay';
     }
 
     // ================================================================>> Section: Payment & Checkout
     selectPaymentMethod(method: string): void {
-        // If switching away from scanpay, clear QR and polling state
-        if (this.selectedPaymentMethod === 'scanpay' && method !== 'scanpay') {
-            this.qrData = '';
-            this.khqrService.lastMd5 = '';
-            if (this.scanPayPollingInterval) {
-                clearInterval(this.scanPayPollingInterval);
-                this.scanPayPollingInterval = null;
-            }
-            this.isWaitingForScanPay = false;
-            this.isGeneratingQR = false;
+    if (this.selectedPaymentMethod === 'scanpay' && method !== 'scanpay') {
+        this.qrData = '';
+        this.khqrService.lastMd5 = '';
+        if (this.scanPayPollingInterval) {
+            clearInterval(this.scanPayPollingInterval);
+            this.scanPayPollingInterval = null;
         }
-        this.selectedPaymentMethod = method;
-        if (method === 'scanpay') {
-            this.qrData = '';
-            this.khqrService.lastMd5 = '';
-            if (this.scanPayPollingInterval) {
-                clearInterval(this.scanPayPollingInterval);
-                this.scanPayPollingInterval = null;
-            }
-            this.isWaitingForScanPay = false;
-            this.isGeneratingQR = false;
-            this.onScanPay();
-        }
+        this.isWaitingForScanPay = false;
+        this.isGeneratingQR = false;
     }
+    this.selectedPaymentMethod = method;
+    this.orderSummary.payment_method = method as 'cash' | 'scanpay';
+    if (method === 'scanpay') {
+        this.qrData = '';
+        this.khqrService.lastMd5 = '';
+        if (this.scanPayPollingInterval) {
+            clearInterval(this.scanPayPollingInterval);
+            this.scanPayPollingInterval = null;
+        }
+        this.isWaitingForScanPay = false;
+        this.isGeneratingQR = false;
+        this.onScanPay();
+    }
+    this._changeDetectorRef.detectChanges();
+}
 
     inputNumber(num: string): void {
         if (this.currentAmount === '0') {
@@ -394,85 +389,92 @@ export class OrderComponent implements OnInit, OnDestroy {
     }
 
     confirmPayment(): void {
-    if (!this.carts.length) {
-        this._snackBarService.openSnackBar(
-            'No items in cart.',
-            GlobalConstants.error
-        );
-        return;
-    }
-    if (this.selectedPaymentMethod === 'cash') {
-        const amount = parseFloat(this.currentAmount);
-        if (isNaN(amount)) {
+        if (!this.carts.length) {
             this._snackBarService.openSnackBar(
-                'Please enter a valid payment amount.',
+                'No items in cart.',
                 GlobalConstants.error
             );
             return;
         }
-        if (Math.abs(amount - this.orderSummary.total) >= 0.01) {
-            this._snackBarService.openSnackBar(
-                `Amount ($${amount.toFixed(2)}) must exactly equal total ($${this.orderSummary.total.toFixed(2)}).`,
-                GlobalConstants.error
-            );
-            return;
-        }
-    }
-    const carts: { [itemId: number]: number } = {};
-    this.carts.forEach((item: CartItem) => {
-        carts[item.id] = item.qty;
-    });
-    const body = { cart: JSON.stringify(carts) };
-    this.isOrderBeingMade = true;
-    this._service.create(body).subscribe({
-        next: (response) => {
-            this.isOrderBeingMade = false;
-            this.lastOrderData = response.data;
-            this.orderedItems = [...this.carts];
-            this.carts = [];
-            this.isCheckoutSuccess = false;
-            this.canSubmit = false;
-            this.currentAmount = '';
-            this.displayAmount = '';
-            this.qrData = '';
-            this.khqrService.lastMd5 = '';
-            if (this.scanPayPollingInterval) {
-                clearInterval(this.scanPayPollingInterval);
-                this.scanPayPollingInterval = null;
+        if (this.selectedPaymentMethod === 'cash') {
+            const amount = parseFloat(this.currentAmount);
+            if (isNaN(amount)) {
+                this._snackBarService.openSnackBar(
+                    'Please enter a valid payment amount.',
+                    GlobalConstants.error
+                );
+                return;
             }
-            this.isWaitingForScanPay = false;
-            this._snackBarService.openSnackBar(
-                response.message || 'Payment successful!',
-                GlobalConstants.success
-            );
-            this.viewReceipt();
-            this._changeDetectorRef.detectChanges();
-        },
-        error: (err: HttpErrorResponse) => {
-            this.isOrderBeingMade = false;
-            this._snackBarService.openSnackBar(
-                err?.error?.message || GlobalConstants.genericError,
-                GlobalConstants.error
-            );
-        },
-    });
-}
+            if (Math.abs(amount - this.orderSummary.total) >= 0.01) {
+                this._snackBarService.openSnackBar(
+                    `Amount ($${amount.toFixed(
+                        2
+                    )}) must exactly equal total ($${this.orderSummary.total.toFixed(
+                        2
+                    )}).`,
+                    GlobalConstants.error
+                );
+                return;
+            }
+        }
+        const carts: { [itemId: number]: number } = {};
+        this.carts.forEach((item: CartItem) => {
+            carts[item.id] = item.qty;
+        });
+        const body = { cart: JSON.stringify(carts),
+            platform: 'Web',
+            payment_method: this.selectedPaymentMethod,
+         };
+        this.isOrderBeingMade = true;
+        this._service.create(body).subscribe({
+            next: (response) => {
+                this.isOrderBeingMade = false;
+                this.lastOrderData = response.data;
+                this.orderedItems = [...this.carts];
+                this.carts = [];
+                this.isCheckoutSuccess = false;
+                this.canSubmit = false;
+                this.currentAmount = '';
+                this.displayAmount = '';
+                this.qrData = '';
+                this.khqrService.lastMd5 = '';
+                if (this.scanPayPollingInterval) {
+                    clearInterval(this.scanPayPollingInterval);
+                    this.scanPayPollingInterval = null;
+                }
+                this.isWaitingForScanPay = false;
+                this._snackBarService.openSnackBar(
+                    response.message || 'Payment successful!',
+                    GlobalConstants.success
+                );
+                this.viewReceipt();
+                this._changeDetectorRef.detectChanges();
+            },
+            error: (err: HttpErrorResponse) => {
+                this.isOrderBeingMade = false;
+                this._snackBarService.openSnackBar(
+                    err?.error?.message || GlobalConstants.genericError,
+                    GlobalConstants.error
+                );
+            },
+        });
+    }
 
     // ================================================================>> Section: Order Submission
     private matDialog = inject(MatDialog);
 
     canConfirmPayment(): boolean {
-    if (this.isOrderBeingMade) return false;
-    if (this.selectedPaymentMethod === 'cash') {
-        const amount = Number(this.currentAmount);
-        return (
-            !!this.currentAmount &&
-            !isNaN(amount) &&
-            Math.abs(amount - this.orderSummary.total) < 0.01 // Exact match with tolerance
-        );
+        if (this.isOrderBeingMade) return false;
+        if (this.selectedPaymentMethod === 'cash') {
+            const amount = Number(this.currentAmount);
+            return (
+                !!this.currentAmount &&
+                !isNaN(amount) &&
+                Math.abs(amount - this.orderSummary.total) < 0.01 // Exact match with tolerance
+            );
+        }
+        return true; // For ScanPay, no amount input required
     }
-    return true; // For ScanPay, no amount input required
-}
 
     checkOut(): void {
         if (!this.carts.length) {
@@ -488,32 +490,34 @@ export class OrderComponent implements OnInit, OnDestroy {
     }
 
     addPayment(): void {
-    const amount = parseFloat(this.currentAmount);
-    const total = this.orderSummary.total;
+        const amount = parseFloat(this.currentAmount);
+        const total = this.orderSummary.total;
 
-    // Step 1: Handle empty/invalid input
-    if (!this.currentAmount || isNaN(amount)) {
-        this._snackBarService.openSnackBar(
-            'Please enter a valid amount.',
-            GlobalConstants.error
-        );
-        return;
-    }
-
-    // Step 2: For cash, amount must exactly equal total
-    if (this.selectedPaymentMethod === 'cash') {
-        if (Math.abs(amount - total) >= 0.01) {
+        // Step 1: Handle empty/invalid input
+        if (!this.currentAmount || isNaN(amount)) {
             this._snackBarService.openSnackBar(
-                `Amount ($${amount.toFixed(2)}) must exactly equal total ($${total.toFixed(2)}).`,
+                'Please enter a valid amount.',
                 GlobalConstants.error
             );
             return;
         }
-    }
 
-    // Step 3: All checks passed
-    this.confirmPayment();
-}
+        // Step 2: For cash, amount must exactly equal total
+        if (this.selectedPaymentMethod === 'cash') {
+            if (Math.abs(amount - total) >= 0.01) {
+                this._snackBarService.openSnackBar(
+                    `Amount ($${amount.toFixed(
+                        2
+                    )}) must exactly equal total ($${total.toFixed(2)}).`,
+                    GlobalConstants.error
+                );
+                return;
+            }
+        }
+
+        // Step 3: All checks passed
+        this.confirmPayment();
+    }
 
     checkScanPayStatus(): void {
         if (!this.qrData || !this.khqrService) return;
@@ -558,7 +562,13 @@ export class OrderComponent implements OnInit, OnDestroy {
     viewReceipt(): void {
         if (!this.lastOrderData) return;
         const dialogConfig = new MatDialogConfig();
-        dialogConfig.data = this.lastOrderData;
+        dialogConfig.data = {
+            ...this.lastOrderData,
+            sub_total_price: this.lastOrderData.sub_total_price,
+            discount_price: this.lastOrderData.discount_price,
+            total_price: this.lastOrderData.total_price,
+            payment_method: this.lastOrderData.payment?.payment_method,
+        };
         dialogConfig.autoFocus = false;
         dialogConfig.position = { right: '0px' };
         dialogConfig.height = '100dvh';

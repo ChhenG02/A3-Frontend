@@ -11,11 +11,15 @@ export interface List {
 
 export interface Data {
     id: number;
-    receipt_number: number;
+    receipt_number: string; // Changed to string to match backend
+    sub_total_price: number; // Added
+    discount_price: number; // Added
     total_price: number;
+    platform: string; // Added to match backend
     ordered_at?: Date;
-    cashier: { id: number; name: string };
+    cashier: Cashier;
     details: Detail[];
+    payment?: { payment_method: string }; // Added
 }
 
 export interface Detail {
