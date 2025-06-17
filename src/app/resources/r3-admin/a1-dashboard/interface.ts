@@ -1,3 +1,4 @@
+
 export interface DashboardResponse {
     statatics: StataticData;
     message: string;
@@ -93,5 +94,15 @@ export interface DashboardResponse {
     id: number;
     name: string;
   }
-  
-  
+export interface TopProduct {
+    id: number;
+    name: string;
+    image: string;
+    totalSales: number;
+    totalAmountSales: number;
+}
+
+export interface TopProductsResponse {
+    topProducts: TopProduct[];
+    message: string;
+}
