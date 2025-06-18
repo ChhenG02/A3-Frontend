@@ -206,7 +206,7 @@
                                     <!-- Promotion badge -->
                                     <div
                                         *ngIf="element.promotion_id && parseDiscount(element.discount) > 0"
-                                        class="absolute -top-0 -right-0 bg-red-500 text-white rounded-full w-6 h-2 flex items-center justify-center text-xs font-bold"
+                                        class="absolute -top-0 -right-0 bg-red-500 text-white rounded-full w-5.5 h-5.5 flex items-center justify-center text-xs font-bold"
                                     >
                                         -{{parseDiscount(element.discount) |
                                         number:'1.0-0'}}%
