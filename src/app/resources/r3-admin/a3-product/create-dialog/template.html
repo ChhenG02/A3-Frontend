@@ -70,7 +70,7 @@
                     <mat-select formControlName="type_id">
                         @for (item of data.setup; track item.id) {
                         <mat-option [value]="item.id">
-                            <span>{{item.name}}</span>
+                            <span>{{item?.name}}</span>
                         </mat-option>
                         } @empty {
                         <span>No Data</span>

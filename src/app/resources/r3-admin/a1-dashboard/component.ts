@@ -1,4 +1,3 @@
-import { TopProduct } from './../../../../../../api/src/app/resources/r3-admin/a1-dashboard/dashboard.interface';
 import {
     CommonModule,
     HashLocationStrategy,
@@ -49,6 +48,7 @@ import {
     ProductTypeData,
     SalesData,
     StataticData,
+    TopProduct,
     TopProductsResponse,
 } from './interface'; //CashierData
 import { ReportComponent } from './report/component';

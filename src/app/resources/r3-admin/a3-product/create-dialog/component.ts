@@ -100,6 +100,7 @@ export class ProductsDialogComponent implements OnInit, OnDestroy {
 
     // ngOnInit method
     ngOnInit(): void {
+        console.log('Full product data:', this.data.product); 
         // Set the image source based on the product data (if available)
         this.data.product != null
             ? (this.src = `${env.FILE_BASE_URL}${this.data.product.image}`)
@@ -138,7 +139,7 @@ export class ProductsDialogComponent implements OnInit, OnDestroy {
             code: [this.data?.product?.code || null, [Validators.required]],
             name: [this.data?.product?.name || null, [Validators.required]],
             type_id: [
-                this.data?.product?.type?.id || null,
+                this.data?.product?.product_type?.id || null,
                 [Validators.required],
             ],
             image: [null, this.data.product == null ? Validators.required : []],
@@ -174,7 +175,7 @@ export class ProductsDialogComponent implements OnInit, OnDestroy {
                     unit_price: response.data.unit_price,
                     total_sale: response.data.total_sale,
                     created_at: response.data.created_at,
-                    type: {
+                    product_type: {
                         id: response.data.type_id,
                         name:
                             this.data.setup.find(
@@ -252,7 +253,7 @@ export class ProductsDialogComponent implements OnInit, OnDestroy {
                         unit_price: response.data.unit_price,
                         total_sale: response.data.total_sale,
                         created_at: response.data.created_at,
-                        type: {
+                        product_type: {
                             id: response.data.type_id,
                             name:
                                 this.data.setup.find(

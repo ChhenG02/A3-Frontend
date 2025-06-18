@@ -18,7 +18,7 @@ export interface Data {
     unit_price: number;
     total_sale: number;
     created_at: Date;
-    type: { id: number; name: string };
+    product_type: { id: number; name: string };
     creator: { id: number; name: string; avatar: string };
     promotion_id?: number;
 }
