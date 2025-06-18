@@ -19,6 +19,7 @@ export interface Product {
     product_type: ProductType;
     promotion_id?: number;
     discount?: number;
+    qty: number;
 }
 
 interface ProductType {
