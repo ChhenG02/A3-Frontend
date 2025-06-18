@@ -1,0 +1,96 @@
+.success-dialog-container {
+    text-align: center;
+    padding: 20px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+
+    .success-icon {
+        margin-bottom: 15px;
+
+        .checkmark {
+            // For SVG icons, use width/height instead of font-size
+            width: 72px !important;
+            height: 72px !important;
+            font-size: 72px; // Keep this as fallback for font icons
+            color: #4caf50;
+            // Add scaling animation
+            animation: checkmarkSuccess 0.6s ease-out;
+            transform-origin: center;
+            
+            // Target the SVG inside the mat-icon
+            svg {
+                width: 100% !important;
+                height: 100% !important;
+            }
+        }
+    }
+
+    h2 {
+        margin: 0 0 10px;
+        color: #333;
+        // Add fade-in animation for the title
+        animation: fadeInUp 0.8s ease-out 0.3s both;
+    }
+
+    p {
+        margin: 5px 0;
+        color: #666;
+        // Add fade-in animation for the description
+        animation: fadeInUp 0.8s ease-out 0.5s both;
+    }
+
+    .done-button {
+        margin-top: 20px;
+        background-color: #f15757;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 20px;
+        // Add fade-in animation for the button
+        animation: fadeInUp 0.8s ease-out 0.7s both;
+    }
+}
+
+/* Checkmark success animation */
+@keyframes checkmarkSuccess {
+    0% {
+        transform: scale(0);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.2);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* Fade in up animation for text elements */
+@keyframes fadeInUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Ensure the dialog has a smooth animation */
+::ng-deep .mat-dialog-container {
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}

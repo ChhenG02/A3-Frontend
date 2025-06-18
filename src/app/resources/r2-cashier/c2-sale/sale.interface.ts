@@ -11,15 +11,15 @@ export interface List {
 
 export interface Data {
     id: number;
-    receipt_number: string; // Changed to string to match backend
-    sub_total_price: number; // Added
-    discount_price: number; // Added
+    receipt_number: string; 
+    sub_total_price: number; 
+    discount_price?: number; // Optional, calculated as sub_total_price - total_price
     total_price: number;
-    platform: string; // Added to match backend
+    platform: string; 
     ordered_at?: Date;
     cashier: Cashier;
     details: Detail[];
-    payment?: { payment_method: string }; // Added
+    payment?: { payment_method: string }; 
 }
 
 export interface Detail {
@@ -35,6 +35,8 @@ export interface Product {
     code: string;
     image: string;
     type: ProductType;
+    promotion_id?: number;
+    discount?: number; // Can be null, default to 0
 }
 
 export interface ProductType {
