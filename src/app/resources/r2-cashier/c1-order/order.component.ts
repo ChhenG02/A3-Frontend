@@ -37,6 +37,7 @@ import { ViewDetailSaleComponent } from 'app/shared/view/view.component';
 import { ZXingScannerModule } from '@zxing/ngx-scanner';
 import { KhqrService } from './khqr/khqr.service';
 import { KHQRRequest } from './khqr/khqr.interface';
+import { PaymentSuccessDialogComponent } from './payment-success/success-dialog.component';
 
 // ================================================================>> Interfaces
 interface CartItem {
@@ -69,6 +70,7 @@ interface CartItem {
         MatProgressSpinnerModule,
         ZXingScannerModule,
         QRCodeComponent,
+        PaymentSuccessDialogComponent,
     ],
 })
 export class OrderComponent implements OnInit, OnDestroy {
@@ -407,11 +409,7 @@ export class OrderComponent implements OnInit, OnDestroy {
             }
             if (Math.abs(amount - this.orderSummary.total) >= 0.01) {
                 this._snackBarService.openSnackBar(
-                    `Amount ($${amount.toFixed(
-                        2
-                    )}) must exactly equal total ($${this.orderSummary.total.toFixed(
-                        2
-                    )}).`,
+                    `Amount ($${amount.toFixed(2)}) must exactly equal total ($${this.orderSummary.total.toFixed(2)}).`,
                     GlobalConstants.error
                 );
                 return;
@@ -421,10 +419,11 @@ export class OrderComponent implements OnInit, OnDestroy {
         this.carts.forEach((item: CartItem) => {
             carts[item.id] = item.qty;
         });
-        const body = { cart: JSON.stringify(carts),
+        const body = { 
+            cart: JSON.stringify(carts),
             platform: 'Web',
             payment_method: this.selectedPaymentMethod,
-         };
+        };
         this.isOrderBeingMade = true;
         this._service.create(body).subscribe({
             next: (response) => {
@@ -443,12 +442,29 @@ export class OrderComponent implements OnInit, OnDestroy {
                     this.scanPayPollingInterval = null;
                 }
                 this.isWaitingForScanPay = false;
+
+                // Display success dialog instead of viewReceipt
+                const dialogConfig = new MatDialogConfig();
+                dialogConfig.data = {
+                    total: this.orderSummary.total,
+                    transactionId: `TXN${Math.floor(Math.random() * 1000000)}741`, // Generate a sample transaction ID
+                };
+                dialogConfig.autoFocus = false;
+                dialogConfig.width = '400px';
+                dialogConfig.panelClass = 'success-dialog';
+                dialogConfig.enterAnimationDuration = '300ms'; // Add animation
+                dialogConfig.exitAnimationDuration = '300ms';
+
+                const dialogRef = this.matDialog.open(PaymentSuccessDialogComponent, dialogConfig);
+
+                dialogRef.afterClosed().subscribe(() => {
+                    this._changeDetectorRef.detectChanges();
+                });
+
                 this._snackBarService.openSnackBar(
                     response.message || 'Payment successful!',
                     GlobalConstants.success
                 );
-                this.viewReceipt();
-                this._changeDetectorRef.detectChanges();
             },
             error: (err: HttpErrorResponse) => {
                 this.isOrderBeingMade = false;
@@ -459,7 +475,6 @@ export class OrderComponent implements OnInit, OnDestroy {
             },
         });
     }
-
     // ================================================================>> Section: Order Submission
     private matDialog = inject(MatDialog);
 
@@ -557,26 +572,6 @@ export class OrderComponent implements OnInit, OnDestroy {
                 );
             },
         });
-    }
-
-    viewReceipt(): void {
-        if (!this.lastOrderData) return;
-        const dialogConfig = new MatDialogConfig();
-        dialogConfig.data = {
-            ...this.lastOrderData,
-            sub_total_price: this.lastOrderData.sub_total_price,
-            discount_price: this.lastOrderData.discount_price,
-            total_price: this.lastOrderData.total_price,
-            payment_method: this.lastOrderData.payment?.payment_method,
-        };
-        dialogConfig.autoFocus = false;
-        dialogConfig.position = { right: '0px' };
-        dialogConfig.height = '100dvh';
-        dialogConfig.width = '100dvw';
-        dialogConfig.maxWidth = '550px';
-        dialogConfig.panelClass = 'custom-mat-dialog-as-mat-drawer';
-        dialogConfig.enterAnimationDuration = '0s';
-        this.matDialog.open(ViewDetailSaleComponent, dialogConfig);
     }
 
     goBack(): void {

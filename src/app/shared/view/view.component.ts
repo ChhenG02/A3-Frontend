@@ -26,6 +26,7 @@ import { SnackbarService } from 'helper/services/snack-bar/snack-bar.service';
 import GlobalConstants from 'helper/shared/constants';
 import { Subject } from 'rxjs';
 import { DetailsService } from '../dialog/service';
+
 @Component({
     selector: 'dashboard-gm-fast-view-customer',
     templateUrl: './view.template.html',
@@ -44,7 +45,6 @@ import { DetailsService } from '../dialog/service';
 })
 export class ViewDetailSaleComponent implements OnInit, OnDestroy {
     private _unsubscribeAll: Subject<any> = new Subject<any>();
-    // Component properties
     displayedColumns: string[] = [
         'number',
         'name',
@@ -66,29 +66,41 @@ export class ViewDetailSaleComponent implements OnInit, OnDestroy {
         private detailsService: DetailsService
     ) {}
 
-    // Method to initialize the component
     ngOnInit(): void {
         if (this.row && this.row.details) {
-            // Assuming row.details contains the data for the table
-            this.dataSource.data = this.row.details;
+            // Map data to ensure discount defaults to 0 if null
+            this.dataSource.data = this.row.details.map(item => ({
+                ...item,
+                product: {
+                    ...item.product,
+                    discount: item.product.discount || 0 // Default to 0 if null
+                }
+            }));
+            this.isLoading = false;
+            this.cdr.detectChanges();
         }
     }
 
-    // Method to calculate the total of the sale
-    getTotal(): number {
-        return this.dataSource.data.reduce(
-            (sum, item) => sum + item.unit_price * item.qty,
-            0
-        );
+    // Calculate discounted price for each product
+    getDiscountedPrice(element: any): number {
+        const discount = element.product.discount || 0;
+        return element.unit_price * (1 - discount / 100);
+    }
+
+    // Calculate total for each product
+    getTotalForProduct(element: any): number {
+        return this.getDiscountedPrice(element) * element.qty;
+    }
+
+    // Calculate total discount for the order
+    getOrderDiscount(): number {
+        return (this.row?.sub_total_price || 0) - (this.row?.total_price || 0);
     }
 
     downloading: boolean = false;
 
-    // Method to initiate the download of a sale invoice
     print(row: any) {
         this.downloading = true;
-
-        // Calling the details service to download the invoice
         this.detailsService.download(row.receipt_number).subscribe({
             next: (res) => {
                 this.downloading = false;
@@ -107,19 +119,12 @@ export class ViewDetailSaleComponent implements OnInit, OnDestroy {
         });
     }
 
-    // Method to convert base64 data to a blob
     b64toBlob(b64Data: string, contentType: string, sliceSize?: number) {
         contentType = contentType || '';
         sliceSize = sliceSize || 512;
-
         var byteCharacters = atob(b64Data);
         var byteArrays = [];
-
-        for (
-            var offset = 0;
-            offset < byteCharacters.length;
-            offset += sliceSize
-        ) {
+        for (var offset = 0; offset < byteCharacters.length; offset += sliceSize) {
             var slice = byteCharacters.slice(offset, offset + sliceSize);
             var byteNumbers = new Array(slice.length);
             for (var i = 0; i < slice.length; i++) {
@@ -132,12 +137,10 @@ export class ViewDetailSaleComponent implements OnInit, OnDestroy {
         return blob;
     }
 
-    // Method to close the dialog
     closeDialog() {
         this._dialogRef.close();
     }
 
-    // Method to unsubscribe from all subscriptions
     ngOnDestroy(): void {
         this._unsubscribeAll.next(null);
         this._unsubscribeAll.complete();

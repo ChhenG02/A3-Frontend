@@ -1,0 +1,10 @@
+<div class="success-dialog-container">
+    <div class="success-icon">
+        <mat-icon svgIcon="check_circle" class="checkmark"></mat-icon>
+    </div>
+    <h2>Payment Successful!</h2>
+    <p>Your payment of {{ data.total.toFixed(2) }}$ has been processed successfully.</p>
+    <button mat-flat-button color="primary" (click)="onDone()" class="done-button">
+        Done
+    </button>
+</div>

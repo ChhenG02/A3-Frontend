@@ -58,7 +58,6 @@
                 </div>
             </div>
 
-
             <!-- Payment Method -->
             <div
                 class="flex justify-start items-center gap-2 p-1 w-full dark:bg-gray-800 h-[3rem]"
@@ -70,10 +69,11 @@
                 <div class="flex justify-start items-center gap-2">
                     <p class="text-lg md:text-xl leading-8">៖</p>
                     <p class="text-lg md:text-xl leading-8 pl-5 text-gray-600">
-                        Cash
+                        {{row?.payment?.payment_method || 'Cash'}}
                     </p>
                 </div>
             </div>
+
             <!-- Order Date -->
             <div
                 class="flex justify-start items-center gap-2 p-1 w-full bg-gray-50 dark:bg-gray-800 h-[3rem]"
@@ -121,7 +121,8 @@
                     </div>
                 </div>
             </div>
-            <!-- data product -->
+
+            <!-- Data Product -->
             <div class="max-w-[525px] overflow-x-hidden mt-2 text-gray-600">
                 <table
                     mat-table
@@ -168,10 +169,8 @@
                                         alt="image"
                                         [src]="fileUrl + element.product?.image"
                                     />
-                                    <div
-                                        class="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold"
-                                    >
-                                        -50%
+                                    <div *ngIf="element.product.discount > 0" class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold">
+                                        -{{element.product.discount | number:'1.0-0'}}%
                                     </div>
                                 </div>
 
@@ -199,7 +198,7 @@
                         <th
                             mat-header-cell
                             *matHeaderCellDef
-                            class="w-[80px] bg-gray-100 text-right px-2 py-2 font-semibold text-gray-700 text-sm border-b border-gray-200 whitespace-nowrap"
+                            class="w-[80px] bg-gray-100 text-right px-2 py-2 font-light text-gray-700 text-sm border-b border-gray-200 whitespace-nowrap"
                         >
                             Price ($)
                         </th>
@@ -209,10 +208,12 @@
                             class="text-right px-2 py-2 border-b border-gray-200 text-sm"
                         >
                             <div class="flex flex-col items-end gap-0.5">
-                                <span class="text-sm text-gray-400 line-through"
-                                    >$99.99</span
-                                >
-                                <span class="text-red-500 font-semibold">$50.99</span>
+                                <span *ngIf="element.product.discount > 0" class="text-sm text-gray-400 line-through">
+                                    {{ (element.unit_price / (1 - (element.product.discount / 100))) | number:'1.2-2'}}$
+                                </span>
+                                <span [class.text-red-500]="element.product.discount > 0" class="font-semibold">
+                                    {{ getDiscountedPrice(element) | number:'1.2-2'}}$
+                                </span>
                             </div>
                         </td>
                     </ng-container>
@@ -249,7 +250,7 @@
                             *matCellDef="let element"
                             class="text-right px-2 py-2 pr-4 border-b border-gray-200 text-sm"
                         >
-                            {{ (element.unit_price * element.qty) | number }}
+                            {{ getTotalForProduct(element) | number:'1.2-2' }}
                         </td>
                     </ng-container>
 
@@ -264,27 +265,24 @@
                     ></tr>
                 </table>
 
-
-
                 <!-- Order Summary Section -->
-<div class="px-4 pt-4 space-y-1 text-sm text-gray-600">
-    <!-- Subtotal -->
-    <div class="flex justify-between">
-        <span>Subtotal</span>
-        <span>99.99$</span>
-    </div>
-    <!-- Discount -->
-    <div class="flex justify-between">
-        <span>Discount</span>
-        <span class="text-green-600">-49.00$</span>
-    </div>
-    <!-- Total -->
-    <div class="flex justify-between text-base font-semibold border-t pt-2">
-        <span>Total</span>
-        <span class="text-red-500">{{ getTotal() | number }}</span>
-    </div>
-</div>
-
+                <div class="px-4 pt-4 space-y-1 text-sm text-gray-600">
+                    <!-- Subtotal -->
+                    <div class="flex justify-between">
+                        <span>Subtotal</span>
+                        <span>{{row?.sub_total_price | number:'1.2-2'}}$</span>
+                    </div>
+                    <!-- Discount -->
+                    <div class="flex justify-between">
+                        <span>Discount</span>
+                        <span class="text-green-600">-{{ getOrderDiscount() | number:'1.2-2'}}$</span>
+                    </div>
+                    <!-- Total -->
+                    <div class="flex justify-between text-base font-semibold border-t pt-2">
+                        <span>Total</span>
+                        <span class="text-red-500">{{row?.total_price | number:'1.2-2'}}$</span>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
