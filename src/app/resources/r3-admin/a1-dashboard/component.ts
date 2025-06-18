@@ -1,3 +1,4 @@
+import { TopProduct } from './../../../../../../api/src/app/resources/r3-admin/a1-dashboard/dashboard.interface';
 import {
     CommonModule,
     HashLocationStrategy,
@@ -48,6 +49,7 @@ import {
     ProductTypeData,
     SalesData,
     StataticData,
+    TopProductsResponse,
 } from './interface'; //CashierData
 import { ReportComponent } from './report/component';
 import { StockAlertComponent } from './stock-alert/component';
@@ -137,12 +139,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
         { id: 'sixMonthAgo', name: '6 Months Ago' },
     ];
 
+
     constructor(
         private _changeDetectorRef: ChangeDetectorRef,
         private _userService: UserService,
         private _snackBarService: SnackbarService,
         private _service: DashbordService
-    ) {}
+    ) { }
 
     // Fetch data on initialization
     ngOnInit(): void {
@@ -165,19 +168,35 @@ export class DashboardComponent implements OnInit, OnDestroy {
             this.selectedDateNameSale ? { thisWeek: this.thisWeek } : undefined
         );
         this._service.getDataOutOfStock().subscribe({
-            next:(res)=>{
+            next: (res) => {
                 this.count_out = res.data.outOfStock.count
                 this.product_out = res.data.outOfStock.products
                 this.count_low = res.data.lowStock.count
                 this.product_low = res.data.lowStock.products
                 console.log("res", res);
             }
-        })
+        });
+
+        this._service.getDataTopProduct().subscribe({
+            next: (response) => {
+                console.log('Raw response:', response); 
+                this.topProducts = (response as any).topProducts; 
+            },
+            error: (error) => {
+                console.error('Full error:', error);
+            }
+        });
     }
+    TopProduct() {
+        throw new Error('Method not implemented.');
+    }
+    // Stock alert
     count_out: number
     product_out: any
     count_low: number
     product_low: number
+    topProducts: TopProduct[]
+
 
     // Initialize the form
     initializeForm(): void {

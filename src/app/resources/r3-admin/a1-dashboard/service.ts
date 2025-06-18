@@ -1,7 +1,7 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { DashboardResponse, DataSaleResponse } from './interface';
+import { DashboardResponse, DataSaleResponse, TopProductsResponse } from './interface';
 // Helper
 // ================================================================================>> Thrid Party Library
 // RxJS
@@ -15,7 +15,7 @@ export class DashbordService {
     }
 
     // Method call to api to get data
-    getDashboardData(params?: { today?: string; yesterday?: string; thisWeek?: string; thisMonth?: string; threeMonthAgo?: string; sixMonthAgo?: string,type?:number }): Observable<DashboardResponse> {
+    getDashboardData(params?: { today?: string; yesterday?: string; thisWeek?: string; thisMonth?: string; threeMonthAgo?: string; sixMonthAgo?: string, type?: number }): Observable<DashboardResponse> {
         let httpParams = new HttpParams();
         if (params) {
             if (params.today) httpParams = httpParams.set('today', params.today);
@@ -25,7 +25,7 @@ export class DashbordService {
             if (params.threeMonthAgo) httpParams = httpParams.set('threeMonthAgo', params.threeMonthAgo);
             if (params.sixMonthAgo) httpParams = httpParams.set('sixMonthAgo', params.sixMonthAgo);
             if (params.type) httpParams = httpParams.set('type', params.type.toString());
-            
+
         }
         // console.log('httpParams',params);
         return this._httpClient.get<DashboardResponse>(`${env.API_BASE_URL}/admin/dashboard`, { params: httpParams });
@@ -61,9 +61,12 @@ export class DashbordService {
     }
 
     getDataOutOfStock(): Observable<any> {
-        
         return this._httpClient.get<any>(`${env.API_BASE_URL}/admin/dashboard/stock-status`);
     }
-
+    getDataTopProduct(): Observable<TopProductsResponse> {
+        return this._httpClient.get<TopProductsResponse>(
+            `${env.API_BASE_URL}/admin/dashboard/top-products`
+        );
+    }
 }
 
