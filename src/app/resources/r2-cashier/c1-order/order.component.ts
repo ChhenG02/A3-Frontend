@@ -671,8 +671,23 @@ export class OrderComponent implements OnInit, OnDestroy {
     }
 
     onQrCodeResult(result: string) {
-        this.closeQrScanner();
-        alert('Scanned QR Code: ' + result);
+        // Parse the scanned QR code as a product code
+        const scannedCode = result.trim();
+        const product = this.allProducts.find(p => p.code === scannedCode);
+
+        if (product) {
+            // Add or increment quantity in cart
+            this.addToCart(product, 1);
+            this._snackBarService.openSnackBar(
+                `Added ${product.name} to cart${this.carts.find(c => c.id === product.id) ? ' (quantity incremented)' : ''}.`,
+                GlobalConstants.success
+            );
+        } else {
+            this._snackBarService.openSnackBar(
+                `Product with code ${scannedCode} not found.`,
+                GlobalConstants.error
+            );
+        }
     }
 
     onCamerasFound(devices: MediaDeviceInfo[]): void {
@@ -685,6 +700,14 @@ export class OrderComponent implements OnInit, OnDestroy {
         this.selectedDevice = this.availableDevices.find(
             (d) => d.deviceId === deviceId
         );
+    }
+
+    trackById(index: number, item: any): number {
+        return item.id;
+    }
+
+    trackByProductId(index: number, product: Product): number {
+        return product.id;
     }
 
     // ================================================================>> Section: Keyboard Shortcuts
