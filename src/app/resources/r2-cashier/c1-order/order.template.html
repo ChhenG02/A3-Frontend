@@ -130,33 +130,58 @@
                 <!-- QR Scanner Dialog Template -->
                 <ng-template #qrScannerDialog>
                     <div class="qr-scanner-dialog">
-                        <!-- Camera selection dropdown -->
-                        <select
-                            *ngIf="availableDevices.length > 1"
-                            (change)="onDeviceSelect($event.target.value)"
-                        >
-                            <option
-                                *ngFor="let device of availableDevices"
-                                [value]="device.deviceId"
-                                [selected]="device.deviceId === selectedDevice?.deviceId"
+                        <!-- Top section with camera selection and close button -->
+                        <div class="flex justify-between items-center w-auto">
+                            <!-- Camera selection dropdown with fixed width -->
+                            <div class="flex-1 mr-2 min-w-[200px]">
+                                <select
+                                    *ngIf="availableDevices.length > 1"
+                                    (change)="onDeviceSelect($event.target.value)"
+                                    class="flex-1"
+                                >
+                                    <option
+                                        *ngFor="let device of availableDevices"
+                                        [value]="device.deviceId"
+                                        [selected]="device.deviceId === selectedDevice?.deviceId"
+                                    >
+                                        {{ device.label || 'Camera ' + device.deviceId }}
+                                    </option>
+                                </select>
+                                <!-- Placeholder if no devices -->
+                                <div *ngIf="availableDevices.length <= 1" class="p-1 text-gray-500">
+                                    Loading camera...
+                                </div>
+                            </div>
+
+                            <!-- Close button -->
+                            <div class="flex gap-2 w-auto justify-end">
+                                <button
+                                    class="helpers-mat-button-sm min-w-[2.5rem] px-2 border-none"
+                                    mat-stroked-button
+                                    (click)="closeQrScanner()"
+                                >
+                                    <mat-icon
+                                        svgIcon="mdi:close"
+                                        class="text-slate-500 text-lg"
+                                    ></mat-icon>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- QR Scanner with fixed dimensions -->
+                        <div class="relative w-full h-64 overflow-hidden">
+                            <zxing-scanner
+                                [device]="selectedDevice"
+                                (camerasFound)="onCamerasFound($event)"
+                                (scanSuccess)="onQrCodeResult($event)"
+                                [start]="true"
+                                class="w-full h-full object-cover"
                             >
-                                {{ device.label || 'Camera ' + device.deviceId
-                                }}
-                            </option>
-                        </select>
-
-                        <!-- QR Scanner -->
-                        <zxing-scanner
-                            [device]="selectedDevice"
-                            (camerasFound)="onCamerasFound($event)"
-                            (scanSuccess)="onQrCodeResult($event)"
-                            [start]="true"
-                        >
-                        </zxing-scanner>
-
-                        <button mat-button (click)="closeQrScanner()">
-                            Close
-                        </button>
+                            </zxing-scanner>
+                            <div *ngIf="!selectedDevice" class="absolute inset-0 flex items-center justify-center bg-gray-200">
+                                <mat-progress-spinner [diameter]="40" mode="indeterminate"></mat-progress-spinner>
+                            </div>
+                        </div>
                     </div>
                 </ng-template>
 
