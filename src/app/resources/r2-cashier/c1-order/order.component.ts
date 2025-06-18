@@ -137,33 +137,40 @@ export class OrderComponent implements OnInit, OnDestroy {
 
     // ================================================================>> Section: Angular Lifecycle
     ngOnInit(): void {
-        this.isLoading = true;
-        this._service.getData().subscribe({
-            next: (response) => {
-                this.data = response.data;
-                this.allProducts = this.data.reduce(
-                    (all, item) => all.concat(item.products),
-                    []
-                );
-                this.data.unshift({
-                    id: 0,
-                    name: 'All Categories',
-                    products: this.allProducts,
-                });
-                if (this.data && this.data.length > 0) {
-                    this.selectedTab = this.data[0];
-                    this._changeDetectorRef.detectChanges();
-                }
-            },
-            error: (err) => {
-                this.isLoading = false;
-                this._snackBarService.openSnackBar(
-                    err?.error?.message || GlobalConstants.genericError,
-                    GlobalConstants.error
-                );
-            },
+    this.isLoading = true;
+    this._service.getData().subscribe({
+      next: (response) => {
+        // Filter out products with qty: 0
+        this.data = response.data.map((category) => ({
+          ...category,
+          products: category.products.filter((product) => product.qty > 0),
+        }));
+        // Remove categories with no products
+        this.data = this.data.filter((category) => category.products.length > 0);
+        this.allProducts = this.data.reduce(
+          (all, item) => all.concat(item.products),
+          []
+        );
+        this.data.unshift({
+          id: 0,
+          name: 'All Categories',
+          products: this.allProducts,
         });
-    }
+        if (this.data && this.data.length > 0) {
+          this.selectedTab = this.data[0];
+          this._changeDetectorRef.detectChanges();
+        }
+        this.isLoading = false;
+      },
+      error: (err) => {
+        this.isLoading = false;
+        this._snackBarService.openSnackBar(
+          err?.error?.message || GlobalConstants.genericError,
+          GlobalConstants.error
+        );
+      },
+    });
+  }
 
     ngOnDestroy(): void {
         if (this.scanPayPollingInterval) {
@@ -391,90 +398,92 @@ export class OrderComponent implements OnInit, OnDestroy {
     }
 
     confirmPayment(): void {
-        if (!this.carts.length) {
-            this._snackBarService.openSnackBar(
-                'No items in cart.',
-                GlobalConstants.error
-            );
-            return;
-        }
-        if (this.selectedPaymentMethod === 'cash') {
-            const amount = parseFloat(this.currentAmount);
-            if (isNaN(amount)) {
-                this._snackBarService.openSnackBar(
-                    'Please enter a valid payment amount.',
-                    GlobalConstants.error
-                );
-                return;
-            }
-            if (Math.abs(amount - this.orderSummary.total) >= 0.01) {
-                this._snackBarService.openSnackBar(
-                    `Amount ($${amount.toFixed(2)}) must exactly equal total ($${this.orderSummary.total.toFixed(2)}).`,
-                    GlobalConstants.error
-                );
-                return;
-            }
-        }
-        const carts: { [itemId: number]: number } = {};
-        this.carts.forEach((item: CartItem) => {
-            carts[item.id] = item.qty;
-        });
-        const body = { 
-            cart: JSON.stringify(carts),
-            platform: 'Web',
-            payment_method: this.selectedPaymentMethod,
-        };
-        this.isOrderBeingMade = true;
-        this._service.create(body).subscribe({
-            next: (response) => {
-                this.isOrderBeingMade = false;
-                this.lastOrderData = response.data;
-                this.orderedItems = [...this.carts];
-                this.carts = [];
-                this.isCheckoutSuccess = false;
-                this.canSubmit = false;
-                this.currentAmount = '';
-                this.displayAmount = '';
-                this.qrData = '';
-                this.khqrService.lastMd5 = '';
-                if (this.scanPayPollingInterval) {
-                    clearInterval(this.scanPayPollingInterval);
-                    this.scanPayPollingInterval = null;
-                }
-                this.isWaitingForScanPay = false;
-
-                // Display success dialog instead of viewReceipt
-                const dialogConfig = new MatDialogConfig();
-                dialogConfig.data = {
-                    total: this.orderSummary.total,
-                    transactionId: `TXN${Math.floor(Math.random() * 1000000)}741`, // Generate a sample transaction ID
-                };
-                dialogConfig.autoFocus = false;
-                dialogConfig.width = '400px';
-                dialogConfig.panelClass = 'success-dialog';
-                dialogConfig.enterAnimationDuration = '300ms'; // Add animation
-                dialogConfig.exitAnimationDuration = '300ms';
-
-                const dialogRef = this.matDialog.open(PaymentSuccessDialogComponent, dialogConfig);
-
-                dialogRef.afterClosed().subscribe(() => {
-                    this._changeDetectorRef.detectChanges();
-                });
-
-                this._snackBarService.openSnackBar(
-                    response.message || 'Payment successful!',
-                    GlobalConstants.success
-                );
-            },
-            error: (err: HttpErrorResponse) => {
-                this.isOrderBeingMade = false;
-                this._snackBarService.openSnackBar(
-                    err?.error?.message || GlobalConstants.genericError,
-                    GlobalConstants.error
-                );
-            },
-        });
+    if (!this.carts.length) {
+      this._snackBarService.openSnackBar(
+        'No items in cart.',
+        GlobalConstants.error
+      );
+      return;
     }
+    if (this.selectedPaymentMethod === 'cash') {
+      const amount = parseFloat(this.currentAmount);
+      if (isNaN(amount)) {
+        this._snackBarService.openSnackBar(
+          'Please enter a valid payment amount.',
+          GlobalConstants.error
+        );
+        return;
+      }
+      if (Math.abs(amount - this.orderSummary.total) >= 0.01) {
+        this._snackBarService.openSnackBar(
+          `Amount ($${amount.toFixed(2)}) must exactly equal total ($${this.orderSummary.total.toFixed(2)}).`,
+          GlobalConstants.error
+        );
+        return;
+      }
+    }
+    const carts: { [itemId: number]: number } = {};
+    this.carts.forEach((item: CartItem) => {
+      carts[item.id] = item.qty;
+    });
+    const body = {
+      cart: JSON.stringify(carts),
+      platform: 'Web',
+      payment_method: this.selectedPaymentMethod,
+    };
+    this.isOrderBeingMade = true;
+    this._service.create(body).subscribe({
+      next: (response) => {
+        this.isOrderBeingMade = false;
+        this.lastOrderData = response.data;
+        this.orderedItems = [...this.carts];
+        this.carts = [];
+        this.isCheckoutSuccess = false;
+        this.canSubmit = false;
+        this.currentAmount = '';
+        this.displayAmount = '';
+        this.qrData = '';
+        this.khqrService.lastMd5 = '';
+        if (this.scanPayPollingInterval) {
+          clearInterval(this.scanPayPollingInterval);
+          this.scanPayPollingInterval = null;
+        }
+        this.isWaitingForScanPay = false;
+
+        // Refresh product list to update quantities
+        this.ngOnInit(); // Re-fetch products to reflect updated stock
+
+        const dialogConfig = new MatDialogConfig();
+        dialogConfig.data = {
+          total: this.orderSummary.total,
+          transactionId: `TXN${Math.floor(Math.random() * 1000000)}741`,
+        };
+        dialogConfig.autoFocus = false;
+        dialogConfig.width = '400px';
+        dialogConfig.panelClass = 'success-dialog';
+        dialogConfig.enterAnimationDuration = '300ms';
+        dialogConfig.exitAnimationDuration = '300ms';
+
+        const dialogRef = this.dialog.open(PaymentSuccessDialogComponent, dialogConfig);
+
+        dialogRef.afterClosed().subscribe(() => {
+          this._changeDetectorRef.detectChanges();
+        });
+
+        this._snackBarService.openSnackBar(
+          response.message || 'Payment successful!',
+          GlobalConstants.success
+        );
+      },
+      error: (err: HttpErrorResponse) => {
+        this.isOrderBeingMade = false;
+        this._snackBarService.openSnackBar(
+          err?.error?.message || GlobalConstants.genericError,
+          GlobalConstants.error
+        );
+      },
+    });
+  }
     // ================================================================>> Section: Order Submission
     private matDialog = inject(MatDialog);
 

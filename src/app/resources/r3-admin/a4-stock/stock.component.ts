@@ -25,6 +25,7 @@ import { FilterDialogComponent } from './filter-dialog/component';
 import { StockDialogComponent } from './create-dialog/create.component';
 import { ViewDialogComponent } from './view-dialog/view.component';
 import { StockAdjustDialogComponent } from './ajust-dialog/adjust.component';
+import { interval, Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-stock',
@@ -95,6 +96,9 @@ export class StockComponent implements OnInit {
   badgeValue: number = 0;
   report_type: string = '';
 
+  // ========== Polling Properties ==========
+  private pollingInterval: Subscription | null = null;
+
   // ========== Constructor ==========
   constructor(
     private cdr: ChangeDetectorRef,
@@ -106,8 +110,46 @@ export class StockComponent implements OnInit {
   ngOnInit(): void {
     this.getSetupData();
     this.getData();
+    this.startPolling();
   }
 
+  ngOnDestroy(): void {
+    this.stopPolling(); // Clean up polling
+  }
+
+  // ========== Polling Methods ==========
+  private startPolling(): void {
+    this.pollingInterval = interval(10000) // Poll every 10 seconds
+      .subscribe(() => {
+        if (!this.isLoading) { // Avoid overlapping requests
+          this.getDataSilently(); // Fetch data without showing loading spinner
+        }
+      });
+  }
+
+  private stopPolling(): void {
+    if (this.pollingInterval) {
+      this.pollingInterval.unsubscribe();
+      this.pollingInterval = null;
+    }
+  }
+
+  private getDataSilently(): void {
+    const params = this.prepareSearchSortFilterParam();
+    this._service.getData(params).subscribe({
+      next: (res: List) => {
+        this.dataSource.data = res.data;
+        this.total = res.pagination.total;
+        this.limit = res.pagination.limit;
+        this.page = res.pagination.page;
+        this.cdr.detectChanges();
+      },
+      error: (err: HttpErrorResponse) => {
+        // Silently handle errors to avoid disrupting UX
+        console.warn('Polling error:', err?.error?.message || GlobalConstants.genericError);
+      },
+    });
+  }
 
   selectSortOrder(): void {
     this.selectedSortOrder = this.selectedSortOrder === 'asc' ? 'desc' : 'asc';
