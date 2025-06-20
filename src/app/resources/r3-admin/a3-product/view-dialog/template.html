@@ -34,12 +34,22 @@
             <!-- Tab headers -->
             <mat-tab label="General">
                 <div class="flex flex-col items-center gap-2 mt-10">
-                    <div class="w-full flex justify-center overflow-hidden">
-                        <img
-                            class="w-auto h-32 object-cover"
-                            [src]="fileUrl + element?.image"
-                            alt="Profile Image"
-                        />
+                    <div class="w-full flex justify-center overflow-hidden relative">
+                        <!-- Product image with promotion badge -->
+                        <div class="relative">
+                            <img
+                                class="w-auto h-32 object-cover"
+                                [src]="fileUrl + element?.image"
+                                alt="Profile Image"
+                            />
+                            <!-- Promotion badge -->
+                            <div
+                                *ngIf="element.promotion_id && parseDiscount(element.discount) > 0"
+                                class="absolute -top-0 -right-2 bg-red-500 text-white rounded-full w-7 h-7 flex items-center justify-center text-xs font-bold"
+                            >
+                                -{{parseDiscount(element.discount) | number:'1.0-0'}}%
+                            </div>
+                        </div>
                     </div>
 
                     <div class="flex flex-row justify-center">
@@ -50,8 +60,26 @@
 
                     <div class="flex flex-row justify-center">
                         <span class="text-gray-500"
-                            >{{element?.code}} | {{element.product_type?.name}} |
-                            {{element?.unit_price}} $
+                            >{{element?.code}} | {{element.product_type?.name}}
+                        </span>
+                    </div>
+                    
+                    <!-- Price with discount information -->
+                    <div class="flex flex-row items-center justify-center gap-2">
+                        <!-- Original price with strikethrough if discounted -->
+                        <span
+                            [class.line-through]="parseDiscount(element.discount) > 0"
+                            [class.text-gray-400]="parseDiscount(element.discount) > 0"
+                            class="text-gray-500 text-lg"
+                        >
+                            {{element.unit_price | number}} $
+                        </span>
+                        <!-- Discounted price -->
+                        <span
+                            *ngIf="parseDiscount(element.discount) > 0"
+                            class="text-red-500 font-semibold text-lg"
+                        >
+                            → {{calculateDiscountPrice(element) | number:'1.2-2'}} $
                         </span>
                     </div>
                 </div>
@@ -65,7 +93,7 @@
                             <mat-icon
                                 svgIcon="mdi:receipt-text-outline"
                             ></mat-icon>
-                            <p class="text-lg md:text-xl leading-8">sale</p>
+                            <p class="text-lg md:text-xl leading-8">Sale</p>
                         </div>
                         <div class="flex justify-start items-center gap-2">
                             <p class="text-lg md:text-xl leading-8">៖</p>
@@ -89,8 +117,13 @@
                         <div class="flex justify-start items-center gap-2">
                             <p class="text-lg md:text-xl leading-8">៖</p>
                             <p class="text-lg md:text-xl leading-8 pl-5">
-                                {{element.total_sale * element.unit_price |
-                                number}}
+                                <!-- Calculate with discounted price if applicable -->
+                                <span *ngIf="parseDiscount(element.discount) > 0">
+                                    {{element.total_sale * calculateDiscountPrice(element) | number}}
+                                </span>
+                                <span *ngIf="!parseDiscount(element.discount) || parseDiscount(element.discount) === 0">
+                                    {{element.total_sale * element.unit_price | number}}
+                                </span>
                             </p>
                         </div>
                     </div>
@@ -119,9 +152,31 @@
                             </div>
                         </div>
                     </div>
+                    
+                    <!-- Promotion information if applicable -->
+                    <div
+                        *ngIf="element.promotion_id && parseDiscount(element.discount) > 0"
+                        class="flex justify-start items-center gap-2 p-1 w-full dark:bg-gray-800 h-[3rem]"
+                    >
+                        <div
+                            class="flex justify-start items-center gap-2 w-[180px]"
+                        >
+                            <mat-icon svgIcon="mdi:brightness-percent"></mat-icon>
+                            <p class="text-lg md:text-xl leading-8">
+                                Promotion
+                            </p>
+                        </div>
+                        <div class="flex justify-start items-center gap-2">
+                            <p class="text-lg md:text-xl leading-8">៖</p>
+                            <p class="text-lg md:text-xl leading-8 pl-5 text-red-500">
+                                {{parseDiscount(element.discount) | number:'1.0-0'}}% Discount
+                            </p>
+                        </div>
+                    </div>
                 </div>
             </mat-tab>
             <mat-tab label="Sale">
+                <!-- Rest of the Sale tab content remains the same -->
                 <div class="list-sale-body">
                     <!-- Show 'No Data' message if the data source is empty -->
                     <div

@@ -82,6 +82,20 @@ export class ViewDialogComponent implements OnInit, OnDestroy {
         );
     }
 
+    parseDiscount(discount: string | number | undefined): number {
+        if (!discount) return 0;
+        if (typeof discount === 'number') return discount;
+        return parseFloat(discount);
+    }
+
+    calculateDiscountPrice(product: Data): number {
+        const discount = this.parseDiscount(product.discount);
+        if (discount <= 0) {
+            return product.unit_price;
+        }
+        return product.unit_price * (1 - discount / 100);
+    }
+
     closeDialog() {
         this._dialogRef.close();
     }
