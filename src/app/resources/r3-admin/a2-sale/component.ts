@@ -60,6 +60,7 @@ export class SaleComponent implements OnInit {
     // ===>> Data
     public data: Data[] = [];
     public setupData: any = {};
+    public downloading: boolean = false;
     public isLoading: boolean = false;
     public dataSource: MatTableDataSource<Data> = new MatTableDataSource<Data>(
         []
@@ -332,83 +333,50 @@ export class SaleComponent implements OnInit {
     // ====================================================================>> Upgrade to Member
 
     // ====================================================================>> Download CV
-    downloadInvoice(cvId: number, index: number = 0): void {
-        this.selectedCVDownloadIndex = index;
-        this.isDownloadingCV = true; // Indicate the download process is ongoing
-    }
-
-    // Downloading a sale report
-    isaving: boolean = false;
-    getReport(type: string = 'PDF') {
-        this.isaving = true;
-        this.report_type = type;
-        console.log(this.report_type);
-        const params = this.prepareSearchSortFilterParam();
-        this._service.downloadReport(params).subscribe({
-            next: (response) => {
-                this.isaving = false;
-                let blob;
-                let fileName;
-                const dateTime = new Date().toISOString().replace(/[:.]/g, '-');
-                if (type === 'PDF') {
-                    blob = this.b64toBlob(response.data, 'application/pdf');
-                    fileName = `របាយការណ៍លក់តាមការលក់-${dateTime}.pdf`;
-                } else if (type === 'EXCEL') {
-                    blob = this.b64toBlob(
-                        response.data,
-                        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-                    );
-                    fileName = `របាយការណ៍លក់តាមការលក់-${dateTime}.xlsx`;
+    downloadInvoice(element: Data): void {
+    this.downloading = true;
+    this._service.downloadInvoice(element.id).subscribe({
+        next: (res) => {
+            this.downloading = false;
+            if (res.status === 'success' && res.data) {
+                try {
+                    const blob = this.b64toBlob(res.data, 'application/pdf');
+                    FileSaver.saveAs(blob, `Invoice-${element.receipt_number}.pdf`);
+                    this._snackbarService.openSnackBar('PDF downloaded successfully', GlobalConstants.success);
+                } catch (e) {
+                    console.error('Blob creation failed:', e);
+                    this._snackbarService.openSnackBar('Failed to create PDF file', GlobalConstants.error);
                 }
-                FileSaver.saveAs(blob, fileName);
-                // Show a success message using the snackBarService
-                this.snackBarService.openSnackBar(
-                    'របាយការណ៍ទាញយកបានជោគជ័យ',
-                    GlobalConstants.success
-                );
-            },
-            error: (err: HttpErrorResponse) => {
-                // Set isaving to false to indicate the operation is completed (even if it failed)
-                this.isaving = false;
-                // Extract error information from the response
-                const errors: { type: string; message: string }[] | undefined =
-                    err.error?.errors;
-                let message: string =
-                    err.error?.message ?? GlobalConstants.genericError;
+            } else {
+                console.error('Unexpected response format:', res);
+                this._snackbarService.openSnackBar('Failed to download PDF: invalid response', GlobalConstants.error);
+            }
+        },
+        error: (err: HttpErrorResponse) => {
+            this.downloading = false;
+            console.error('Download error:', err);
+            this._snackbarService.openSnackBar(
+                err.error?.message || 'Failed to download invoice',
+                GlobalConstants.error
+            );
+        },
+    });
+}
 
-                // If there are field-specific errors, join them into a single message
-                if (errors && errors.length > 0) {
-                    message = errors.map((obj) => obj.message).join(', ');
-                }
-                // Show an error message using the snackBarService
-                this.snackBarService.openSnackBar(
-                    message,
-                    GlobalConstants.error
-                );
-            },
-        });
-    }
 
     // Convert base64 to blob
-    b64toBlob(b64Data: string, contentType: string, sliceSize?: number) {
-        contentType = contentType || '';
-        sliceSize = sliceSize || 512;
-        var byteCharacters = atob(b64Data);
-        var byteArrays = [];
-        for (
-            var offset = 0;
-            offset < byteCharacters.length;
-            offset += sliceSize
-        ) {
-            var slice = byteCharacters.slice(offset, offset + sliceSize);
-            var byteNumbers = new Array(slice.length);
-            for (var i = 0; i < slice.length; i++) {
-                byteNumbers[i] = slice.charCodeAt(i);
-            }
-            var byteArray = new Uint8Array(byteNumbers);
-            byteArrays.push(byteArray);
+    b64toBlob(b64Data: string, contentType: string, sliceSize: number = 512): Blob {
+    const byteCharacters = atob(b64Data);
+    const byteArrays = [];
+    for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+        const slice = byteCharacters.slice(offset, offset + sliceSize);
+        const byteNumbers = new Array(slice.length);
+        for (let i = 0; i < slice.length; i++) {
+            byteNumbers[i] = slice.charCodeAt(i);
         }
-        var blob = new Blob(byteArrays, { type: contentType });
-        return blob;
+        const byteArray = new Uint8Array(byteNumbers);
+        byteArrays.push(byteArray);
     }
+    return new Blob(byteArrays, { type: contentType });
+}
 }

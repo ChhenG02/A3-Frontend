@@ -19,8 +19,8 @@
 
         <!-- Print Button -->
         <div class="flex items-center">
-            <button mat-icon-button (click)="print(row)">
-                <mat-icon [svgIcon]="'heroicons_outline:printer'"></mat-icon>
+            <button mat-icon-button (click)="print(row)" [disabled]="downloading">
+                <mat-icon [svgIcon]="downloading ? 'heroicons_outline:arrow-path' : 'heroicons_outline:arrow-down-tray'"></mat-icon>
             </button>
         </div>
 
