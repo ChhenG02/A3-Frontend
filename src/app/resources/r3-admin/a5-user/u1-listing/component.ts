@@ -94,40 +94,44 @@ export class UserComponent implements OnInit, OnDestroy {
     getData(
         _page: number = 1,
         _page_size: number = 10,
-        filter_data: { timeType?: string; platform?: string; type?: number; startDate?: string; endDate?: string } = {}
-    ): void {
-        const params: {
-            page: number;
-            page_size: number;
-            key?: string;
-            type?: number;
-            startDate?: string;
-            endDate?: string;
-        } = {
+        filter_data: { role_id?: number } = {}
+        ): void {
+        // Prepare request parameters
+        const params: any = {
             page: _page,
-            page_size: _page_size,
-            ...filter_data // Spread operator to add filters dynamically
+            page_size: _page_size
         };
 
-        if (this.key !== '') {
+        // Add filter if provided
+        if (filter_data?.role_id) {
+            params.role_id = filter_data.role_id;
+        }
+
+        // Add search key if exists
+        if (this.key) {
             params.key = this.key;
         }
 
+
         this.isLoading = true;
         this.userService.getData(params).subscribe({
-            next: res => {
-                this.dataSource.data = res.data ?? [];
-                this.total = res.pagination.totalItems;
-                this.limit = res.pagination.perPage;
-                this.page = res.pagination.currentPage;
-                this.isLoading = false;
+            next: (res) => {
+            this.dataSource.data = res.data ?? [];
+            this.total = res.pagination.totalItems;
+            this.limit = res.pagination.perPage;
+            this.page = res.pagination.currentPage;
+            this.isLoading = false;
             },
-            error: err => {
-                this.isLoading = false;
-                this.snackBarService.openSnackBar(err.error?.message ?? GlobalConstants.genericError, GlobalConstants.error);
+            error: (err) => {
+            this.isLoading = false;
+            this.snackBarService.openSnackBar(
+                err.error?.message ?? GlobalConstants.genericError, 
+                GlobalConstants.error
+            );
             }
         });
     }
+
     filter_data: { timeType: string; platform: string; type: number; startDate: string; endDate: string };
     openFilterDialog(): void {
         const dialogConfig = new MatDialogConfig();
@@ -142,11 +146,9 @@ export class UserComponent implements OnInit, OnDestroy {
 
         const dialogRef = this.dialog.open(FilterUserComponent, dialogConfig);
 
-        dialogRef.afterClosed().subscribe((result) => {
-            if (result) {
-                this.filter_data = result;
-                this.cdr.detectChanges();
-                this.getData(1, 10, this.filter_data);
+        dialogRef.afterClosed().subscribe((filter: { role_id?: number }) => {
+            if (filter) {
+                this.getData(1, this.limit, { role_id: filter.role_id });
             }
         });
     }

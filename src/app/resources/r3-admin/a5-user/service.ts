@@ -40,30 +40,35 @@ export class UserService {
     }
 
     getData(params?: {
-        page: number; page_size: number; key?: string, type?: number;
+        page: number; 
+        page_size: number; 
+        key?: string;
+        role_id?: number;  // Frontend uses role_id
+        type?: number;     // Backend expects type
         startDate?: string;
         endDate?: string;
-    }): Observable<List> {
-        // Record the request start time
-        const requestStartTime = Date.now();
+        }): Observable<List> {
+        // Transform role_id to type for backend
+        const backendParams = {...params};
+        if (backendParams.role_id !== undefined) {
+            backendParams.type = backendParams.role_id;
+            delete backendParams.role_id;
+        }
 
-        // Filter out null and undefined parameters
-        const filteredParams: { [key: string]: any } = {};
-        Object.keys(params || {}).forEach(key => {
-            if (params![key] !== null && params![key] !== undefined) {
-                filteredParams[key] = params![key];
+        // Filter out null/undefined
+        const cleanParams: any = {};
+        Object.keys(backendParams).forEach(key => {
+            if (backendParams[key as keyof typeof backendParams] !== null && 
+                backendParams[key as keyof typeof backendParams] !== undefined) {
+            cleanParams[key] = backendParams[key as keyof typeof backendParams];
             }
         });
 
-        return this.httpClient.get<List>(`${env.API_BASE_URL}/admin/users`, { params: filteredParams }).pipe(
-            // Only add a delay if the request finishes in less than 1 second
-            delayWhen(() => {
-                const timeElapsed = Date.now() - requestStartTime;
-                return timer(Math.max(0, 1000 - timeElapsed));
-            }),
+        return this.httpClient.get<List>(`${env.API_BASE_URL}/admin/users`, { 
+            params: cleanParams 
+        }).pipe(
             catchError((error: HttpErrorResponse) => {
-                console.error('Error occurred:', error);
-                return throwError(() => error); // Use throwError to pass the error
+            return throwError(() => error);
             })
         );
     }

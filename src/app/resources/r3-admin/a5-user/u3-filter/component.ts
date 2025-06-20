@@ -55,10 +55,10 @@ export class FilterUserComponent implements OnInit, OnDestroy {
     saving: boolean = false;
     filterForm: FormGroup;
 
-    public types = [
+     public roles = [
         { id: 1, name: 'Admin' },
         { id: 2, name: 'Cashier' }
-    ];
+     ];
 
     constructor(
         @Inject(MAT_DIALOG_DATA) public setup: any,
@@ -72,18 +72,22 @@ export class FilterUserComponent implements OnInit, OnDestroy {
         this.buildForm();
     }
 
-    buildForm(): void {
-        this.filterForm = this.formBuilder.group({
-            type: [null]
-        });
-    }
+   buildForm(): void {
+    this.filterForm = this.formBuilder.group({
+        role_id: [null] // This will store the role ID (1 for admin, 2 for cashier)
+    });
+   }
+
 
     submit(): void {
         if (this.filterForm.valid) {
-            this.dialogRef.close(this.filterForm.value);
-            this.saving = true;
+        this.saving = true;
+        const filterValue = {
+            role_id: this.filterForm.value.role_id
+        };
+        this.dialogRef.close(filterValue);
         } else {
-            this.snackBarService.openSnackBar('Please fill in the required fields.', 'Error');
+        this.snackBarService.openSnackBar('Please select a role to filter', 'error');
         }
     }
 

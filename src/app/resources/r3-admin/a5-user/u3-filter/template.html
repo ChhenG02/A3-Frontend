@@ -12,9 +12,10 @@
         <form [formGroup]="filterForm" class="out-create-content pt-4">
             <mat-form-field appearance="outline" class="w-full">
                 <mat-label>Role</mat-label>
-                <mat-select formControlName="type" placeholder="Role">
-                    <mat-option *ngFor="let type of types" [value]="type.id">
-                        {{ type?.name }}
+                <mat-select formControlName="role_id" placeholder="Select Role">
+                    <mat-option [value]="null">All Roles</mat-option>
+                    <mat-option *ngFor="let role of roles" [value]="role.id">
+                        {{ role.name }}
                     </mat-option>
                 </mat-select>
             </mat-form-field>
