@@ -254,45 +254,48 @@ export class SaleComponent implements OnInit {
     }
 
     downloading: boolean = false;
-    // print(row: Data) {
-    //     this.downloading = true;
-    //     this.detailsService.download(row.receipt_number).subscribe({
-    //         next: (res) => {
-    //             this.downloading = false;
-    //             let blob = this.b64toBlob(res.data, 'application/pdf');
-    //             FileSaver.saveAs(
-    //                 blob,
-    //                 'Invoice-' + row.receipt_number + '.pdf'
-    //             );
-    //         },
-    //         error: (err: HttpErrorResponse) => {
-    //             this.snackBarService.openSnackBar(
-    //                 err.error?.message || GlobalConstants.genericError,
-    //                 GlobalConstants.error
-    //             );
-    //         },
-    //     });
-    // }
+    print(row: Data): void {
+    this.downloading = true;
+    this.saleService.downloadInvoice(row.id).subscribe({
+        next: (res) => {
+            this.downloading = false;
+            if (res.status === 'success' && res.data) {
+                try {
+                    const blob = this.b64toBlob(res.data, 'application/pdf');
+                    FileSaver.saveAs(blob, `Invoice-${row.receipt_number}.pdf`);
+                    this.snackBarService.openSnackBar('PDF downloaded successfully', 'success');
+                } catch (e) {
+                    console.error('Blob creation failed:', e);
+                    this.snackBarService.openSnackBar('Failed to create PDF file', 'error');
+                }
+            } else {
+                console.error('Unexpected response format:', res);
+                this.snackBarService.openSnackBar('Failed to download PDF: invalid response', 'error');
+            }
+        },
+        error: (err: HttpErrorResponse) => {
+            this.downloading = false;
+            console.error('Download error:', err);
+            this.snackBarService.openSnackBar(
+                err.error?.message || 'Failed to download invoice',
+                GlobalConstants.error
+            );
+        },
+    });
+}
 
-    b64toBlob(b64Data: string, contentType: string, sliceSize?: number) {
-        contentType = contentType || '';
-        sliceSize = sliceSize || 512;
-        var byteCharacters = atob(b64Data);
-        var byteArrays = [];
-        for (
-            var offset = 0;
-            offset < byteCharacters.length;
-            offset += sliceSize
-        ) {
-            var slice = byteCharacters.slice(offset, offset + sliceSize);
-            var byteNumbers = new Array(slice.length);
-            for (var i = 0; i < slice.length; i++) {
+    b64toBlob(b64Data: string, contentType: string, sliceSize: number = 512): Blob {
+        const byteCharacters = atob(b64Data);
+        const byteArrays = [];
+        for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+            const slice = byteCharacters.slice(offset, offset + sliceSize);
+            const byteNumbers = new Array(slice.length);
+            for (let i = 0; i < slice.length; i++) {
                 byteNumbers[i] = slice.charCodeAt(i);
             }
-            var byteArray = new Uint8Array(byteNumbers);
+            const byteArray = new Uint8Array(byteNumbers);
             byteArrays.push(byteArray);
         }
-        var blob = new Blob(byteArrays, { type: contentType });
-        return blob;
+        return new Blob(byteArrays, { type: contentType });
     }
 }

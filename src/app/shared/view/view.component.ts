@@ -69,12 +69,12 @@ export class ViewDetailSaleComponent implements OnInit, OnDestroy {
     ngOnInit(): void {
         if (this.row && this.row.details) {
             // Map data to ensure discount defaults to 0 if null
-            this.dataSource.data = this.row.details.map(item => ({
+            this.dataSource.data = this.row.details.map((item) => ({
                 ...item,
                 product: {
                     ...item.product,
-                    discount: item.product.discount || 0 // Default to 0 if null
-                }
+                    discount: item.product.discount || 0, // Default to 0 if null
+                },
             }));
             this.isLoading = false;
             this.cdr.detectChanges();
@@ -101,18 +101,43 @@ export class ViewDetailSaleComponent implements OnInit, OnDestroy {
 
     print(row: any) {
         this.downloading = true;
-        this.detailsService.download(row.receipt_number).subscribe({
+        this.saleService.downloadInvoice(row.id).subscribe({
             next: (res) => {
                 this.downloading = false;
-                let blob = this.b64toBlob(res.data, 'application/pdf');
-                FileSaver.saveAs(
-                    blob,
-                    'Invoice-' + row.receipt_number + '.pdf'
-                );
+                if (res.status === 'success' && res.data) {
+                    try {
+                        const blob = this.b64toBlob(
+                            res.data,
+                            'application/pdf'
+                        );
+                        FileSaver.saveAs(
+                            blob,
+                            `Invoice-${row.receipt_number}.pdf`
+                        );
+                        this._snackbar.openSnackBar(
+                            'PDF downloaded successfully',
+                            'success'
+                        );
+                    } catch (e) {
+                        console.error('Blob creation failed:', e);
+                        this._snackbar.openSnackBar(
+                            'Failed to create PDF file',
+                            'error'
+                        );
+                    }
+                } else {
+                    console.error('Unexpected response format:', res);
+                    this._snackbar.openSnackBar(
+                        'Failed to download PDF: invalid response',
+                        'error'
+                    );
+                }
             },
             error: (err: HttpErrorResponse) => {
+                this.downloading = false;
+                console.error('Download error:', err);
                 this._snackbar.openSnackBar(
-                    err.error?.message || GlobalConstants.genericError,
+                    err.error?.message || 'Failed to download invoice',
                     GlobalConstants.error
                 );
             },
@@ -124,7 +149,11 @@ export class ViewDetailSaleComponent implements OnInit, OnDestroy {
         sliceSize = sliceSize || 512;
         var byteCharacters = atob(b64Data);
         var byteArrays = [];
-        for (var offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+        for (
+            var offset = 0;
+            offset < byteCharacters.length;
+            offset += sliceSize
+        ) {
             var slice = byteCharacters.slice(offset, offset + sliceSize);
             var byteNumbers = new Array(slice.length);
             for (var i = 0; i < slice.length; i++) {

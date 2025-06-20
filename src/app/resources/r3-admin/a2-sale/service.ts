@@ -3,7 +3,7 @@ import { HttpClient, HttpHeaders, HttpParams }           from '@angular/common/h
 import { inject, Injectable }   from '@angular/core';
 
 // ================================================================>> Third-Party Library (RxJS)
-import { catchError, Observable, of, switchMap, tap } from 'rxjs';
+import { catchError, Observable, of, switchMap, tap, throwError } from 'rxjs';
 
 // ================================================================>> Custom Library
 import { env }                          from 'envs/env';
@@ -78,6 +78,18 @@ export class SaleService {
     //Method to delete data
     delete(id: number = 0): Observable<{ status_code: number, message: string }> {
         return this.httpClient.delete<{ status_code: number, message: string }>(`${env.API_BASE_URL}/admin/sales/${id}`);
+    }
+
+    downloadInvoice(id: number): Observable<{ status: string; data: string; contentType: string }> {
+        if (!env.API_BASE_URL) {
+            throw new Error('API_BASE_URL is not configured');
+        }
+        if (id <= 0) {
+            return throwError(() => new Error('Invalid order ID'));
+        }
+        return this.httpClient.get<{ status: string; data: string; contentType: string }>(
+            `${env.API_BASE_URL}/share/report/invoice/view/${id}`
+        );
     }
 
     // Method to fetch product report

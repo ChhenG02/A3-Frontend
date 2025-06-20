@@ -3,11 +3,12 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 
 // ================================================================>> Third-Party Library (RxJS)
-import { catchError, Observable, of, switchMap, tap } from 'rxjs';
+import { catchError, Observable, tap, throwError } from 'rxjs';
 
 // ================================================================>> Custom Library
 import { env } from 'envs/env';
 import { LoadingSpinnerService } from 'helper/shared/loading/service';
+
 import { List } from './sale.interface';
 
 @Injectable({
@@ -34,6 +35,10 @@ export class SaleService {
         startDate?: string;
         endDate?: string;
     }): Observable<List> {
+        if (!env.API_BASE_URL) {
+            throw new Error('API_BASE_URL is not configured');
+        }
+
         // Filter out null or undefined parameters
         const filteredParams: { [key: string]: any } = {};
         Object.keys(params || {}).forEach((key) => {
@@ -42,24 +47,17 @@ export class SaleService {
             }
         });
 
+        this.loadingSpinner.open();
         return this.httpClient
             .get<List>(`${env.API_BASE_URL}/cashier/sales`, {
                 params: filteredParams,
             })
             .pipe(
-                switchMap((response: List) => {
-                    this.loadingSpinner.open();
-                    return of(response);
-                }),
+                tap(() => this.loadingSpinner.close()),
                 catchError((error) => {
                     this.loadingSpinner.close();
-                    return new Observable((observer) => {
-                        observer.error(error);
-                        observer.complete();
-                    });
-                }),
-                tap((_response: List) => {
-                    this.loadingSpinner.close();
+                    console.error('Get sales data failed:', error);
+                    return throwError(() => error);
                 })
             );
     }
@@ -71,5 +69,28 @@ export class SaleService {
         return this.httpClient.delete<{ status_code: number; message: string }>(
             `${env.API_BASE_URL}/cashier/sales/${id}`
         );
+    }
+
+    // Method to download an invoice PDF by order ID
+    downloadInvoice(id: number): Observable<{ status: string; data: string; contentType: string }> {
+        if (!env.API_BASE_URL) {
+            throw new Error('API_BASE_URL is not configured');
+        }
+        if (id <= 0) {
+            return throwError(() => new Error('Invalid order ID'));
+        }
+        this.loadingSpinner.open();
+        return this.httpClient
+            .get<{ status: string; data: string; contentType: string }>(
+                `${env.API_BASE_URL}/share/report/invoice/view/${id}`
+            )
+            .pipe(
+                tap(() => this.loadingSpinner.close()),
+                catchError((error) => {
+                    this.loadingSpinner.close();
+                    console.error('Download invoice failed:', error);
+                    return throwError(() => error);
+                })
+            );
     }
 }

@@ -18,9 +18,11 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { env } from 'envs/env';
 import { SnackbarService } from 'helper/services/snack-bar/snack-bar.service';
 import { Subject } from 'rxjs';
-
 import { Data } from './interface';
 import { SaleService } from '../service';
+import { HttpErrorResponse } from '@angular/common/http';
+import FileSaver from 'file-saver';
+import GlobalConstants from 'helper/shared/constants';
 
 @Component({
     selector: 'sales',
@@ -53,6 +55,7 @@ export class ViewDialogComponent implements OnInit, OnDestroy {
     dataSource: MatTableDataSource<Data> = new MatTableDataSource<Data>([]);
     fileUrl = env.FILE_BASE_URL;
     public isLoading: boolean = false;
+    public downloading: boolean = false;
 
     constructor(
         @Inject(MAT_DIALOG_DATA) public element: any,
@@ -84,6 +87,51 @@ export class ViewDialogComponent implements OnInit, OnDestroy {
                 });
             }
         );
+    }
+
+    downloadInvoice(): void {
+        this.downloading = true;
+        this.saleService.downloadInvoice(this.element.id).subscribe({
+            next: (res) => {
+                this.downloading = false;
+                if (res.status === 'success' && res.data) {
+                    try {
+                        const blob = this.b64toBlob(res.data, 'application/pdf');
+                        FileSaver.saveAs(blob, `Invoice-${this.element.receipt_number}.pdf`);
+                        this._snackbar.openSnackBar('PDF downloaded successfully', GlobalConstants.success);
+                    } catch (e) {
+                        console.error('Blob creation failed:', e);
+                        this._snackbar.openSnackBar('Failed to create PDF file', GlobalConstants.error);
+                    }
+                } else {
+                    console.error('Unexpected response format:', res);
+                    this._snackbar.openSnackBar('Failed to download PDF: invalid response', GlobalConstants.error);
+                }
+            },
+            error: (err: HttpErrorResponse) => {
+                this.downloading = false;
+                console.error('Download error:', err);
+                this._snackbar.openSnackBar(
+                    err.error?.message || 'Failed to download invoice',
+                    GlobalConstants.error
+                );
+            },
+        });
+    }
+
+    b64toBlob(b64Data: string, contentType: string, sliceSize: number = 512): Blob {
+        const byteCharacters = atob(b64Data);
+        const byteArrays = [];
+        for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+            const slice = byteCharacters.slice(offset, offset + sliceSize);
+            const byteNumbers = new Array(slice.length);
+            for (let i = 0; i < slice.length; i++) {
+                byteNumbers[i] = slice.charCodeAt(i);
+            }
+            const byteArray = new Uint8Array(byteNumbers);
+            byteArrays.push(byteArray);
+        }
+        return new Blob(byteArrays, { type: contentType });
     }
 
     // ===>> File Url
