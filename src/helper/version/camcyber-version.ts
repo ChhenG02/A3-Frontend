@@ -1,3 +1,3 @@
 import { Version } from 'helper/version/version';
 
-export const CAMCYBER_VERSION = new Version('4.0.0').full;
+export const POS_VERSION = new Version('4.0.0').full;

@@ -1,7 +1,7 @@
 import { Routes } from '@angular/router';
 import { DashboardComponent } from './a1-dashboard/component';
 
-import { SaleComponent } from './a2-sale/component';
+import { SaleComponent } from './a2-sale/sale.component';
 
 import { UserComponent } from './a5-user/u1-listing/component';
 import { ProductComponent } from './a3-product/product.component';

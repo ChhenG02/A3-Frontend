@@ -1,9 +1,9 @@
 {
-  "name": "camcyber-angular",
+  "name": "pos-angular",
   "version": "4.0.0",
-  "description": "CamCyber - Angular Admin Template",
-  "author": "Yim Klok",
-  "license": "CamCyber Digital Tech Team",
+  "description": "Pos - Angular Admin Template",
+  "author": "Sokchheng",
+  "license": "Pos",
   "private": true,
   "scripts": {
     "ng": "ng",

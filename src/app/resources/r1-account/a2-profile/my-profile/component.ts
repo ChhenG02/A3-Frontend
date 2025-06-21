@@ -18,12 +18,6 @@ import { Subject, takeUntil } from 'rxjs';
 // Env
 import { env } from 'envs/env';
 
-// // Service
-// import { UserService } from 'app/core/user/user.service';
-
-// // Type
-// import { User } from 'app/core/user/user.types';
-
 // Component
 import { ChangePasswordComponent } from './change-password/component';
 import { UpdateProfileDialogComponent } from './update/component';
