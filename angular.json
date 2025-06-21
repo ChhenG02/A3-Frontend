@@ -3,7 +3,7 @@
     "version": 1,
     "newProjectRoot": "projects",
     "projects": {
-        "CamCyber": {
+        "Pos": {
             "projectType": "application",
             "schematics": {
                 "@schematics/angular:component": {
@@ -89,15 +89,15 @@
                 "serve": {
                     "builder": "@angular-builders/custom-webpack:dev-server",
                     "options": {
-                        "buildTarget": "CamCyber:build",
+                        "buildTarget": "pos:build",
                         "port": 4444
                     },
                     "configurations": {
                         "production": {
-                            "buildTarget": "CamCyber:build:production"
+                            "buildTarget": "poa:build:production"
                         },
                         "development": {
-                            "buildTarget": "CamCyber:build:development"
+                            "buildTarget": "pos:build:development"
                         }
                     },
                     "defaultConfiguration": "development"

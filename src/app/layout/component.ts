@@ -11,7 +11,7 @@ import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { HelperConfig, HelperConfigService } from 'helper/services/config';
 import { HelperMediaWatcherService } from 'helper/services/media-watcher';
 import { HelperPlatformService } from 'helper/services/platform';
-import { CAMCYBER_VERSION } from 'helper/version';
+import { POS_VERSION } from 'helper/version';
 import { Subject, combineLatest, filter, map, takeUntil } from 'rxjs';
 import { EmptyLayoutComponent } from './empty/component';
 import { ClassyLayoutComponent } from './classy/component';
@@ -119,8 +119,8 @@ export class LayoutComponent implements OnInit, OnDestroy {
         // Set the app version
         this._renderer2.setAttribute(
             this._document.querySelector('[ng-version]'),
-            'camcyber-version',
-            CAMCYBER_VERSION
+            'pos-version',
+            POS_VERSION
         );
 
         // Set the OS name
