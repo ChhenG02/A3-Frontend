@@ -89,15 +89,15 @@
                 "serve": {
                     "builder": "@angular-builders/custom-webpack:dev-server",
                     "options": {
-                        "buildTarget": "pos:build",
+                        "buildTarget": "Pos:build",
                         "port": 4444
                     },
                     "configurations": {
                         "production": {
-                            "buildTarget": "poa:build:production"
+                            "buildTarget": "Pos:build:production"
                         },
                         "development": {
-                            "buildTarget": "pos:build:development"
+                            "buildTarget": "Pos:build:development"
                         }
                     },
                     "defaultConfiguration": "development"
