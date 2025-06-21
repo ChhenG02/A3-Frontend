@@ -94,7 +94,8 @@ export class VerifyOTPAndPasswordComponent implements OnInit {
 
     // Initialize component
     ngOnInit() {
-        this.phone = localStorage.getItem('phone');
+        localStorage.setItem('phone', 'odompanharith@gmail.com');
+        this.phone = 'odompanharith@gmail.com';
         this.remainingTime = 60;
         this.startCountdown();
 
@@ -188,7 +189,7 @@ export class VerifyOTPAndPasswordComponent implements OnInit {
                 this.isLoading = false;
                 this.clearAllInput(); // Assuming this clears the input fields
                 this._router.navigateByUrl('');
-                this._snackbarService.openSnackBar("ចូលប្រព័ន្ធបានដោយជោគជ័យ", GlobalConstants.success);
+                this._snackbarService.openSnackBar("Login Successfully", GlobalConstants.success);
             },
             error: (err: HttpErrorResponse) => {
                 const errors: { field: string, message: string }[] | undefined = err.error.errors;
