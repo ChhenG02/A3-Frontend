@@ -1,8 +1,8 @@
 export const env = {
     production: true,
-    API_BASE_URL: 'http://localhost:8000/api',
-    FILE_BASE_URL: 'http://localhost:8080/',
-    WEB_BASE_URL: 'http://localhost:3000',
+    API_BASE_URL: 'http://api.gamestorekh.shop/api',
+    FILE_BASE_URL: 'http://file.gamestorekh.shop/',
+    WEB_BASE_URL: 'http://gamestorekh.shop',
 
     // KHQR Configuration
     KHQR_BANK_ACCOUNT: 'sokchheng_eng@trmc',
