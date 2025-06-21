@@ -17,7 +17,7 @@
                             svgIcon="feather:arrow-left"></mat-icon>
                     </button>
                     <div></div>
-                    <languages login="true"></languages>
+                    <!-- <languages login="true"></languages> -->
                 </div>
 
                 <!-- Login Form -->
@@ -27,13 +27,13 @@
                             <mat-icon class="icon-size-10 text-black"
                                 [svgIcon]="'mat_outline:phone_android'"></mat-icon>
                         </div>
-                        <p class="text-xl md:text-3xl w-fit font-bold">Login to your account</p>
+                        <p class="text-xl md:text-3xl w-fit font-bold mt-4">Login to your account</p>
                     </div>
 
                     <div class="h-auto">
                         <form class="md-form-field-appearance-outline" [formGroup]="signInForm" #signInNgForm="ngForm">
                             <!-- phone field -->
-                            <mat-form-field class="w-full thick-border">
+                            <mat-form-field class="w-full thick-border mt-6">
                                 <mat-label>Phone or Email</mat-label>
                                 <input id="username" matInput [formControlName]="'username'" />
                                 @if (signInForm.get('username').hasError('required')) {
@@ -50,7 +50,7 @@
                                 </button>
                             </mat-form-field>
 
-                            <mat-form-field class="w-full thick-border">
+                            <mat-form-field class="w-full thick-border mt-6">
                                 <mat-label>Password</mat-label>
                                 <input id="password" matInput type="password" [formControlName]="'password'"
                                     #passwordField [type]="passwordField.type" />
